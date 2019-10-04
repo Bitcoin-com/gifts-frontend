@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Gilroy-SemiBold';
+  src: url('Gilroy-SemiBold.eot');
+  src: url('Gilroy-SemiBold.eot?#iefix') format('embedded-opentype'),
+    url('Gilroy-SemiBold.woff2') format('woff2'),
+    url('Gilroy-SemiBold.woff') format('woff'),
+    url('Gilroy-SemiBold.ttf') format('ttf'),
+    url('Gilroy-SemiBold.svg#Gilroy-SemiBold') format('svg');
+  font-style: normal;
+  font-weight: 700;
+}

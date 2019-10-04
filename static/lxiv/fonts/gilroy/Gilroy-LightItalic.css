@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Gilroy-LightItalic';
+  src: url('Gilroy-LightItalic.eot');
+  src: url('Gilroy-LightItalic.eot?#iefix') format('embedded-opentype'),
+    url('Gilroy-LightItalic.woff2') format('woff2'),
+    url('Gilroy-LightItalic.woff') format('woff'),
+    url('Gilroy-LightItalic.ttf') format('ttf'),
+    url('Gilroy-LightItalic.svg#Gilroy-LightItalic') format('svg');
+  font-style: italic;
+  font-weight: 300;
+}

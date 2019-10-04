@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Gilroy-BlackItalic';
+  src: url('Gilroy-BlackItalic.eot');
+  src: url('Gilroy-BlackItalic.eot?#iefix') format('embedded-opentype'),
+    url('Gilroy-BlackItalic.woff2') format('woff2'),
+    url('Gilroy-BlackItalic.woff') format('woff'),
+    url('Gilroy-BlackItalic.ttf') format('ttf'),
+    url('Gilroy-BlackItalic.svg#Gilroy-BlackItalic') format('svg');
+  font-style: italic;
+  font-weight: 900;
+}

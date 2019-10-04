@@ -1,0 +1,8 @@
+node_modules
+bitcoincom-storybook
+bitcoincom-universal
+public
+.cache
+.vscode
+static
+src/assets

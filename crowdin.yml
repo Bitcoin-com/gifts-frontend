@@ -1,0 +1,5 @@
+files:
+  - source: /src/data/*/locales/*.json
+    translation: '%original_path%/%original_file_name%'
+  - source: /src/data/*/*/*.md
+    translation: '%original_path%/%original_file_name%'
