@@ -3,7 +3,6 @@ module.exports = {
     title: `Bitcoin.com Homepage`,
     siteUrl: 'https://www.bitcoin.com',
   },
-  assetPrefix: `/lxiv/`,
   plugins: [
     { resolve: `gatsby-plugin-react-helmet` },
     {
@@ -15,7 +14,7 @@ module.exports = {
         display: `fullscreen`,
         background_color: `#fdfdfd`,
         theme_color: `#111724`,
-        icon: `src/assets/images/favicon-2.png`,
+        icon: `static/images/favicon.png`,
         icons: [
           {
             src: 'icons/icon-48x48.png',
@@ -67,38 +66,9 @@ module.exports = {
         navigateFallbackWhitelist: [],
       },
     },
+    `gatsby-plugin-sitemap`,
     { resolve: `gatsby-plugin-styled-components` },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: `images`,
-        path: `${__dirname}/src/assets/images`,
-      },
-    },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: 'data',
-        path: `${__dirname}/src/data`,
-      },
-    },
-    `gatsby-transformer-sharp`,
-    {
-      resolve: `gatsby-transformer-remark`,
-      options: {
-        // CommonMark mode (default: true)
-        commonmark: true,
-        // Footnotes mode (default: true)
-        footnotes: true,
-        // Pedantic mode (default: true)
-        pedantic: true,
-        // GitHub Flavored Markdown mode (default: true)
-        gfm: true,
-        // Plugins configs
-        plugins: [],
-      },
-    },
-    `gatsby-plugin-sharp`,
+
     {
       resolve: 'gatsby-plugin-eslint',
       options: {
@@ -117,18 +87,12 @@ module.exports = {
           'https:///trackcmp.net',
           'https://s3.amazonaws.com',
           'https://api.opmnstr.com',
-          'https://integration.test-simplexcc.com',
           'https://accounts.google.com',
           'https://www.google-analytics.com',
           'https://ajax.googleapis.com',
           'https://coin-api.bitcoin.com',
           'https://api.pulse.btctest.net',
           'https://www.bitcoin.com',
-          'https://static.doubleclick.net',
-          'https://www.youtube.com',
-          'https://www.google.com',
-          'https://news.bitcoin.com',
-          'https://charts.bitcoin.com',
         ],
       },
     },
@@ -145,7 +109,8 @@ module.exports = {
       options: {
         custom: {
           families: ['Gilroy:n4,n6,n7'],
-          urls: ['/lxiv/fonts.css'],
+          // should probably use the CDN here to load fonts but was getting cors errors locally
+          urls: ['/fonts/fonts.css'],
         },
       },
     },

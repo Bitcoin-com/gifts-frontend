@@ -31,7 +31,8 @@ const gtmTag = (
   />
 );
 
-const excludes = ['/mining/workers/apiviewer/'];
+// array of pathnames to exclude gtm tracking scripts
+const excludes = [];
 
 exports.onPreRenderHTML = props => {
   const {

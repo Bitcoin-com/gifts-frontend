@@ -1,11 +1,9 @@
 const { appLocales: locales } = require('../../../i18n');
-const enMessages = require('../../../data/home/locales/en.json');
-const jaMessages = require('../../../data/home/locales/ja.json');
+const enMessages = require('../../../data/404/locales/en.json');
 const flattenMessages = require('../../../helpers/flattenMessages');
 
 const translationMessages = {
-  en: flattenMessages(enMessages, 'home'),
-  ja: flattenMessages(jaMessages, 'home'),
+  en: flattenMessages(enMessages, '404'),
 };
 
 exports.onCreatePage = ({ page, actions }) => {
@@ -16,13 +14,13 @@ exports.onCreatePage = ({ page, actions }) => {
 
     Object.keys(locales).map(lang => {
       const localizedPath = locales[lang].default
-        ? page.path
-        : locales[lang].path + page.path;
+        ? '/404'
+        : `${locales[lang].path}/404`;
 
       return createPage({
         ...page,
+        matchPath: locales[lang].default ? '/404' : `/${lang}/404`,
         path: localizedPath,
-        matchPath: localizedPath,
         context: {
           locale: lang,
           locales: translationMessages,
