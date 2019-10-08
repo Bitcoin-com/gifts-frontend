@@ -10,7 +10,6 @@ exports.onCreatePage = params => {
 
   if (page.path === '/offline-plugin-app-shell-fallback/')
     return new Promise(resolve => resolve());
-  if (page.path === '/404/') return errorBuild(params);
   if (page.path === '/404.html') return errorBuild(params);
 
   return new Promise(resolve => {

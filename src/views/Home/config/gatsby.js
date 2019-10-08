@@ -20,6 +20,7 @@ exports.onCreatePage = ({ page, actions }) => {
       return createPage({
         ...page,
         path: localizedPath,
+        matchPath: localizedPath,
         context: {
           locale: lang,
           locales: translationMessages,

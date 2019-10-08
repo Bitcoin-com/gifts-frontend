@@ -14,12 +14,12 @@ exports.onCreatePage = ({ page, actions }) => {
 
     Object.keys(locales).map(lang => {
       const localizedPath = locales[lang].default
-        ? page.path
-        : locales[lang].path + page.path;
+        ? '/404'
+        : `${locales[lang].path}/404`;
 
       return createPage({
         ...page,
-        matchPath: locales[lang].default ? '/*' : `/${lang}/*`,
+        matchPath: locales[lang].default ? '/404' : `/${lang}/404`,
         path: localizedPath,
         context: {
           locale: lang,
