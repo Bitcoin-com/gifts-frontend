@@ -66,6 +66,7 @@ module.exports = {
         navigateFallbackWhitelist: [],
       },
     },
+    `gatsby-plugin-sitemap`,
     { resolve: `gatsby-plugin-styled-components` },
     {
       resolve: `gatsby-source-filesystem`,
@@ -81,7 +82,6 @@ module.exports = {
         path: `${__dirname}/src/data`,
       },
     },
-    `gatsby-transformer-sharp`,
     {
       resolve: `gatsby-transformer-remark`,
       options: {
@@ -97,7 +97,6 @@ module.exports = {
         plugins: [],
       },
     },
-    `gatsby-plugin-sharp`,
     {
       resolve: 'gatsby-plugin-eslint',
       options: {
