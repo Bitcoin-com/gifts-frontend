@@ -5,11 +5,11 @@ exports.appLocales = {
     locale: 'English',
     default: true,
   },
-  /*
   ja: {
     path: 'ja',
     locale: '日本語',
   },
+  /*
   ko: {
     path: 'ko',
     locale: '한국어',

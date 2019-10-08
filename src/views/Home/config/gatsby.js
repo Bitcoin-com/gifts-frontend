@@ -1,9 +1,11 @@
 const { appLocales: locales } = require('../../../i18n');
 const enMessages = require('../../../data/home/locales/en.json');
+const jaMessages = require('../../../data/home/locales/ja.json');
 const flattenMessages = require('../../../helpers/flattenMessages');
 
 const translationMessages = {
   en: flattenMessages(enMessages, 'home'),
+  ja: flattenMessages(jaMessages, 'home'),
 };
 
 exports.onCreatePage = ({ page, actions }) => {
