@@ -68,35 +68,7 @@ module.exports = {
     },
     `gatsby-plugin-sitemap`,
     { resolve: `gatsby-plugin-styled-components` },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: `images`,
-        path: `${__dirname}/src/assets/images`,
-      },
-    },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: 'data',
-        path: `${__dirname}/src/data`,
-      },
-    },
-    {
-      resolve: `gatsby-transformer-remark`,
-      options: {
-        // CommonMark mode (default: true)
-        commonmark: true,
-        // Footnotes mode (default: true)
-        footnotes: true,
-        // Pedantic mode (default: true)
-        pedantic: true,
-        // GitHub Flavored Markdown mode (default: true)
-        gfm: true,
-        // Plugins configs
-        plugins: [],
-      },
-    },
+
     {
       resolve: 'gatsby-plugin-eslint',
       options: {
@@ -115,18 +87,12 @@ module.exports = {
           'https:///trackcmp.net',
           'https://s3.amazonaws.com',
           'https://api.opmnstr.com',
-          'https://integration.test-simplexcc.com',
           'https://accounts.google.com',
           'https://www.google-analytics.com',
           'https://ajax.googleapis.com',
           'https://coin-api.bitcoin.com',
           'https://api.pulse.btctest.net',
           'https://www.bitcoin.com',
-          'https://static.doubleclick.net',
-          'https://www.youtube.com',
-          'https://www.google.com',
-          'https://news.bitcoin.com',
-          'https://charts.bitcoin.com',
         ],
       },
     },
