@@ -14,7 +14,7 @@ module.exports = {
         display: `fullscreen`,
         background_color: `#fdfdfd`,
         theme_color: `#111724`,
-        icon: `src/assets/images/favicon-2.png`,
+        icon: `static/images/favicon.png`,
         icons: [
           {
             src: 'icons/icon-48x48.png',
