@@ -6,7 +6,7 @@ const translationMessages = {
   en: flattenMessages(enMessages, '404'),
 };
 
-exports.onCreatePage = ({ page, actions }) => {
+exports.errorBuild = ({ page, actions }) => {
   const { createPage, deletePage } = actions;
 
   return new Promise(resolve => {

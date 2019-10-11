@@ -8,7 +8,7 @@ const translationMessages = {
   zh: flattenMessages(zhMessages, 'home'),
 };
 
-exports.onCreatePage = ({ page, actions }) => {
+exports.homeBuild = ({ page, actions }) => {
   const { createPage, deletePage } = actions;
 
   return new Promise(resolve => {

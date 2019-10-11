@@ -31,7 +31,6 @@ IndexPage.propTypes = {
     locales: PropTypes.shape({
       [PropTypes.string]: PropTypes.string,
     }),
-    settings: PropTypes.object,
   }).isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string,
