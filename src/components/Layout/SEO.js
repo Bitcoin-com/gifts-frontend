@@ -46,7 +46,6 @@ class SEO extends React.PureComponent {
           content={`${origin}/images/tile.png`}
         />
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-
         {origin && <base href={origin} />}
       </Helmet>
     );

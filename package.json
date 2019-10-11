@@ -12,7 +12,6 @@
     "build": "yarn compress-images && yarn gatsby clean && cross-env NODE_OPTIONS=--max_old_space_size=4096 NODE_ENV=production gatsby build",
     "build:sandbox": "yarn compress-images && yarn gatsby clean && cross-env NODE_OPTIONS=--max_old_space_size=4096 gatsby build",
     "serve": "gatsby serve",
-    "move": "node move.js",
     "develop": "gatsby develop -H 0.0.0.0 -p 3000",
     "format": "prettier --write '**/*.js'",
     "link:sb": "yarn link bitcoincom-storybook",

@@ -1,10 +1,10 @@
 const path = require('path');
 
-const { onCreatePage: homeBuild } = require('./src/views/Home/config/gatsby');
-const { onCreatePage: errorBuild } = require('./src/views/404/config/gatsby');
+const { homeBuild } = require('./src/views/Home/config/gatsby');
+const { errorBuild } = require('./src/views/404/config/gatsby');
 
-const replacePath = pagepath =>
-  pagepath === `/` ? pagepath : pagepath.replace(/\/$/, ``);
+const replacePath = pagePath =>
+  pagePath === `/` ? pagePath : pagePath.replace(/\/$/, ``);
 
 exports.onCreatePage = params => {
   const { page, actions } = params;
@@ -16,8 +16,10 @@ exports.onCreatePage = params => {
   if (page.path === '/404.html') return errorBuild(params);
 
   const oldPage = Object.assign({}, page);
+
   // Remove trailing slash unless page is /
   page.path = replacePath(page.path);
+
   if (page.path !== oldPage.path) {
     // Replace new page with old page
     deletePage(oldPage);
