@@ -37,8 +37,8 @@
   "dependencies": {
     "axios": "^0.19.0",
     "babel-plugin-styled-components": "^1.10.6",
-    "bitcoincom-storybook": "git+ssh://git@github.com/bitcoin-portal/bitcoincom-storybook.git",
-    "bitcoincom-universal": "git+ssh://git@github.com/bitcoin-portal/bitcoincom-universal.git",
+    "bitcoincom-storybook": "git+ssh://git@github.com/bitcoin-portal/bitcoincom-storybook.git#v1.0.0",
+    "bitcoincom-universal": "git+ssh://git@github.com/bitcoin-portal/bitcoincom-universal.git#v1.0.0",
     "gatsby": "^2.15.34",
     "gatsby-plugin-manifest": "^2.2.20",
     "gatsby-plugin-netlify-cms": "^4.1.22",
