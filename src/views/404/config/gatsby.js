@@ -14,12 +14,12 @@ exports.errorBuild = ({ page, actions }) => {
 
     Object.keys(locales).map(lang => {
       const localizedPath = locales[lang].default
-        ? '/404'
-        : `${locales[lang].path}/404`;
+        ? page.path
+        : `${locales[lang].path}${page.path}`;
 
       return createPage({
         ...page,
-        matchPath: locales[lang].default ? '/404' : `/${lang}/404`,
+        matchPath: locales[lang].default ? page.path : `/${lang}${page.path}`,
         path: localizedPath,
         context: {
           locale: lang,

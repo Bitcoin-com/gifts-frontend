@@ -100,6 +100,7 @@ module.exports = {
       resolve: 'gatsby-plugin-netlify-cms',
       options: {
         htmlTitle: `Bitcoin.com | Content Manager`,
+        htmlFavicon: `${__dirname}/static/icons/icon-512x512.png`,
         manualInit: true,
         modulePath: `${__dirname}/src/cms/cms.js`,
       },
