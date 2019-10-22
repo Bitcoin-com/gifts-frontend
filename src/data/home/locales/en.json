@@ -1,24 +1,24 @@
 {
-  "schema": {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "url": "https://www.bitcoin.com",
-    "name": "Bitcoin.com",
-    "logo": "https://www.bitcoin.com/icons/icon-512x512.png",
-    "sameAs": [
-      "https://www.facebook.com/buy.bitcoin.news",
-      "https://twitter.com/bitcoincom",
-      "https://www.instagram.com/bitcoin.com_official/",
-      "https://www.youtube.com/channel/UCetxkZolEBHX47BqtZktbkg",
-      "https://www.linkedin.com/company/bitcoin.com/",
-      "https://github.com/bitcoin-com"
-    ]
-  },
   "meta": {
     "title": "Boilerplate | Bitcoin.com",
     "description": "Bitcoin.com Boilerplate",
     "twitter": "bitcoincom",
-    "image": "/images/uploads/facebook.png"
+    "image": "/images/uploads/facebook.png",
+    "schema": {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "https://www.bitcoin.com",
+      "name": "Bitcoin.com",
+      "logo": "https://www.bitcoin.com/icons/icon-512x512.png",
+      "sameAs": [
+        "https://www.facebook.com/buy.bitcoin.news",
+        "https://twitter.com/bitcoincom",
+        "https://www.instagram.com/bitcoin.com_official/",
+        "https://www.youtube.com/channel/UCetxkZolEBHX47BqtZktbkg",
+        "https://www.linkedin.com/company/bitcoin.com/",
+        "https://github.com/bitcoin-com"
+      ]
+    }
   },
   "content": {
     "logo": "/images/uploads/full-logo-white-500px.png",

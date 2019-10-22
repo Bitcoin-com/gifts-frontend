@@ -1,9 +1,6 @@
 import CMS from 'netlify-cms-app';
 
-import {
-  netlifyJsonControl,
-  netlifyJsonPreview,
-} from '../components/CMSJsonWidget';
+import { netlifyJsonControl } from './widgets/JsonEditor';
 
 /* Custom Widgets */
-CMS.registerWidget('json', netlifyJsonControl, netlifyJsonPreview);
+CMS.registerWidget('json', netlifyJsonControl);
