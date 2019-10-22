@@ -47,7 +47,6 @@ const homeConfig = {
         { name: 'logo-alt', label: 'Logo image alt', widget: 'string' },
         { name: 'title', label: 'Title', widget: 'string' },
         { name: 'subtitle', label: 'Description', widget: 'text' },
-        { name: 'link', label: 'Link', widget: 'string' },
         { name: 'image', label: 'Image', widget: 'image' },
         { name: 'image-alt', label: 'Image Alt', widget: 'string' },
       ],
