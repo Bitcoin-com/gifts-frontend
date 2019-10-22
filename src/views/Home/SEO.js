@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
+import schema from '../../data/home/schema.json';
 
 const SEO = ({ intl }) => (
   <Helmet title={intl.formatMessage({ id: 'home.meta.title' })}>
@@ -44,6 +45,8 @@ const SEO = ({ intl }) => (
       name="twitter:image"
       content={`https://www.bitcoin.com${intl.messages['home.meta.image']}`}
     />
+    <script type="application/ld+json">{JSON.stringify(schema)}</script>
+
     <link rel="canonical" href="https://www.bitcoin.com/" />
   </Helmet>
 );

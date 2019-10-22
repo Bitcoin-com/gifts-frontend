@@ -38,6 +38,11 @@ const homeConfig = {
   name: 'home.content',
   fields: [
     {
+      label: 'Structured Data',
+      name: 'schema',
+      widget: 'json',
+    },
+    {
       label: 'Page Meta',
       widget: 'object',
       name: 'meta',

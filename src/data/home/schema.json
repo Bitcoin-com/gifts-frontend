@@ -1,0 +1,104 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Bitcoin.com",
+  "url": "https://www.bitcoin.com",
+  "logo": "https://www.bitcoin.com/icons/icon-512x512.png",
+  "sameAs": [
+    "https://www.facebook.com/buy.bitcoin.news",
+    "https://twitter.com/bitcoincom",
+    "https://www.instagram.com/bitcoin.com_official/",
+    "https://www.youtube.com/channel/UCetxkZolEBHX47BqtZktbkg",
+    "https://www.linkedin.com/company/bitcoin.com/",
+    "https://github.com/bitcoin-com"
+  ],
+  "foundingDate": "January 2008",
+  "founder": {
+    "@type": "Person",
+    "givenName": "Roger",
+    "familyName": "Ver",
+    "jobTitle": "CEO",
+    "image": "https://pbs.twimg.com/profile_images/887327002721738753/OrAh2fgQ_400x400.jpg",
+    "sameAs": [
+      "https://twitter.com/rogerkver",
+      "https://www.reddit.com/user/memorydealers"
+    ]
+  },
+  "owns": [
+    {
+      "@type": "Product",
+      "name": "Buy Bitcoin",
+      "url": "https://buy.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Badger Wallet",
+      "url": "https://badger.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com Wallet",
+      "url": "https://wallet.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Trade Locally",
+      "url": "https://local.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Free Bitcoin Cash",
+      "url": "https://free.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin Games",
+      "url": "https://games.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin Cash Games",
+      "url": "https://cashgames.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com Tools",
+      "url": "https://tools.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com Markets",
+      "url": "https://markets.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com News",
+      "url": "https://news.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com Mining",
+      "url": "https://mining.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com Developer Platform",
+      "url": "https://developer.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin Block Explorer",
+      "url": "https://explorer.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Marco Coino",
+      "url": "https://marcocoino.bitcoin.com"
+    },
+    {
+      "@type": "Product",
+      "name": "Bitcoin.com Store",
+      "url": "https://store.bitcoin.com"
+    }
+  ]
+}

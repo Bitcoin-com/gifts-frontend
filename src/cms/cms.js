@@ -1,5 +1,6 @@
 import { init } from 'netlify-cms-app';
 import './previews';
+import './widgets';
 import collections from './collections';
 
 init({
