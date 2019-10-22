@@ -14,13 +14,19 @@ exports.onCreatePage = params => {
   if (page.path === '/subpage/') return homeBuild(params);
 
   if (page.path === '/404.html') return errorBuild(params);
+  if (page.path === '/404/') return errorBuild(params);
 
   const oldPage = Object.assign({}, page);
 
   // Remove trailing slash unless page is /
-  page.path = replacePath(page.path);
+  if (!page.path.includes('.html')) {
+    page.path = replacePath(page.path);
+  }
 
-  if (page.path !== oldPage.path) {
+  if (
+    page.path !== oldPage.path ||
+    page.path === '/offline-plugin-app-shell-fallback/'
+  ) {
     // Replace new page with old page
     deletePage(oldPage);
     createPage(page);
