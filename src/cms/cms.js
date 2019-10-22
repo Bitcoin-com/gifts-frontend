@@ -14,7 +14,6 @@ init({
     load_config_file: false,
     media_folder: 'static/images/uploads',
     public_folder: '/images/uploads',
-    publish_mode: 'editorial_workflow',
     collections,
   },
 });
