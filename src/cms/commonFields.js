@@ -1,4 +1,4 @@
-const fieldSchema = {
+export const fieldSchema = {
   label: 'Structured Data',
   name: 'schema',
   hint: 'Must be valid schema. See schema.org for more info',

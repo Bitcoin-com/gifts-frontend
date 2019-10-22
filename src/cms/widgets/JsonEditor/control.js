@@ -2,6 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { JsonEditor as Editor } from 'jsoneditor-react';
 import 'jsoneditor-react/es/editor.min.css';
+import ace from 'brace';
+import 'brace/mode/json';
+import 'brace/theme/github';
 
 const ControlClass = props => {
   const {
@@ -25,6 +28,9 @@ const ControlClass = props => {
       <Editor
         value={value}
         mode="code"
+        history
+        ace={ace}
+        theme="ace/theme/github"
         allowedModes={['tree', 'view', 'form', 'code', 'text']}
         onChange={onChange}
       />
