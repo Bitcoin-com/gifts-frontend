@@ -1,4 +1,4 @@
-import { homeConfig } from '../views/Home/config/netlify';
+import { enHomeConfig, zhHomeCOnfig } from '../views/Home/config/netlify';
 import { error404Config } from '../views/404/config/netlify';
 
 const sortItems = (a, b) => {
@@ -15,10 +15,15 @@ const sortItems = (a, b) => {
   return 0;
 };
 
-const pageConfigs = {
-  name: 'pages',
-  label: 'Pages',
-  files: [homeConfig, error404Config].sort(sortItems),
+const enConfigs = {
+  name: 'pages.en',
+  label: 'English',
+  files: [enHomeConfig, error404Config].sort(sortItems),
+};
+const zhConfigs = {
+  name: 'pages.zh',
+  label: 'Chinese',
+  files: [zhHomeCOnfig].sort(sortItems),
 };
 
-export default [pageConfigs];
+export default [enConfigs, zhConfigs];

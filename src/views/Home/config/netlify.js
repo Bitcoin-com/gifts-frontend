@@ -33,10 +33,9 @@ HomePreview.propTypes = {
   }).isRequired,
 };
 
-export const homeConfig = {
+const homeConfig = {
   label: 'Home',
   name: 'home.content',
-  file: 'src/data/home/locales/en.json',
   fields: [
     {
       label: 'Page Meta',
@@ -75,4 +74,14 @@ export const homeConfig = {
       ],
     },
   ],
+};
+
+export const enHomeConfig = {
+  ...homeConfig,
+  file: 'src/data/home/locales/en.json',
+};
+
+export const zhHomeCOnfig = {
+  ...homeConfig,
+  file: 'src/data/home/locales/zh.json',
 };

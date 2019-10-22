@@ -7,8 +7,9 @@ init({
     backend: {
       name: 'github',
       repo: 'bitcoin-portal/bitcoincom-boilerplate',
-      branch: 'staging',
+      branch: 'master', // be sure to change this to staging branch
       base_url: 'https://netlify-oauth-github.herokuapp.com',
+      use_graphql: true,
     },
     load_config_file: false,
     media_folder: 'static/images/uploads',
