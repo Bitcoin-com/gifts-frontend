@@ -5,6 +5,7 @@ const flattenMessages = (nestedMessages, prefix = '') =>
     const prefixedKey = prefix ? `${prefix}.${key}` : key;
 
     if (
+      key === 'schema' ||
       typeof value === 'string' ||
       typeof value === 'number' ||
       typeof value === 'boolean' ||

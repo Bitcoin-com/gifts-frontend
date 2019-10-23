@@ -44,6 +44,10 @@ const SEO = ({ intl }) => (
       name="twitter:image"
       content={`https://www.bitcoin.com${intl.messages['home.meta.image']}`}
     />
+    <script type="application/ld+json">
+      {JSON.stringify(intl.messages['home.meta.schema'])}
+    </script>
+
     <link rel="canonical" href="https://www.bitcoin.com/" />
   </Helmet>
 );

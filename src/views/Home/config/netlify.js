@@ -6,6 +6,7 @@ import Home from '../Home';
 import Layout from '../../../components/Layout/Layout';
 import { DEFAULT_LOCALE } from '../../../i18n';
 import flattenMessages from '../../../helpers/flattenMessages';
+import { fieldMeta, fieldNewsletter } from '../../../cms/commonFields';
 
 export const HomePreview = ({ entry }) => {
   const iframe = document.getElementsByTagName('iframe')[1];
@@ -38,17 +39,6 @@ const homeConfig = {
   name: 'home.content',
   fields: [
     {
-      label: 'Page Meta',
-      widget: 'object',
-      name: 'meta',
-      fields: [
-        { name: 'title', label: 'Title', widget: 'string' },
-        { name: 'description', label: 'Description', widget: 'text' },
-        { name: 'twitter', label: 'Twitter', widget: 'string' },
-        { name: 'image', label: 'SM Image', widget: 'image' },
-      ],
-    },
-    {
       label: 'Content',
       widget: 'object',
       name: 'content',
@@ -57,22 +47,12 @@ const homeConfig = {
         { name: 'logo-alt', label: 'Logo image alt', widget: 'string' },
         { name: 'title', label: 'Title', widget: 'string' },
         { name: 'subtitle', label: 'Description', widget: 'text' },
-        { name: 'link', label: 'Link', widget: 'string' },
         { name: 'image', label: 'Image', widget: 'image' },
         { name: 'image-alt', label: 'Image Alt', widget: 'string' },
       ],
     },
-    {
-      label: 'Newsletter',
-      widget: 'object',
-      name: 'newsletter',
-      fields: [
-        { name: 'title', label: 'Title', widget: 'string' },
-        { name: 'text', label: 'Description', widget: 'text' },
-        { name: 'button', label: 'Button Text', widget: 'string' },
-        { name: 'acList', label: 'Active Campaign List', widget: 'string' },
-      ],
-    },
+    fieldNewsletter,
+    fieldMeta,
   ],
 };
 
