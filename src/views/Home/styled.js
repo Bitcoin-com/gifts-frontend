@@ -6,12 +6,27 @@ import {
   media,
   Button,
   CardContainer,
+  Card,
 } from 'bitcoincom-storybook';
 
-export const CardButton = styled(Button)``;
+export const CardButton = styled(Button)`
+  margin: auto;
+`;
+export const WalletCard = styled(Card)`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+`;
+
+export const MakeAndPayTipsCard = styled(Card)`
+  & > div {
+    margin: auto;
+  }
+`;
 
 export const CustomCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
+`;
+export const TipsWrapper = styled.div`
+  margin: auto;
 `;
 export const TipContainer = styled.div`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
@@ -46,6 +61,8 @@ export const CustomFlexCardContainer = styled(CardContainer)`
 
 export const InputWrapper = styled.div`
   width: 100%;
+  max-width: 450px;
+  margin: auto;
   box-sizing: border-box;
   position: relative;
   padding-bottom: ${theme.spacing.unit * 3}px;
@@ -65,6 +82,7 @@ export const InputWrapper = styled.div`
 `;
 
 export const Form = styled.div`
+  max-width: 450px;
   text-align: left;
   @media screen and (min-width: ${theme.breakpoints.md}px) {
     display: flex;

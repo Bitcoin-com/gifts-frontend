@@ -43,13 +43,16 @@
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
-    "tipAmountFiat": "Enter the fiat amount desired for each tip"
+    "tipAmountFiat": "Enter the fiat amount desired for each tip",
+    "importMnemonic": "Enter your 12-word seed"
   },
   "errors": {
     "tipCountNoTips": "Tip count must be greater than zero",
     "tipCountNum": "Tip count must be a number",
     "fiatTipAmountNum": "Tip amount in local currency must be a number",
-    "fiatTipAmountRequired": "Desired tip in local currency is required"
+    "fiatTipAmountRequired": "Desired tip in local currency is required",
+    "noMnemonic": "To import a mnemonic, you must enter a 12-word seed",
+    "invalidMnemonic": "Please enter a valid 12-word mnemonic"
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],
