@@ -7,8 +7,25 @@ import {
   Button,
   CardContainer,
   Card,
+  Table,
+  Input,
 } from 'bitcoincom-storybook';
+import { BadgerButton } from 'badger-components-react';
 
+export const CenteredBadgerButton = styled(BadgerButton)`
+  margin: auto;
+  & > div {
+    margin: auto;
+  }
+`;
+
+export const TipTable = styled(Table)``;
+export const TipTh = styled.td`
+  text-align: center;
+`;
+export const TipTd = styled.td`
+  text-align: center;
+`;
 export const CardButton = styled(Button)`
   margin: auto;
 `;
@@ -81,7 +98,7 @@ export const InputWrapper = styled.div`
   }
 `;
 
-export const Form = styled.div`
+export const Form = styled.form`
   max-width: 450px;
   text-align: left;
   @media screen and (min-width: ${theme.breakpoints.md}px) {
@@ -94,6 +111,10 @@ export const Form = styled.div`
 export const InputError = styled.div`
   color: #f44336;
   font-size: 0.8rem;
+`;
+
+export const TipInput = styled(Input)`
+  padding-bottom: 0px;
 `;
 
 export const Red = styled.span`

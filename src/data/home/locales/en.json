@@ -39,7 +39,8 @@
     "tipAmountFiat": "Fiat amount (per tip) in your selected currency"
   },
   "buttons": {
-    "createTips": "Generate Tips"
+    "createTips": "Generate Tips",
+    "goBack": "Go Back"
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
