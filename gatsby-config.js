@@ -110,8 +110,10 @@ module.exports = {
       options: {
         custom: {
           families: ['Gilroy:n4,n6,n7'],
-          // should probably use the CDN here to load fonts but was getting cors errors locally
-          urls: ['/fonts/fonts.css'],
+          urls: [
+            'https://menu.cdn.bitcoindotcom.net/uni/dist/fonts.css',
+            '/fonts/fonts.css',
+          ],
         },
       },
     },

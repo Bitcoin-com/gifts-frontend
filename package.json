@@ -9,7 +9,7 @@
     "start": "yarn develop",
     "start:local": "gatsby develop",
     "compress-images": "node image-compressor.js",
-    "build": "yarn compress-images && yarn gatsby clean && cross-env NODE_ENV=production gatsby build --no-uglify",
+    "build": "yarn compress-images && yarn gatsby clean && cross-env NODE_ENV=production gatsby build",
     "build:sandbox": "yarn compress-images && yarn gatsby clean && cross-env gatsby build",
     "serve": "gatsby serve",
     "develop": "gatsby develop -H 0.0.0.0 -p 3000",
