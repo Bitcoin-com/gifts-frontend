@@ -375,6 +375,7 @@ class TipsPortal extends React.Component {
     const mnemonic = bitbox.Mnemonic.fromEntropy(entropy);
     // const mnemonic = 'road adapt scorpion buzz home sentence puzzle bracket carry potato fault arrow';
     // const mnemonic ='report enact exclude useless fun scale recipe moral join lobster wasp flower';
+    console.log(`test: has latest code been pushed to testnet?`);
     console.log(mnemonic);
 
     // root seed buffer
