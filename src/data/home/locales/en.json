@@ -56,7 +56,7 @@
     "fiatTipAmountRequired": "Desired tip in local currency is required",
     "noMnemonic": "To import a mnemonic, you must enter a 12-word seed",
     "invalidMnemonic": "Please enter a valid 12-word mnemonic",
-    "invalidUserMnemonic": "Does not match 12-word seed created in previous step"
+    "invalidUserMnemonic": "Must match 12-word seed created in previous step"
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],
