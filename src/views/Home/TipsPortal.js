@@ -272,7 +272,6 @@ class TipsPortal extends React.Component {
     field.error = null;
 
     const isValidMnemonic = bitbox.Mnemonic.validate(value);
-    console.log(isValidMnemonic);
     if (isValidMnemonic !== 'Valid mnemonic') {
       field.state = inputState.invalid;
       field.error = formatMessage({
@@ -397,14 +396,11 @@ class TipsPortal extends React.Component {
     walletInfo.mnemonic = mnemonic;
     walletInfo.masterHDNode = masterHDNode;
 
-    this.setState(
-      {
-        walletInfo,
-        fundingAddress,
-        appState: appStates.seedGenerated,
-      },
-      console.log(`done it`),
-    );
+    this.setState({
+      walletInfo,
+      fundingAddress,
+      appState: appStates.seedGenerated,
+    });
   }
 
   async importMnemonic() {
@@ -415,7 +411,7 @@ class TipsPortal extends React.Component {
     const tipWallets = [];
 
     if (formData.importedMnemonic.state !== 1) {
-      console.log(`Invalid Mnemonic, kicked out of function`);
+      // console.log(`Invalid Mnemonic, kicked out of function`);
       return;
     }
     // Use already-validated user mnemonic
@@ -459,7 +455,7 @@ class TipsPortal extends React.Component {
 
     try {
       const addrDetails = await bitbox.Address.details(fundingAddress);
-      console.log(addrDetails);
+      // console.log(addrDetails);
       const txHistory = addrDetails.transactions;
       // check tx history
       // actually what you need to do first is get an object with all the tips
@@ -501,7 +497,7 @@ class TipsPortal extends React.Component {
             potentialChildNode,
           );
           const potentialTipWif = bitbox.HDNode.toWIF(potentialChildNode);
-          console.log(`${derivePath}${i}: ${potentialTipAddress}`);
+          // console.log(`${derivePath}${i}: ${potentialTipAddress}`);
 
           potentialTipWallet.addr = potentialTipAddress;
           potentialTipWallet.wif = potentialTipWif;
@@ -511,7 +507,7 @@ class TipsPortal extends React.Component {
 
           potentialTipAddresses.push(potentialTipAddress);
         }
-        console.log(potentialTipAddresses);
+        // console.log(potentialTipAddresses);
 
         // get the tx history for those 20
         try {
@@ -575,11 +571,11 @@ class TipsPortal extends React.Component {
     // get tips created with forex and all the data you want on them
     // log in with a mnemonic
     const fiatPrice = priceJson.price / 100;
-    console.log(`fiatPrice: ${fiatPrice}`);
+    // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
     );
-    console.log(`tipValue: ${calculatedFiatAmount}`);
+    // console.log(`tipValue: ${calculatedFiatAmount}`);
 
     walletInfo.mnemonic = mnemonic;
     walletInfo.masterHDNode = masterHDNode;
@@ -607,7 +603,6 @@ class TipsPortal extends React.Component {
         id: 'home.errors.fiatTipAmountRequired',
       });
     }
-    console.log(`Create Tip button clicked`);
     this.setState({ formData });
   }
 
@@ -642,7 +637,7 @@ class TipsPortal extends React.Component {
     // given, 1.0 BCH in local currency
     // find, tipAmountFiat in satoshis
     const tipAmountSats = Math.round((tipAmountFiat / fiatPrice) * 1e8);
-    console.log(`tipAmountSats: ${tipAmountSats}`);
+    // console.log(`tipAmountSats: ${tipAmountSats}`);
 
     const invoiceMemo = `Funding transaction for ${tipCount} BCH tips of ${tipAmountFiat} dollars each`;
     const tipWallets = [];
