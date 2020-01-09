@@ -38,6 +38,7 @@ import {
   SeedWarning,
   Buttons,
   CustomInfo,
+  SeedReminder,
 } from './styled';
 
 const bitbox = new BITBOX({
@@ -782,7 +783,7 @@ class TipsPortal extends React.Component {
     } else {
       displayWidth = `${tipWallets.length * tipWidth}in`;
     }
-    //console.log(`displayWidth: ${displayWidth}`);
+    // console.log(`displayWidth: ${displayWidth}`);
 
     if (tipWallets.length > 0) {
       tipWallets.forEach(tipWallet => {
@@ -1008,12 +1009,28 @@ class TipsPortal extends React.Component {
                     />
                   </BadgerWrap>
                   {tipsFunded ? (
-                    <CopyToClipboard
-                      text={walletInfo.mnemonic}
-                      onCopy={() => this.handleSeedCopied()}
-                    >
-                      <SeedWrapper>{walletInfo.mnemonic}</SeedWrapper>
-                    </CopyToClipboard>
+                    <React.Fragment>
+                      <CopyToClipboard
+                        text={walletInfo.mnemonic}
+                        onCopy={() => this.handleSeedCopied()}
+                      >
+                        <SeedWrapper>{walletInfo.mnemonic}</SeedWrapper>
+                      </CopyToClipboard>
+                      <CopyToClipboard
+                        text={walletInfo.mnemonic}
+                        onCopy={() => this.handleSeedCopied()}
+                      >
+                        <CardButton
+                          primary
+                          style={{ margin: 'auto', maxWidth: '212px' }}
+                        >
+                          <FormattedMessage id="home.buttons.copySeed" />
+                        </CardButton>
+                      </CopyToClipboard>
+                      <SeedReminder>
+                        Save this seed to access your tips in the future.
+                      </SeedReminder>
+                    </React.Fragment>
                   ) : (
                     <React.Fragment>
                       <ButtonHider show={!tipsFunded}>

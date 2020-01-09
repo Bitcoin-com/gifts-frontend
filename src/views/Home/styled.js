@@ -93,6 +93,12 @@ export const CustomInfo = styled.h5`
   margin: auto;
   padding-bottom: ${theme.spacing.unit * 2}px;
 `;
+export const SeedReminder = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: ${theme.spacing.unit * 2}px;
+`;
+
 export const TipsWrapper = styled.div`
   margin: auto;
 `;
