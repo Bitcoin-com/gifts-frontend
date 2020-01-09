@@ -11,3 +11,5 @@ Redeemable BCH tips with a client-side management portal
 ## Development
 
 ## Production
+
+1. Updating README to test another prod build
