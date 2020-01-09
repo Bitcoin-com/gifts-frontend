@@ -10,15 +10,11 @@ import {
   Table,
   Input,
 } from 'bitcoincom-storybook';
-import { BadgerButton } from 'badger-components-react';
 
-export const CenteredBadgerButton = styled(BadgerButton)`
+export const BadgerWrap = styled.div`
   margin: auto;
-  & > div {
-    margin: auto;
-  }
+  padding: ${theme.spacing.unit * 3}px;
 `;
-
 export const TipTable = styled(Table)``;
 export const TipTh = styled.td`
   text-align: center;
@@ -29,16 +25,48 @@ export const TipTd = styled.td`
 export const CardButton = styled(Button)`
   margin: auto;
 `;
+export const ButtonHider = styled.div`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+`;
 export const WalletCard = styled(Card)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
+export const TipContainerWrapper = styled.div`
+  margin: auto;
+  margin-top: ${theme.spacing.unit * 6}px;
+  width: ${props => props.maxWidth || '100%'};
+  ${media.sm`
+    max-width: 2in;
+  `}
+  ${media.smmd`
+    max-width: 4in;
 
-export const MakeAndPayTipsCard = styled(Card)`
+  `}
+  ${media.md`
+    max-width: 6in;
+  `}
+
+
+`;
+
+export const MakeAndPayTipsCard = styled(Card)``;
+export const SeedCard = styled(Card)`
   & > div {
     margin: auto;
   }
 `;
-
+export const SeedWrapper = styled.div`
+  margin-bottom: ${theme.spacing.unit * 3}px;
+  border: 2px solid black;
+  padding: ${theme.spacing.unit * 2}px;
+  border-radius: 5px;
+  & :hover {
+    background-color: #0fcb97;
+    color: #fff;
+    border-color: #0fcb97;
+  }
+`;
+export const SeedWarning = styled.p``;
 export const CustomCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
 `;
@@ -50,6 +78,11 @@ export const TipContainer = styled.div`
   grid-row-gap: 0px;
   grid-column-gap: 0px;
   justify-items: center;
+  @media print {
+    grid-template-columns: ${props =>
+      props.columns && `repeat(${props.columns}, 0fr)`}
+    }
+
 
   ${media.sm`
     grid-template-columns: 0fr;
