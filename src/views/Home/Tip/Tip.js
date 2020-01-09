@@ -12,7 +12,6 @@ import {
   TipExchangeRate,
   StatusWrap,
   ClaimedBlock,
-  ClaimedSpan,
 } from './styled';
 import bchLogo from '../../../../static/images/uploads/bch-logo.png';
 import tipsLogo from '../../../../static/images/uploads/bitcoin-cash-tips-logo-horizontal-grn.png';
@@ -78,7 +77,13 @@ Tip.propTypes = {
   fiatAmount: PropTypes.number.isRequired,
   fiatCurrency: PropTypes.string.isRequired,
   dateStr: PropTypes.string,
-  tipWallet: PropTypes.object.isRequired,
+  tipWallet: PropTypes.shape({
+    addr: PropTypes.string.isRequired,
+    wif: PropTypes.string.isRequired,
+    sats: PropTypes.number.isRequired,
+    status: PropTypes.string.isRequired,
+    claimedTxId: PropTypes.string,
+  }).isRequired,
 };
 
 Tip.defaultProps = {

@@ -50,18 +50,21 @@ export const TipContainerWrapper = styled.div`
   margin: auto;
   margin-top: ${theme.spacing.unit * 6}px;
   width: ${props => props.maxWidth || '100%'};
+  @media only screen and (max-width: 424px) {
+  max-width: 2in;
+}
   ${media.sm`
-    max-width: 2in;
+    max-width: 4in;
   `}
   ${media.smmd`
-    max-width: 4in;
-
-  `}
-  ${media.md`
     max-width: 6in;
   `}
-
-
+  ${media.md`
+  max-width: 6in;
+  `}
+  ${media.lg`
+  max-width: ${props => props.maxWidth || '100%'};
+  `}
 `;
 
 export const MakeAndPayTipsCard = styled(Card)``;
@@ -103,16 +106,21 @@ export const TipContainer = styled.div`
       props.columns && `repeat(${props.columns}, 0fr)`}
     }
 
+    @media only screen and (max-width: 424px) {
+      grid-template-columns: 0fr;
+}
+
 
   ${media.sm`
-    grid-template-columns: 0fr;
+  grid-template-columns: ${props => (props.columns >= 2 ? '0fr 0fr' : '0fr')};
   `}
   ${media.smmd`
-    grid-template-columns: ${props => (props.columns >= 2 ? '0fr 0fr' : '0fr')};
+  grid-template-columns: ${props => (props.columns >= 2 ? '0fr 0fr' : '0fr')};
+
   `}
   ${media.md`
-    grid-template-columns: ${props =>
-      props.columns >= 3 ? '0fr 0fr 0fr' : `repeat(${props.columns}, 0fr)`};
+  grid-template-columns: ${props =>
+    props.columns >= 3 ? '0fr 0fr 0fr' : `repeat(${props.columns}, 0fr)`};
   `}
   ${media.lg`
     grid-template-columns: ${props =>
