@@ -383,7 +383,7 @@ class TipsPortal extends React.Component {
     console.log(`rootSeed generated`);
 
     // master HDNode
-    const masterHDNode = bitbox.HDNode.fromSeed(rootSeed, 'bitcoincash');
+    const masterHDNode = bitbox.HDNode.fromSeed(rootSeed, 'mainnet');
     console.log(`masterHDNode generated`);
 
     // HDNode of BIP44 account
