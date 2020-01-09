@@ -3,6 +3,7 @@ import { injectIntl, FormattedMessage } from 'react-intl';
 import memoize from 'memoize-one';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BITBOX } from 'bitbox-sdk';
+import { BadgerButton } from 'badger-components-react';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
@@ -14,7 +15,6 @@ import {
   InputSelect,
 } from 'bitcoincom-storybook';
 import merge from 'lodash/merge';
-import { BadgerButton } from 'badger-components-react';
 import Tip from './Tip';
 import {
   CardButton,
