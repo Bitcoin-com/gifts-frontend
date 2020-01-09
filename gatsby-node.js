@@ -38,6 +38,7 @@ exports.onCreateWebpackConfig = ({ actions }) => {
     resolve: {
       alias: {
         'styled-components': path.resolve('./node_modules/styled-components'),
+        'bitbox-sdk': path.resolve('./node_modules/bitbox-sdk'),
       },
     },
   });

@@ -116,7 +116,6 @@ class TipsPortal extends React.Component {
     this.handleSeedCopied = this.handleSeedCopied.bind(this);
     this.handleSeedSavedConfirmed = this.handleSeedSavedConfirmed.bind(this);
     this.goBackOneStep = this.goBackOneStep.bind(this);
-    this.importMnemonicOneByOne = this.importMnemonicOneByOne.bind(this);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -203,8 +202,10 @@ class TipsPortal extends React.Component {
     // if not, show next stuff
   }
 
+  // eslint-disable-next-line class-methods-use-this
   handleConfirmSeedButton() {
     // set state that seed is confirmed
+    // Leave in as stub method for now
   }
 
   invoiceSuccess() {
@@ -535,6 +536,7 @@ class TipsPortal extends React.Component {
                   potentialTipDetails[i].unconfirmedBalanceSat < 0)
               ) {
                 tipWallet.status = 'claimed';
+                // eslint-disable-next-line prefer-destructuring
                 tipWallet.claimedTxid = potentialTipDetails[i].transactions[0];
               }
               tipWallets.push(tipWallet);
@@ -593,8 +595,6 @@ class TipsPortal extends React.Component {
       tipsFunded: true,
     });
   }
-
-  async importMnemonicOneByOne() {}
 
   handleCreateTipSubmitButton() {
     const {
@@ -847,7 +847,7 @@ class TipsPortal extends React.Component {
                   text={walletInfo.mnemonic}
                   onCopy={() => this.handleSeedCopied()}
                 >
-                  <CardButton primary>
+                  <CardButton primary style={{ maxWidth: '212px' }}>
                     <FormattedMessage id="home.buttons.copySeed" />
                   </CardButton>
                 </CopyToClipboard>

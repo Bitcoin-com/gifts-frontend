@@ -42,13 +42,14 @@ import TipsPortal from './TipsPortal';
 // consider max amount for tips, auto-return tips
 // save sending address
 
-const Home = ({ locale, intl: { messages } }) => {
+const Home = ({ locale }) => {
   return (
     <React.Fragment>
       <SEO />
       <Wrapper>
         <HeadSection>
-          <Nav locale={locale} contrast languages={['en', 'zh']} />
+          {/* <Nav locale={locale} contrast languages={['en', 'zh']} /> */}
+          <Nav locale={locale} contrast />
         </HeadSection>
         <TipsPortal locale={locale} />
 
