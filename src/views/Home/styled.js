@@ -15,6 +15,23 @@ export const BadgerWrap = styled.div`
   margin: auto;
   padding: ${theme.spacing.unit * 3}px;
 `;
+export const Buttons = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  & > div {
+    margin-left: ${theme.spacing.unit * 0.5}px;
+    margin-right: ${theme.spacing.unit * 0.5}px;
+    max-width: 130px;
+  }
+  ${media.sm`
+    & > div {
+      margin-left: ${theme.spacing.unit}px;
+      margin-right: ${theme.spacing.unit}px;
+      max-width: 200px;
+    }
+  `}
+`;
 export const TipTable = styled(Table)``;
 export const TipTh = styled.td`
   text-align: center;
@@ -22,9 +39,7 @@ export const TipTh = styled.td`
 export const TipTd = styled.td`
   text-align: center;
 `;
-export const CardButton = styled(Button)`
-  margin: auto;
-`;
+export const CardButton = styled(Button)``;
 export const ButtonHider = styled.div`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
@@ -69,6 +84,11 @@ export const SeedWrapper = styled.div`
 export const SeedWarning = styled.p``;
 export const CustomCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
+`;
+export const CustomInfo = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-bottom: ${theme.spacing.unit * 2}px;
 `;
 export const TipsWrapper = styled.div`
   margin: auto;

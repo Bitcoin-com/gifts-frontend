@@ -40,7 +40,7 @@
   },
   "buttons": {
     "createTips": "Generate Tips",
-    "goBack": "Go Back",
+    "goBack": "Back",
     "copySeed": "Copy to Clipboard"
   },
   "placeholders": {
