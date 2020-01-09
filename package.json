@@ -37,6 +37,8 @@
   "dependencies": {
     "axios": "^0.19.0",
     "babel-plugin-styled-components": "^1.10.6",
+    "badger-components-react": "^0.7.0",
+    "bitbox-sdk": "^8.11.2",
     "bitcoincom-storybook": "git+ssh://git@github.com/bitcoin-portal/bitcoincom-storybook.git#v1.0.0",
     "bitcoincom-universal": "git+ssh://git@github.com/bitcoin-portal/bitcoincom-universal.git#v1.0.0",
     "brace": "^0.11.1",
@@ -56,10 +58,14 @@
     "netlify-cms-app": "^2.9.7",
     "prop-types": "^15.7.2",
     "react": "^16.10.2",
+    "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.10.2",
     "react-helmet": "^5.2.1",
     "react-intl": "^3.3.2",
-    "styled-components": "^4.4.0"
+    "react-qrcode-logo": "^2.2.1",
+    "react-spring": "^8.0.27",
+    "styled-components": "^4.4.0",
+    "toasted-notes": "^3.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.3",
