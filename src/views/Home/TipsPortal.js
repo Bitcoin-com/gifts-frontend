@@ -380,15 +380,18 @@ class TipsPortal extends React.Component {
 
     // root seed buffer
     const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
+    console.log(`rootSeed generated`);
 
     // master HDNode
     const masterHDNode = bitbox.HDNode.fromSeed(rootSeed, 'bitcoincash');
+    console.log(`masterHDNode generated`);
 
     // HDNode of BIP44 account
     const account = bitbox.HDNode.derivePath(
       masterHDNode,
       `${walletInfo.derivePath}0`,
     );
+    console.log(`account generated`);
 
     const fundingAddress = bitbox.HDNode.toCashAddress(account);
 
