@@ -38,6 +38,7 @@ import {
   SeedWarning,
   Buttons,
   CustomInfo,
+  SeedReminder,
 } from './styled';
 
 const bitbox = new BITBOX({
@@ -135,6 +136,7 @@ class TipsPortal extends React.Component {
       calculatedFiatAmount: null,
       tipsFunded: false,
       appState: appStates.initial,
+      invoiceGenerationError: '',
     };
   }
 
@@ -600,19 +602,26 @@ class TipsPortal extends React.Component {
     const {
       intl: { formatMessage },
     } = this.props;
-    const { formData } = this.state;
-    console.log(formData.tipAmountFiat.value);
+    const { formData, invoiceGenerationError } = this.state;
+
     if (formData.tipAmountFiat.value === '') {
       formData.tipAmountFiat.error = formatMessage({
         id: 'home.errors.fiatTipAmountRequired',
       });
     }
     this.setState({ formData });
+
+    // Reset to blank in case user is creating another invoice after an error
+    if (invoiceGenerationError !== '') {
+      this.setState({ invoiceGenerationError: '' });
+    }
   }
 
   async handleCreateTipSubmit(e) {
     e.preventDefault();
-
+    const {
+      intl: { formatMessage },
+    } = this.props;
     const { formData, walletInfo, selectedCurrency } = this.state;
     const { masterHDNode, derivePath } = walletInfo;
 
@@ -691,7 +700,7 @@ class TipsPortal extends React.Component {
           console.log(res);
           // catch errors that aren't handled by pay.bitcoin.com
           if (res.cause) {
-            console.log(`Unhandled error in BIP070 invoice generation`);
+            console.log(`Error in BIP070 invoice generation`);
             /*
             Sample response from request that should have been parsed by pay.bitcoin.com server:
             {
@@ -701,24 +710,31 @@ class TipsPortal extends React.Component {
               "isOperational": true
             }
             */
+            // handle this error
+            return this.setState({
+              invoiceGenerationError: formatMessage({
+                id: 'home.errors.invoiceGenerationError',
+              }),
+            });
           }
           console.log(`funding outputs used:`);
           console.log(fundingOutputs);
           const { paymentId } = res;
-          this.setState({
+          return this.setState({
             invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+            tipWallets,
           });
         },
         err => {
-          console.log(`error creating invoice`);
+          console.log(`Error creating invoice`);
           console.log(err);
+          return this.setState({
+            invoiceGenerationError: formatMessage({
+              id: 'home.errors.invoiceGenerationError',
+            }),
+          });
         },
       );
-
-    // badger invoice with that invoice url
-
-    console.log(tipWallets);
-    this.setState({ tipWallets });
   }
 
   render() {
@@ -736,6 +752,7 @@ class TipsPortal extends React.Component {
       calculatedFiatAmount,
       tipsFunded,
       appState,
+      invoiceGenerationError,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -766,6 +783,7 @@ class TipsPortal extends React.Component {
     } else {
       displayWidth = `${tipWallets.length * tipWidth}in`;
     }
+    // console.log(`displayWidth: ${displayWidth}`);
 
     if (tipWallets.length > 0) {
       tipWallets.forEach(tipWallet => {
@@ -799,7 +817,7 @@ class TipsPortal extends React.Component {
                 style={{ margin: 'auto' }}
                 onClick={this.generateNewWallet}
               >
-                Generate Tips
+                <FormattedMessage id="home.buttons.createTips" />
               </CardButton>
             </WalletCard>
             <Card title="Manage Created Tips">
@@ -954,12 +972,13 @@ class TipsPortal extends React.Component {
                     type="submit"
                     form="createTip"
                     primary
-                    style={{ margin: 'auto' }}
+                    style={{ margin: 'auto', marginBottom: '12px' }}
                     onClick={this.handleCreateTipSubmitButton}
                     action="submit"
                   >
                     <FormattedMessage id="home.buttons.createTips" />
                   </CardButton>
+                  <InputError>{invoiceGenerationError}</InputError>
                 </React.Fragment>
               ) : (
                 <React.Fragment>
@@ -990,12 +1009,28 @@ class TipsPortal extends React.Component {
                     />
                   </BadgerWrap>
                   {tipsFunded ? (
-                    <CopyToClipboard
-                      text={walletInfo.mnemonic}
-                      onCopy={() => this.handleSeedCopied()}
-                    >
-                      <SeedWrapper>{walletInfo.mnemonic}</SeedWrapper>
-                    </CopyToClipboard>
+                    <React.Fragment>
+                      <CopyToClipboard
+                        text={walletInfo.mnemonic}
+                        onCopy={() => this.handleSeedCopied()}
+                      >
+                        <SeedWrapper>{walletInfo.mnemonic}</SeedWrapper>
+                      </CopyToClipboard>
+                      <CopyToClipboard
+                        text={walletInfo.mnemonic}
+                        onCopy={() => this.handleSeedCopied()}
+                      >
+                        <CardButton
+                          primary
+                          style={{ margin: 'auto', maxWidth: '212px' }}
+                        >
+                          <FormattedMessage id="home.buttons.copySeed" />
+                        </CardButton>
+                      </CopyToClipboard>
+                      <SeedReminder>
+                        Save this seed to access your tips in the future.
+                      </SeedReminder>
+                    </React.Fragment>
                   ) : (
                     <React.Fragment>
                       <ButtonHider show={!tipsFunded}>
