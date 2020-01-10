@@ -5,6 +5,7 @@ import { Nav, Footer } from 'bitcoincom-universal';
 import { Wrapper, HeadSection } from './styled';
 import SEO from './SEO';
 import TipsPortal from './TipsPortal';
+import './print.css';
 
 // Next steps
 
@@ -46,8 +47,8 @@ const Home = ({ locale }) => {
   return (
     <React.Fragment>
       <SEO />
-      <Wrapper>
-        <HeadSection>
+      <Wrapper className="print">
+        <HeadSection className="noPrint">
           {/* <Nav locale={locale} contrast languages={['en', 'zh']} /> */}
           <Nav locale={locale} contrast />
         </HeadSection>

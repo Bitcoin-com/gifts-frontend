@@ -1,0 +1,12 @@
+@media print {
+  .noPrint {
+    display: none;
+  }
+  footer {
+    display: none;
+  }
+  .print {
+    margin: 0mm;
+    padding: 0mm;
+  }
+}

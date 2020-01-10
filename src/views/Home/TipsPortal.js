@@ -8,7 +8,6 @@ import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
 import {
-  ContentBlock,
   Card,
   InputLabel,
   Input,
@@ -17,6 +16,7 @@ import {
 import merge from 'lodash/merge';
 import Tip from './Tip';
 import {
+  PrintableContentBlock,
   CardButton,
   CustomCardContainer,
   CustomFlexCardContainer,
@@ -806,7 +806,7 @@ class TipsPortal extends React.Component {
 
     return (
       <React.Fragment>
-        <ContentBlock>
+        <PrintableContentBlock>
           <CustomCardContainer
             show={fundingAddress === '' || importedMnemonic}
             columns={!importedMnemonic ? 2 : 1}
@@ -1061,7 +1061,7 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
-        </ContentBlock>
+        </PrintableContentBlock>
       </React.Fragment>
     );
   }
