@@ -11,6 +11,20 @@ import {
   Input,
 } from 'bitcoincom-storybook';
 
+export const PrintableContentBlock = styled(ContentBlock)`
+  @media print {
+    margin: 0mm;
+    padding: 0mm;
+    & > div {
+      margin: 0mm;
+      padding: 0mm;
+      & > div {
+        margin: 0mm;
+        padding: 0mm;
+      }
+    }
+  }
+`;
 export const BadgerWrap = styled.div`
   margin: auto;
   padding: ${theme.spacing.unit * 3}px;
@@ -46,26 +60,6 @@ export const ButtonHider = styled.div`
 export const WalletCard = styled(Card)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
-export const TipContainerWrapper = styled.div`
-  margin: auto;
-  margin-top: ${theme.spacing.unit * 6}px;
-  width: ${props => props.maxWidth || '100%'};
-  @media only screen and (max-width: 424px) {
-  max-width: 2in;
-}
-  ${media.sm`
-    max-width: 4in;
-  `}
-  ${media.smmd`
-    max-width: 6in;
-  `}
-  ${media.md`
-  max-width: 6in;
-  `}
-  ${media.lg`
-  max-width: ${props => props.maxWidth || '100%'};
-  `}
-`;
 
 export const MakeAndPayTipsCard = styled(Card)``;
 export const SeedCard = styled(Card)`
@@ -87,6 +81,9 @@ export const SeedWrapper = styled.div`
 export const SeedWarning = styled.p``;
 export const CustomCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
+  @media print {
+    display: none;
+  }
 `;
 export const CustomInfo = styled.h5`
   text-align: center;
@@ -102,15 +99,42 @@ export const SeedReminder = styled.h5`
 export const TipsWrapper = styled.div`
   margin: auto;
 `;
+export const TipContainerWrapper = styled.div`
+  margin: auto;
+  margin-top: ${theme.spacing.unit * 6}px;
+  width: ${props => props.maxWidth || '100%'};
+  @media only screen and (max-width: 424px) {
+  max-width: 2in;
+}
+  ${media.sm`
+    max-width: 4in;
+  `}
+  ${media.smmd`
+    max-width: 6in;
+  `}
+  ${media.md`
+  max-width: 6in;
+  `}
+  ${media.lg`
+  max-width: ${props => props.maxWidth || '100%'};
+  `}
+  @media print {
+    margin: 0mm;
+    padding: 0mm;
+    max-width: none;
+  }
+`;
 export const TipContainer = styled.div`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
   grid-row-gap: 0px;
   grid-column-gap: 0px;
   justify-items: center;
   @media print {
-    grid-template-columns: ${props =>
-      props.columns && `repeat(${props.columns}, 0fr)`}
-    }
+   margin: 0mm;
+   padding: 0mm;
+   width: 10in;
+   grid-template-columns: repeat(4,0fr) !important;
+  }
 
     @media only screen and (max-width: 424px) {
       grid-template-columns: 0fr;
@@ -141,6 +165,9 @@ export const CustomFlexCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
+  @media print {
+    display: none;
+  }
 `;
 
 export const InputWrapper = styled.div`

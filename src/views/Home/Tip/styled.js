@@ -14,6 +14,9 @@ export const TipWrapper = styled.div`
     .printHide {
       display: none;
     }
+    display: inline-block;
+    height: 3.18in;
+    page-break-inside: avoid !important;
   }
 `;
 export const StatusWrap = styled.div`
