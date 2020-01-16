@@ -7,12 +7,7 @@ import { BadgerButton } from 'badger-components-react';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
-import {
-  Card,
-  InputLabel,
-  Input,
-  InputSelect,
-} from 'bitcoincom-storybook';
+import { Card, InputLabel, Input, InputSelect } from 'bitcoincom-storybook';
 import merge from 'lodash/merge';
 import Tip from './Tip';
 import {
@@ -21,6 +16,7 @@ import {
   CustomCardContainer,
   CustomFlexCardContainer,
   InputWrapper,
+  AddressInputWrapper,
   Form,
   InputError,
   Red,
@@ -39,6 +35,8 @@ import {
   Buttons,
   CustomInfo,
   SeedReminder,
+  AddressForm,
+  SweepNotice,
 } from './styled';
 
 const bitbox = new BITBOX({
@@ -85,6 +83,11 @@ class TipsPortal extends React.Component {
         state: inputState.untouched,
         error: null,
       },
+      userRefundAddress: {
+        value: '',
+        state: inputState.untouched,
+        error: null,
+      },
     };
 
     this.getCurrenciesOptions = this.getCurrenciesOptions.bind(this);
@@ -117,6 +120,14 @@ class TipsPortal extends React.Component {
     this.handleSeedCopied = this.handleSeedCopied.bind(this);
     this.handleSeedSavedConfirmed = this.handleSeedSavedConfirmed.bind(this);
     this.goBackOneStep = this.goBackOneStep.bind(this);
+    this.sweepAllTips = this.sweepAllTips.bind(this);
+    this.handleUserRefundAddressChange = this.handleUserRefundAddressChange.bind(
+      this,
+    );
+    this.validateUserRefundAddressChange = this.validateUserRefundAddressChange.bind(
+      this,
+    );
+    this.handleSweepAllTipsButton = this.handleSweepAllTipsButton.bind(this);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -137,6 +148,8 @@ class TipsPortal extends React.Component {
       tipsFunded: false,
       appState: appStates.initial,
       invoiceGenerationError: '',
+      sweptTxid: null,
+      tipsSweptCount: 0,
     };
   }
 
@@ -161,6 +174,133 @@ class TipsPortal extends React.Component {
     this.setState({
       selectedCurrency,
     });
+  }
+
+  async sweepAllTips(e) {
+    e.preventDefault();
+    console.log(`sweepAllTips`);
+    // Accept a validated cash address from user input
+    // Scan addresses from this HD node for a balance
+    // Use a tipCount var in state; if your tips were just created, you'll have it
+    // Figure out a way to find tipCount from import as well
+    // reference: https://github.com/Bitcoin-com/bch-cli-wallet/blob/master/src/commands/sweep.js
+    // key difference is that you will be building 1 transaction with utxos from different addresses
+    // Build this for the case of "you just made the tips" first; simpler than the import case
+    const { formData, tipWallets } = this.state;
+    const refundAddress = formData.userRefundAddress.value;
+    // Scan through tip wallets by wif, see if there is money to sweep, and output a new object
+    // of what you need to build your sweeping tx
+    const sweepBuilder = [];
+    const sweepAddresses = [];
+    tipWallets.forEach(tipWallet => {
+      const sweepChunk = {};
+      // get ec pair from wif
+      const ecPair = bitbox.ECPair.fromWIF(tipWallet.wif);
+      // get address from ecpair
+      const fromAddr = bitbox.ECPair.toCashAddress(ecPair);
+      sweepChunk.ecPair = ecPair;
+      sweepChunk.fromAddr = fromAddr;
+      sweepAddresses.push(fromAddr);
+      sweepBuilder.push(sweepChunk);
+    });
+    console.log(sweepBuilder);
+
+    // check balances of addresses in one async batch
+    const u = await bitbox.Address.utxo(sweepAddresses);
+    console.log(`utxos:`);
+    console.log(u);
+
+    // Add the utxos to the sweepbuilder array
+    // iterate over utxo object
+    // if the address matches a sweepbuilder entry, add it to that entry
+    // might be best to do this step in the txbuilder loop
+
+    for (let i = 0; i < u.length; i += 1) {
+      // utxos come back in same order they were sent
+      // handle case that not all addresses will have utxos later
+      sweepBuilder[i].utxos = u[i].utxos;
+    }
+    console.log(`completed sweepBuilder:`);
+    console.log(sweepBuilder);
+
+    // now make that return tx
+    const transactionBuilder = new bitbox.TransactionBuilder();
+    let originalAmount = 0;
+    let inputCount = 0;
+
+    // loop over sweepBuilder
+    for (let j = 0; j < sweepBuilder.length; j++) {
+      // Loop through all for each tip with utxos and add as inputs
+      for (let i = 0; i < sweepBuilder[j].utxos.length; i++) {
+        const utxo = sweepBuilder[j].utxos[i];
+
+        originalAmount += utxo.satoshis;
+        console.log(`Input ${inputCount + 1}: { ${utxo.txid} , ${utxo.vout}}`);
+
+        transactionBuilder.addInput(utxo.txid, utxo.vout);
+        inputCount += 1;
+      }
+    }
+    if (originalAmount < 1) {
+      console.log(`originalAmount is 0, handle as error`);
+    }
+    console.log(`Total inputs: ${inputCount}`);
+    const byteCount = bitbox.BitcoinCash.getByteCount(
+      { P2PKH: inputCount },
+      { P2PKH: 1 },
+    );
+    const fee = Math.ceil(1.1 * byteCount);
+    console.log(`fee: ${fee}`);
+    // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+    const sendAmount = originalAmount - fee;
+    console.log(`sendAmount: ${sendAmount}`);
+
+    // add output w/ address and amount to send
+    transactionBuilder.addOutput(
+      bitbox.Address.toLegacyAddress(refundAddress),
+      sendAmount,
+    );
+
+    // Loop through each input and sign
+    let redeemScript;
+    let signedInputCount = 0;
+    for (let j = 0; j < sweepBuilder.length; j++) {
+      for (let i = 0; i < sweepBuilder[j].utxos.length; i++) {
+        const utxo = sweepBuilder[j].utxos[i];
+        // console.log(`utxo[${i}]: ${utxo.vout}`);
+        // console.log(utxo);
+        // console.log(`signing ecPair:`);
+        // console.log(sweepBuilder[j].ecPair);
+        transactionBuilder.sign(
+          signedInputCount,
+          sweepBuilder[j].ecPair,
+          redeemScript,
+          transactionBuilder.hashTypes.SIGHASH_ALL,
+          utxo.satoshis,
+        );
+        signedInputCount += 1;
+        console.log(
+          `Signed input ${i} round ${j} with ${sweepBuilder[j].ecPair.d[0]}`,
+        );
+      }
+    }
+    // build tx
+    const tx = transactionBuilder.build();
+    // output rawhex
+    const hex = tx.toHex();
+    console.log(hex);
+
+    try {
+      const txid = await bitbox.RawTransactions.sendRawTransaction([hex]);
+
+      console.log(`txid: ${txid}`);
+      this.setState({ sweptTxid: txid, tipsSweptCount: sweepBuilder.length });
+    } catch (err) {
+      console.log(`Error in broadcasting transaction:`);
+      console.log(err);
+    }
+
+    // ...a thought. you probably must make 1 tx for each tip. probably can't batch a tx from utxos from different addresses...? nah you definitely can...
   }
 
   handleSeedCopied() {
@@ -215,6 +355,49 @@ class TipsPortal extends React.Component {
     this.setState({
       tipsFunded: true,
     });
+  }
+
+  handleUserRefundAddressChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateUserRefundAddressChange({ name, value }),
+      },
+    });
+  }
+
+  validateUserRefundAddressChange = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+    console.log(`validate:`);
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // validation goes here
+    try {
+      bitbox.Address.toLegacyAddress(value);
+      console.log(bitbox.Address.toLegacyAddress(value));
+    } catch (err) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidRefundAddress',
+      });
+    }
+
+    return field;
+  };
+
+  handleSweepAllTipsButton() {
+    console.log(`handleSweepAllTipsButton`);
   }
 
   handleUserConfirmedMnemonicChange(e) {
@@ -681,6 +864,8 @@ class TipsPortal extends React.Component {
       fundingOutput.amount = tipAmountSats;
       fundingOutputs.push(fundingOutput);
     }
+    console.log(`Building invoice with these funding outputs:`);
+    console.log(fundingOutputs);
 
     // get invoice
     fetch('https://pay.bitcoin.com/create_invoice', {
@@ -753,6 +938,8 @@ class TipsPortal extends React.Component {
       tipsFunded,
       appState,
       invoiceGenerationError,
+      sweptTxid,
+      tipsSweptCount,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -803,6 +990,26 @@ class TipsPortal extends React.Component {
         );
       });
     }
+    const sweepNotice = (
+      <SweepNotice>
+        {tipsSweptCount} tips have been{' '}
+        <a
+          href={`https://explorer.bitcoin.com/bch/tx/${sweptTxid}`}
+          target="_blank"
+          rel="nofollow noopener"
+        >
+          swept
+        </a>{' '}
+        to{' '}
+        <a
+          href={`https://explorer.bitcoin.com/bch/address/${formData.userRefundAddress.value}`}
+          target="_blank"
+          rel="nofollow noopener"
+        >
+          {formData.userRefundAddress.value}
+        </a>
+      </SweepNotice>
+    );
 
     return (
       <React.Fragment>
@@ -841,6 +1048,49 @@ class TipsPortal extends React.Component {
               >
                 {!importedMnemonic ? `Load Tips` : `Refresh`}
               </CardButton>
+              {importedMnemonic && (
+                <React.Fragment>
+                  <ButtonHider show={sweptTxid === null}>
+                    <AddressForm
+                      id="userRefundAddressForm"
+                      onSubmit={this.sweepAllTips}
+                    >
+                      <AddressInputWrapper show>
+                        <InputLabel>
+                          <FormattedMessage id="home.labels.refundAddress" />{' '}
+                          <Red>*</Red>
+                        </InputLabel>
+                        <Input
+                          name="userRefundAddress"
+                          type="text"
+                          value={formData.userRefundAddress.value}
+                          onChange={this.handleUserRefundAddressChange}
+                          placeholder={formatMessage({
+                            id: 'home.placeholders.userRefundAddress',
+                          })}
+                          required
+                        />
+                        <InputError>
+                          {formData.userRefundAddress.error}
+                        </InputError>
+                      </AddressInputWrapper>
+                    </AddressForm>
+                    <CardButton
+                      type="submit"
+                      form="userRefundAddressForm"
+                      primary
+                      style={{ margin: 'auto', marginBottom: '12px' }}
+                      onClick={this.handleSweepAllTipsButton}
+                      action="submit"
+                    >
+                      <FormattedMessage id="home.buttons.sweepAll" />
+                    </CardButton>
+                  </ButtonHider>
+                  <ButtonHider show={sweptTxid !== null}>
+                    {sweepNotice}
+                  </ButtonHider>
+                </React.Fragment>
+              )}
             </Card>
           </CustomCardContainer>
           <CustomFlexCardContainer
@@ -1004,7 +1254,6 @@ class TipsPortal extends React.Component {
                       currency={selectedCurrency}
                       paymentRequestUrl={invoiceUrl}
                       isRepeatable={false}
-                      failFn={console.log(`invoice failed`)}
                       successFn={this.invoiceSuccess}
                     />
                   </BadgerWrap>
@@ -1030,6 +1279,45 @@ class TipsPortal extends React.Component {
                       <SeedReminder>
                         Save this seed to access your tips in the future.
                       </SeedReminder>
+                      <ButtonHider show={sweptTxid === null}>
+                        <AddressForm
+                          id="userRefundAddressForm"
+                          onSubmit={this.sweepAllTips}
+                        >
+                          <AddressInputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.refundAddress" />{' '}
+                              <Red>*</Red>
+                            </InputLabel>
+                            <Input
+                              name="userRefundAddress"
+                              type="text"
+                              value={formData.userRefundAddress.value}
+                              onChange={this.handleUserRefundAddressChange}
+                              placeholder={formatMessage({
+                                id: 'home.placeholders.userRefundAddress',
+                              })}
+                              required
+                            />
+                            <InputError>
+                              {formData.userRefundAddress.error}
+                            </InputError>
+                          </AddressInputWrapper>
+                        </AddressForm>
+                        <CardButton
+                          type="submit"
+                          form="userRefundAddressForm"
+                          primary
+                          style={{ margin: 'auto', marginBottom: '12px' }}
+                          onClick={this.handleSweepAllTipsButton}
+                          action="submit"
+                        >
+                          <FormattedMessage id="home.buttons.sweepAll" />
+                        </CardButton>
+                      </ButtonHider>
+                      <ButtonHider show={sweptTxid !== null}>
+                        {sweepNotice}
+                      </ButtonHider>
                     </React.Fragment>
                   ) : (
                     <React.Fragment>

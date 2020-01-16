@@ -95,6 +95,11 @@ export const SeedReminder = styled.h5`
   margin: auto;
   padding-top: ${theme.spacing.unit * 2}px;
 `;
+export const SweepNotice = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: ${theme.spacing.unit * 2}px;
+`;
 
 export const TipsWrapper = styled.div`
   margin: auto;
@@ -189,6 +194,36 @@ export const InputWrapper = styled.div`
   @media screen and (min-width: ${theme.breakpoints.md}px) {
     width: 100%;
     padding-top: ${theme.spacing.unit * 2}px;
+  }
+`;
+
+export const AddressInputWrapper = styled.div`
+  width: 100%;
+  margin: auto;
+  box-sizing: border-box;
+  position: relative;
+  padding-bottom: ${theme.spacing.unit * 3}px;
+  padding-top: ${theme.spacing.unit}px;
+  display: ${({ show = false }) => (show === true ? 'block' : 'none')};
+
+  & > input {
+    width: 100%;
+    max-width: 700px;
+    margin: 0;
+  }
+
+  @media screen and (min-width: ${theme.breakpoints.md}px) {
+    width: 100%;
+    padding-top: ${theme.spacing.unit * 2}px;
+  }
+`;
+
+export const AddressForm = styled.form`
+  text-align: left;
+  @media screen and (min-width: ${theme.breakpoints.md}px) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 `;
 
