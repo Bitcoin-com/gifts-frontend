@@ -13,7 +13,8 @@ import {
   StatusWrap,
   ClaimedBlock,
 } from './styled';
-import bchLogo from '../../../../static/images/uploads/bch-logo.png';
+// import bchLogo from '../../../../static/images/uploads/bch-logo.png';
+import bchLogo from '../../../../static/images/uploads/bch-logo-2.png';
 import tipsLogo from '../../../../static/images/uploads/bitcoin-cash-tips-logo-horizontal-grn.png';
 
 const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
@@ -42,6 +43,11 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
           value={tipWallet.wif}
           size={125}
           logoImage={bchLogo}
+          logoWidth={32}
+          qrStyle="squares"
+          ecLevel="M"
+          quietZone={10}
+          bgColor="#fff"
         />
       </React.Fragment>
     ) : (

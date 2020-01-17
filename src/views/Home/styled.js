@@ -9,8 +9,12 @@ import {
   Card,
   Table,
   Input,
+  InputLabel,
 } from 'bitcoincom-storybook';
 
+export const AddressInputLabel = styled(InputLabel)`
+  text-align: left;
+`;
 export const PrintableContentBlock = styled(ContentBlock)`
   @media print {
     margin: 0mm;
@@ -30,7 +34,7 @@ export const BadgerWrap = styled.div`
   padding: ${theme.spacing.unit * 3}px;
 `;
 export const Buttons = styled.div`
-  display: flex;
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
   & > div {
@@ -54,6 +58,7 @@ export const TipTd = styled.td`
   text-align: center;
 `;
 export const CardButton = styled(Button)``;
+
 export const ButtonHider = styled.div`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
@@ -91,6 +96,18 @@ export const CustomInfo = styled.h5`
   padding-bottom: ${theme.spacing.unit * 2}px;
 `;
 export const SeedReminder = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: ${theme.spacing.unit * 2}px;
+`;
+export const SweepNotice = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: ${theme.spacing.unit * 2}px;
+`;
+export const ErrorNotice = styled.h5`
+  max-width: 400px;
+  color: red;
   text-align: center;
   margin: auto;
   padding-top: ${theme.spacing.unit * 2}px;
@@ -189,6 +206,38 @@ export const InputWrapper = styled.div`
   @media screen and (min-width: ${theme.breakpoints.md}px) {
     width: 100%;
     padding-top: ${theme.spacing.unit * 2}px;
+  }
+`;
+
+export const AddressInputWrapper = styled.div`
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  box-sizing: border-box;
+  position: relative;
+  padding-bottom: ${theme.spacing.unit * 3}px;
+  padding-top: ${theme.spacing.unit}px;
+  display: ${({ show = false }) => (show === true ? 'block' : 'none')};
+
+  & > input {
+    width: 100%;
+    max-width: 700px;
+    margin: 0;
+  }
+
+  @media screen and (min-width: ${theme.breakpoints.md}px) {
+    width: 100%;
+    padding-top: ${theme.spacing.unit * 2}px;
+  }
+`;
+
+export const AddressForm = styled.form`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+
+  @media screen and (min-width: ${theme.breakpoints.md}px) {
+    display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 `;
 

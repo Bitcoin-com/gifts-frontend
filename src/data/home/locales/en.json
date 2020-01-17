@@ -36,18 +36,22 @@
   },
   "labels": {
     "tipCount": "Number of tips",
-    "tipAmountFiat": "Fiat amount (per tip) in your selected currency"
+    "tipAmountFiat": "Fiat amount (per tip) in your selected currency",
+    "refundAddress": "Your refund address"
   },
   "buttons": {
     "createTips": "Generate Tips",
     "goBack": "Back",
-    "copySeed": "Copy to Clipboard"
+    "copySeed": "Copy to Clipboard",
+    "sweepAll": "Sweep All",
+    "newTips": "Make new tips"
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
     "tipAmountFiat": "Enter the fiat amount desired for each tip",
     "importMnemonic": "Enter your 12-word seed",
-    "userConfirmedMnemonic": "Enter your 12-word seed"
+    "userConfirmedMnemonic": "Enter your 12-word seed",
+    "userRefundAddress": "All swept tips will be returned to this address."
   },
   "errors": {
     "tipCountNoTips": "Tip count must be greater than zero",
@@ -57,7 +61,10 @@
     "noMnemonic": "To import a mnemonic, you must enter a 12-word seed",
     "invalidMnemonic": "Please enter a valid 12-word mnemonic",
     "invalidUserMnemonic": "Must match 12-word seed created in previous step",
-    "invoiceGenerationError": "Invoice server unavailable. Please try again later."
+    "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
+    "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",
+    "yourTooCheap": "Error: Value of tip is too low. Tips must be at least 0.0005 BCH. Increase your fiat amount per tip.",
+    "tipCountTooManyTips": "Tip creation is currently limited to 20."
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],
