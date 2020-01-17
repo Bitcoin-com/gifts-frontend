@@ -30,7 +30,7 @@ export const BadgerWrap = styled.div`
   padding: ${theme.spacing.unit * 3}px;
 `;
 export const Buttons = styled.div`
-  display: flex;
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
   & > div {
@@ -199,6 +199,7 @@ export const InputWrapper = styled.div`
 
 export const AddressInputWrapper = styled.div`
   width: 100%;
+  max-width: 700px;
   margin: auto;
   box-sizing: border-box;
   position: relative;
@@ -219,9 +220,10 @@ export const AddressInputWrapper = styled.div`
 `;
 
 export const AddressForm = styled.form`
-  text-align: left;
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+
   @media screen and (min-width: ${theme.breakpoints.md}px) {
-    display: flex;
+    display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
     flex-wrap: wrap;
     justify-content: space-between;
   }

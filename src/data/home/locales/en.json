@@ -43,7 +43,8 @@
     "createTips": "Generate Tips",
     "goBack": "Back",
     "copySeed": "Copy to Clipboard",
-    "sweepAll": "Sweep All"
+    "sweepAll": "Sweep All",
+    "newTips": "Make new tips"
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
