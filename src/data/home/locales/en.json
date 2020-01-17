@@ -62,7 +62,9 @@
     "invalidMnemonic": "Please enter a valid 12-word mnemonic",
     "invalidUserMnemonic": "Must match 12-word seed created in previous step",
     "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
-    "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address."
+    "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",
+    "yourTooCheap": "Error: Value of tip is too low. Tips must be at least 0.0005 BCH. Increase your fiat amount per tip.",
+    "tipCountTooManyTips": "Tip creation is currently limited to 20."
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],

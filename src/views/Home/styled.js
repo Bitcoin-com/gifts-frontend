@@ -9,8 +9,12 @@ import {
   Card,
   Table,
   Input,
+  InputLabel,
 } from 'bitcoincom-storybook';
 
+export const AddressInputLabel = styled(InputLabel)`
+  text-align: left;
+`;
 export const PrintableContentBlock = styled(ContentBlock)`
   @media print {
     margin: 0mm;
@@ -54,6 +58,7 @@ export const TipTd = styled.td`
   text-align: center;
 `;
 export const CardButton = styled(Button)``;
+
 export const ButtonHider = styled.div`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
@@ -96,6 +101,13 @@ export const SeedReminder = styled.h5`
   padding-top: ${theme.spacing.unit * 2}px;
 `;
 export const SweepNotice = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: ${theme.spacing.unit * 2}px;
+`;
+export const ErrorNotice = styled.h5`
+  max-width: 400px;
+  color: red;
   text-align: center;
   margin: auto;
   padding-top: ${theme.spacing.unit * 2}px;

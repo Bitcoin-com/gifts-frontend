@@ -37,6 +37,8 @@ import {
   SeedReminder,
   AddressForm,
   SweepNotice,
+  AddressInputLabel,
+  ErrorNotice,
 } from './styled';
 
 const bitbox = new BITBOX({
@@ -153,6 +155,7 @@ class TipsPortal extends React.Component {
       sweptTxid: null,
       tipsSweptCount: 0,
       showSweepForm: false,
+      tipsAlreadySweptError: false,
     };
   }
 
@@ -277,6 +280,7 @@ class TipsPortal extends React.Component {
     }
     if (originalAmount < 1) {
       console.log(`originalAmount is 0, handle as error`);
+      return this.setState({ tipsAlreadySweptError: true });
     }
     console.log(`Total inputs: ${inputCount}`);
     const byteCount = bitbox.BitcoinCash.getByteCount(
@@ -537,6 +541,11 @@ class TipsPortal extends React.Component {
       field.error = formatMessage({
         id: 'home.errors.tipCountNoTips',
       });
+    } else if (value > 20) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.tipCountTooManyTips',
+      });
     }
     return field;
   };
@@ -557,7 +566,7 @@ class TipsPortal extends React.Component {
     const {
       intl: { formatMessage },
     } = this.props;
-    const { formData } = this.state;
+    const { formData, selectedCurrency } = this.state;
 
     const field = formData[name];
 
@@ -865,7 +874,15 @@ class TipsPortal extends React.Component {
     // given, 1.0 BCH in local currency
     // find, tipAmountFiat in satoshis
     const tipAmountSats = Math.round((tipAmountFiat / fiatPrice) * 1e8);
-    // console.log(`tipAmountSats: ${tipAmountSats}`);
+    console.log(`tipAmountSats: ${tipAmountSats}`);
+    if (tipAmountSats < 5000) {
+      // error
+      return this.setState({
+        invoiceGenerationError: formatMessage({
+          id: 'home.errors.yourTooCheap',
+        }),
+      });
+    }
 
     const invoiceMemo = `Funding transaction for ${tipCount} BCH tips of ${tipAmountFiat} dollars each`;
     const tipWallets = [];
@@ -973,6 +990,7 @@ class TipsPortal extends React.Component {
       sweptTxid,
       tipsSweptCount,
       showSweepForm,
+      tipsAlreadySweptError,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1037,11 +1055,25 @@ class TipsPortal extends React.Component {
         <a
           href={`https://explorer.bitcoin.com/bch/address/${formData.userRefundAddress.value}`}
           target="_blank"
-          rel="nofollow noopener"
+          rel="noopener noreferrer"
         >
           {formData.userRefundAddress.value}
         </a>
       </SweepNotice>
+    );
+    const tipsAlreadySweptNotice = (
+      <React.Fragment>
+        <ErrorNotice>
+          Error: Cannot sweep tips, all tips have already been claimed!
+          <CardButton
+            primary
+            onClick={this.appStateInitial}
+            style={{ marginTop: '24px' }}
+          >
+            <FormattedMessage id="home.buttons.newTips" />
+          </CardButton>
+        </ErrorNotice>
+      </React.Fragment>
     );
 
     return (
@@ -1078,11 +1110,12 @@ class TipsPortal extends React.Component {
                 <CardButton onClick={this.importMnemonic}>
                   {!importedMnemonic ? `Load Tips` : `Refresh`}
                 </CardButton>
-                {sweptTxid === null ? (
+                {sweptTxid === null && importedMnemonic && (
                   <CardButton primary onClick={this.toggleSweepForm}>
                     <FormattedMessage id="home.buttons.sweepAll" />
                   </CardButton>
-                ) : (
+                )}
+                {sweptTxid !== null && (
                   <CardButton primary onClick={this.appStateInitial}>
                     <FormattedMessage id="home.buttons.newTips" />
                   </CardButton>
@@ -1096,10 +1129,10 @@ class TipsPortal extends React.Component {
                     show={sweptTxid === null}
                   >
                     <AddressInputWrapper show>
-                      <InputLabel>
+                      <AddressInputLabel>
                         <FormattedMessage id="home.labels.refundAddress" />{' '}
                         <Red>*</Red>
-                      </InputLabel>
+                      </AddressInputLabel>
                       <Input
                         name="userRefundAddress"
                         type="text"
@@ -1131,6 +1164,9 @@ class TipsPortal extends React.Component {
                   </Buttons>
                   <ButtonHider show={sweptTxid !== null}>
                     {sweepNotice}
+                  </ButtonHider>
+                  <ButtonHider show={tipsAlreadySweptError}>
+                    {tipsAlreadySweptNotice}
                   </ButtonHider>
                 </React.Fragment>
               )}
@@ -1223,6 +1259,7 @@ class TipsPortal extends React.Component {
                         name="tipCount"
                         type="number"
                         min="1"
+                        max="20"
                         step="1"
                         value={formData.tipCount.value}
                         onChange={this.handleTipCountChange}
@@ -1271,7 +1308,7 @@ class TipsPortal extends React.Component {
                   >
                     <FormattedMessage id="home.buttons.createTips" />
                   </CardButton>
-                  <InputError>{invoiceGenerationError}</InputError>
+                  <ErrorNotice>{invoiceGenerationError}</ErrorNotice>
                 </React.Fragment>
               ) : (
                 <React.Fragment>
@@ -1322,45 +1359,51 @@ class TipsPortal extends React.Component {
                       <SeedReminder>
                         Save this seed to access your tips in the future.
                       </SeedReminder>
-                      <ButtonHider show={sweptTxid === null}>
-                        <AddressForm
-                          id="userRefundAddressForm"
-                          onSubmit={this.sweepAllTips}
-                          show={sweptTxid === null}
-                        >
-                          <AddressInputWrapper show>
-                            <InputLabel>
-                              <FormattedMessage id="home.labels.refundAddress" />{' '}
-                              <Red>*</Red>
-                            </InputLabel>
-                            <Input
-                              name="userRefundAddress"
-                              type="text"
-                              value={formData.userRefundAddress.value}
-                              onChange={this.handleUserRefundAddressChange}
-                              placeholder={formatMessage({
-                                id: 'home.placeholders.userRefundAddress',
-                              })}
-                              required
-                            />
-                            <InputError>
-                              {formData.userRefundAddress.error}
-                            </InputError>
-                          </AddressInputWrapper>
-                        </AddressForm>
-                        <CardButton
-                          type="submit"
-                          form="userRefundAddressForm"
-                          primary
-                          style={{ margin: 'auto', marginBottom: '12px' }}
-                          onClick={this.handleSweepAllTipsButton}
-                          action="submit"
-                        >
-                          <FormattedMessage id="home.buttons.sweepAll" />
-                        </CardButton>
-                      </ButtonHider>
+                      {sweptTxid === null && (
+                        <React.Fragment>
+                          <AddressForm
+                            id="userRefundAddressForm"
+                            onSubmit={this.sweepAllTips}
+                            show={sweptTxid === null}
+                          >
+                            <AddressInputWrapper show>
+                              <AddressInputLabel>
+                                <FormattedMessage id="home.labels.refundAddress" />{' '}
+                                <Red>*</Red>
+                              </AddressInputLabel>
+                              <Input
+                                name="userRefundAddress"
+                                type="text"
+                                value={formData.userRefundAddress.value}
+                                onChange={this.handleUserRefundAddressChange}
+                                placeholder={formatMessage({
+                                  id: 'home.placeholders.userRefundAddress',
+                                })}
+                                required
+                              />
+                              <InputError>
+                                {formData.userRefundAddress.error}
+                              </InputError>
+                            </AddressInputWrapper>
+                          </AddressForm>
+                          <CardButton
+                            type="submit"
+                            form="userRefundAddressForm"
+                            primary
+                            style={{ margin: 'auto', marginBottom: '12px' }}
+                            onClick={this.handleSweepAllTipsButton}
+                            action="submit"
+                          >
+                            <FormattedMessage id="home.buttons.sweepAll" />
+                          </CardButton>
+                        </React.Fragment>
+                      )}
+
                       <ButtonHider show={sweptTxid !== null}>
                         {sweepNotice}
+                      </ButtonHider>
+                      <ButtonHider show={tipsAlreadySweptError}>
+                        {tipsAlreadySweptNotice}
                       </ButtonHider>
                     </React.Fragment>
                   ) : (
