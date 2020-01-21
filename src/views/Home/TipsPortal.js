@@ -7,7 +7,13 @@ import { BadgerButton } from 'badger-components-react';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
-import { Card, InputLabel, Input, InputSelect } from 'bitcoincom-storybook';
+import {
+  Card,
+  InputLabel,
+  Input,
+  InputSelect,
+  Select,
+} from 'bitcoincom-storybook';
 import merge from 'lodash/merge';
 import Tip from './Tip';
 import {
@@ -96,6 +102,9 @@ class TipsPortal extends React.Component {
     this.handleSelectedCurrencyChange = this.handleSelectedCurrencyChange.bind(
       this,
     );
+    this.handleSelectedCurrencyChangeFromSelect = this.handleSelectedCurrencyChangeFromSelect.bind(
+      this,
+    );
     this.generateNewWallet = this.generateNewWallet.bind(this);
     this.handleTipCountChange = this.handleTipCountChange.bind(this);
     this.handleTipAmountFiatChange = this.handleTipAmountFiatChange.bind(this);
@@ -154,6 +163,7 @@ class TipsPortal extends React.Component {
       invoiceGenerationError: '',
       sweptTxid: null,
       tipsSweptCount: 0,
+      tipsClaimedCount: 0,
       showSweepForm: false,
       tipsAlreadySweptError: false,
     };
@@ -182,6 +192,27 @@ class TipsPortal extends React.Component {
     });
   }
 
+  async handleSelectedCurrencyChangeFromSelect(e) {
+    const { tipWallets } = this.state;
+    const currency = e.value;
+    const currencyCode = currency.toLowerCase();
+    const price = await fetch(
+      `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`,
+    );
+
+    const priceJson = await price.json();
+
+    const fiatPrice = priceJson.price / 100;
+    // console.log(`fiatPrice: ${fiatPrice}`);
+    const calculatedFiatAmount = parseFloat(
+      ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
+    );
+    this.setState({
+      selectedCurrency: currency,
+      calculatedFiatAmount,
+    });
+  }
+
   appStateInitial() {
     this.setState({
       formData: merge({}, this.initialFormData),
@@ -205,6 +236,7 @@ class TipsPortal extends React.Component {
       sweptTxid: null,
       tipsSweptCount: 0,
       showSweepForm: false,
+      tipsAlreadySweptError: false,
     });
   }
 
@@ -330,9 +362,26 @@ class TipsPortal extends React.Component {
 
     try {
       const txid = await bitbox.RawTransactions.sendRawTransaction([hex]);
-
+      const txidStr = txid[0];
+      console.log(typeof txid);
+      console.log(`txidStr: ${txidStr}`);
       console.log(`txid: ${txid}`);
-      this.setState({ sweptTxid: txid, tipsSweptCount: signedInputCount });
+      // set tips as claimed by this txid
+      const claimedTipWallets = [];
+      tipWallets.forEach(tipWallet => {
+        const claimedTipWallet = tipWallet;
+        // Only apply to tips that were not previously claimed
+        if (claimedTipWallet.status !== 'claimed') {
+          claimedTipWallet.status = 'claimed';
+          claimedTipWallet.claimedTxid = txidStr;
+        }
+        claimedTipWallets.push(claimedTipWallet);
+      });
+      this.setState({
+        sweptTxid: txidStr,
+        tipsSweptCount: signedInputCount,
+        tipWallets: claimedTipWallets,
+      });
     } catch (err) {
       console.log(`Error in broadcasting transaction:`);
       console.log(err);
@@ -635,8 +684,19 @@ class TipsPortal extends React.Component {
   }
 
   async importMnemonic() {
-    const { walletInfo, formData, selectedCurrency } = this.state;
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const {
+      walletInfo,
+      formData,
+      selectedCurrency,
+      sweptTxid,
+      tipsAlreadySweptError,
+      showSweepForm,
+    } = this.state;
     const { derivePath } = walletInfo;
+    let claimedTipCount = 0;
 
     // reset to 0 in case the user is importing with tips already on the page
     const tipWallets = [];
@@ -644,6 +704,17 @@ class TipsPortal extends React.Component {
     if (formData.importedMnemonic.state !== 1) {
       // console.log(`Invalid Mnemonic, kicked out of function`);
       return;
+    }
+
+    // If user has already swept tips, remove that notice on refresh
+    if (tipsAlreadySweptError) {
+      this.setState({ tipsAlreadySweptError: false });
+    }
+    if (sweptTxid !== null) {
+      this.setState({ sweptTxid: null });
+    }
+    if (showSweepForm) {
+      this.setState({ showSweepForm: false });
     }
     // Use already-validated user mnemonic
     const mnemonic = formData.importedMnemonic.value;
@@ -686,11 +757,12 @@ class TipsPortal extends React.Component {
 
     try {
       const addrDetails = await bitbox.Address.details(fundingAddress);
-      // console.log(addrDetails);
+      console.log(addrDetails);
       const txHistory = addrDetails.transactions;
       // check tx history
       // actually what you need to do first is get an object with all the tips
       const potentialTipWallets = [];
+
       if (txHistory.length > 0) {
         const firstTipWallet = {
           addr: '',
@@ -700,14 +772,23 @@ class TipsPortal extends React.Component {
           claimedTxid: '',
         };
         // determine status
-        if (txHistory.length === 1 && addrDetails.balance > 0) {
+
+        if (
+          txHistory.length === 1 &&
+          (addrDetails.balance > 0 || addrDetails.unconfirmedBalanceSat > 0)
+        ) {
           firstTipWallet.status = 'funded';
         } else if (txHistory.length > 1 && addrDetails.balance === 0) {
           firstTipWallet.status = 'claimed';
         }
 
         firstTipWallet.addr = fundingAddress;
-        firstTipWallet.sats = addrDetails.totalReceivedSat;
+        if (addrDetails.totalReceivedSat > 0) {
+          firstTipWallet.sats = addrDetails.totalReceivedSat;
+        } else {
+          firstTipWallet.sats = addrDetails.unconfirmedBalanceSat;
+        }
+
         firstTipWallet.wif = fundingWif;
         potentialTipWallets.push(firstTipWallet);
         const potentialTipAddresses = [fundingAddress];
@@ -750,10 +831,17 @@ class TipsPortal extends React.Component {
           for (let i = 0; i < potentialTipDetails.length; i += 1) {
             if (potentialTipDetails[i].transactions.length > 0) {
               const tipWallet = potentialTipWallets[i];
-              tipWallet.sats = potentialTipDetails[i].totalReceivedSat;
+              if (potentialTipDetails[i].totalReceivedSat > 0) {
+                tipWallet.sats = potentialTipDetails[i].totalReceivedSat;
+              } else {
+                // handle 0 conf
+                tipWallet.sats = potentialTipDetails[i].unconfirmedBalanceSat;
+              }
+
               if (
                 potentialTipDetails[i].transactions.length === 1 &&
-                potentialTipDetails[i].balance > 0
+                (potentialTipDetails[i].balance > 0 ||
+                  potentialTipDetails[i].unconfirmedBalanceSat > 0)
               ) {
                 tipWallet.status = 'funded';
               } else if (
@@ -762,6 +850,7 @@ class TipsPortal extends React.Component {
                   potentialTipDetails[i].unconfirmedBalanceSat < 0)
               ) {
                 tipWallet.status = 'claimed';
+                claimedTipCount += 1;
                 // eslint-disable-next-line prefer-destructuring
                 tipWallet.claimedTxid = potentialTipDetails[i].transactions[0];
               }
@@ -778,6 +867,23 @@ class TipsPortal extends React.Component {
           console.log(err);
           return;
         }
+      } else {
+        // there is no tx history at the first address
+        // if there are no potential tips, ask user if they would like to make tips with this seed
+        // for now, just set an import error
+        const noTipsAtMnemonic = {
+          value: formData.importedMnemonic.value,
+          state: inputState.invalid,
+          error: formatMessage({
+            id: 'home.errors.noTipsAtMnemonic',
+          }),
+        };
+        return this.setState({
+          formData: {
+            ...formData,
+            importedMnemonic: noTipsAtMnemonic,
+          },
+        });
       }
 
       // else just load the next stuff as usual
@@ -811,6 +917,11 @@ class TipsPortal extends React.Component {
 
     walletInfo.mnemonic = mnemonic;
     walletInfo.masterHDNode = masterHDNode;
+    let allTipsSwept = false;
+    console.log(`claimedTipCount: ${claimedTipCount}`);
+    if (claimedTipCount === tipWallets.length) {
+      allTipsSwept = true;
+    }
 
     this.setState({
       walletInfo,
@@ -819,6 +930,8 @@ class TipsPortal extends React.Component {
       calculatedFiatAmount,
       importedMnemonic: true,
       tipsFunded: true,
+      tipsClaimedCount: claimedTipCount,
+      tipsAlreadySweptError: allTipsSwept,
     });
   }
 
@@ -991,9 +1104,21 @@ class TipsPortal extends React.Component {
       tipsSweptCount,
       showSweepForm,
       tipsAlreadySweptError,
+      tipsClaimedCount,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
+
+    const selectCurrencies = [
+      { value: 'USD', label: 'USD' },
+      { value: 'EUR', label: 'EUR' },
+      { value: 'GBP', label: 'GBP' },
+      { value: 'JPY', label: 'JPY' },
+      { value: 'CNY', label: 'CNY' },
+      { value: 'AUD', label: 'AUD' },
+      { value: 'HKD', label: 'HKD' },
+      { value: 'CAD', label: 'CAD' },
+    ];
 
     const printingTips = [];
     const today = new Date();
@@ -1042,29 +1167,40 @@ class TipsPortal extends React.Component {
       });
     }
     const sweepNotice = (
-      <SweepNotice>
-        {tipsSweptCount} of original {tipWallets.length} tips have been{' '}
-        <a
-          href={`https://explorer.bitcoin.com/bch/tx/${sweptTxid}`}
-          target="_blank"
-          rel="nofollow noopener"
-        >
-          swept
-        </a>{' '}
-        to{' '}
-        <a
-          href={`https://explorer.bitcoin.com/bch/address/${formData.userRefundAddress.value}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {formData.userRefundAddress.value}
-        </a>
-      </SweepNotice>
+      <React.Fragment>
+        <SweepNotice>
+          {tipsSweptCount} of original {tipWallets.length} tips have been{' '}
+          <a
+            href={`https://explorer.bitcoin.com/bch/tx/${sweptTxid}`}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            swept
+          </a>{' '}
+          to{' '}
+          <a
+            href={`https://explorer.bitcoin.com/bch/address/${formData.userRefundAddress.value}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {formData.userRefundAddress.value}
+          </a>
+          <br />
+          <CardButton
+            primary
+            onClick={this.appStateInitial}
+            style={{ marginTop: '24px' }}
+          >
+            <FormattedMessage id="home.buttons.newTips" />
+          </CardButton>
+        </SweepNotice>
+      </React.Fragment>
     );
     const tipsAlreadySweptNotice = (
       <React.Fragment>
         <ErrorNotice>
           Error: Cannot sweep tips, all tips have already been claimed!
+          <br />
           <CardButton
             primary
             onClick={this.appStateInitial}
@@ -1110,23 +1246,26 @@ class TipsPortal extends React.Component {
                 <CardButton onClick={this.importMnemonic}>
                   {!importedMnemonic ? `Load Tips` : `Refresh`}
                 </CardButton>
-                {sweptTxid === null && importedMnemonic && (
-                  <CardButton primary onClick={this.toggleSweepForm}>
-                    <FormattedMessage id="home.buttons.sweepAll" />
-                  </CardButton>
-                )}
-                {sweptTxid !== null && (
-                  <CardButton primary onClick={this.appStateInitial}>
-                    <FormattedMessage id="home.buttons.newTips" />
-                  </CardButton>
-                )}
+                {sweptTxid === null &&
+                  importedMnemonic &&
+                  !tipsAlreadySweptError && (
+                    <CardButton primary onClick={this.toggleSweepForm}>
+                      <FormattedMessage id="home.buttons.sweepAll" />
+                    </CardButton>
+                  )}
+                {sweptTxid !== null ||
+                  (tipsAlreadySweptError && (
+                    <CardButton primary onClick={this.appStateInitial}>
+                      <FormattedMessage id="home.buttons.newTips" />
+                    </CardButton>
+                  ))}
               </Buttons>
               {showSweepForm && (
                 <React.Fragment>
                   <AddressForm
                     id="userRefundAddressForm"
                     onSubmit={this.sweepAllTips}
-                    show={sweptTxid === null}
+                    show={sweptTxid === null && !tipsAlreadySweptError}
                   >
                     <AddressInputWrapper show>
                       <AddressInputLabel>
@@ -1148,7 +1287,7 @@ class TipsPortal extends React.Component {
                       </InputError>
                     </AddressInputWrapper>
                   </AddressForm>
-                  <Buttons show={sweptTxid === null}>
+                  <Buttons show={sweptTxid === null && !tipsAlreadySweptError}>
                     <CardButton
                       type="submit"
                       form="userRefundAddressForm"
@@ -1168,6 +1307,14 @@ class TipsPortal extends React.Component {
                   <ButtonHider show={tipsAlreadySweptError}>
                     {tipsAlreadySweptNotice}
                   </ButtonHider>
+                </React.Fragment>
+              )}
+              {importedMnemonic && (
+                <React.Fragment>
+                  <p>
+                    {tipsClaimedCount} of {tipWallets.length} tips have been
+                    claimed
+                  </p>
                 </React.Fragment>
               )}
             </Card>
@@ -1302,7 +1449,11 @@ class TipsPortal extends React.Component {
                     type="submit"
                     form="createTip"
                     primary
-                    style={{ margin: 'auto', marginBottom: '12px' }}
+                    style={{
+                      margin: 'auto',
+                      marginBottom: '12px',
+                      zIndex: '1',
+                    }}
                     onClick={this.handleCreateTipSubmitButton}
                     action="submit"
                   >
@@ -1436,6 +1587,17 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
+          <InputWrapper show={importedMnemonic}>
+            <InputLabel>
+              <FormattedMessage id="home.labels.changeCurrency" /> <Red>*</Red>
+            </InputLabel>
+            <Select
+              onChange={this.handleSelectedCurrencyChangeFromSelect}
+              options={selectCurrencies}
+              selectedOption={selectCurrencies[0]}
+              isSearchable
+            />
+          </InputWrapper>
         </PrintableContentBlock>
       </React.Fragment>
     );

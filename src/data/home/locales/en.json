@@ -37,7 +37,9 @@
   "labels": {
     "tipCount": "Number of tips",
     "tipAmountFiat": "Fiat amount (per tip) in your selected currency",
-    "refundAddress": "Your refund address"
+    "refundAddress": "Your refund address",
+    "localCurrency": "Selected Currency",
+    "changeCurrency": "Change tip currency"
   },
   "buttons": {
     "createTips": "Generate Tips",
@@ -60,6 +62,7 @@
     "fiatTipAmountRequired": "Desired tip in local currency is required",
     "noMnemonic": "To import a mnemonic, you must enter a 12-word seed",
     "invalidMnemonic": "Please enter a valid 12-word mnemonic",
+    "noTipsAtMnemonic": "No tips found for this mnemonic",
     "invalidUserMnemonic": "Must match 12-word seed created in previous step",
     "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
     "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",

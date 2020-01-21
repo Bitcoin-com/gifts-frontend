@@ -62,7 +62,8 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
         'Funded'
       ) : (
         <React.Fragment>
-          {tipWallet.claimedTxid !== undefined ? (
+          {tipWallet.claimedTxid !== undefined &&
+          tipWallet.claimedTxid !== '' ? (
             <a
               target="_blank"
               rel="noopener noreferrer"
@@ -88,7 +89,7 @@ Tip.propTypes = {
     wif: PropTypes.string.isRequired,
     sats: PropTypes.number.isRequired,
     status: PropTypes.string.isRequired,
-    claimedTxId: PropTypes.string,
+    claimedTxid: PropTypes.string,
   }).isRequired,
 };
 
