@@ -15,7 +15,9 @@ import {
   Select,
 } from 'bitcoincom-storybook';
 import merge from 'lodash/merge';
-import Tip from './Tip';
+// import { PDFDownloadLink, Document } from 'react-pdf/dist/entry.webpack';
+// import { PDFDownloadLink, Document } from 'react-pdf/';
+import { PDFDownloadLink, Document, Page } from '@react-pdf/renderer';
 import {
   PrintableContentBlock,
   CardButton,
@@ -46,6 +48,8 @@ import {
   AddressInputLabel,
   ErrorNotice,
 } from './styled';
+import Tip from './Tip';
+import TipPdf from './TipPdf';
 
 const bitbox = new BITBOX({
   restURL: 'https://rest.bitcoin.com/v2/',
@@ -97,6 +101,39 @@ class TipsPortal extends React.Component {
         error: null,
       },
     };
+
+    this.testTipsData = [
+      {
+        addr: 'bitcoincash:qph7qlnqv4mt7nxfquw488n4vj8c78glsgw2qjhhgm',
+        wif: 'Kyb5PbaeRgqRSScYvtq9hNXWuAQdyadF57QPF6mN2duu2tctojJf',
+        sats: 296463,
+        status: 'funded',
+      },
+      {
+        addr: 'bitcoincash:qrdm05ke7rvd07mdyu5gxzemqj0fxk4wdsz3k6xr9e',
+        wif: 'L3Xbr7nYwYrmQBzn64MhiPakSjvYGLDmcbYQCdzCyD7nSmyQx3Wg',
+        sats: 296463,
+        status: 'funded',
+      },
+      {
+        addr: 'bitcoincash:qpj9msemkf0kpzrgvzvh86wkvfm5dghd6qsvjydrp6',
+        wif: 'KxJo2sMmRtRfYZ91wnDw8Vj6EKALbiQWJpWXTKvBBWJ7ZcFYEwyr',
+        sats: 296463,
+        status: 'funded',
+      },
+      {
+        addr: 'bitcoincash:qp35urpthpenvcxddkh9uyxxaa505jqn4qztlwh4hv',
+        wif: 'L5TUczJdU5UkgXi3rFApQE8xSddYkjqiLxQhfR6MaBdf21qnUsjY',
+        sats: 296463,
+        status: 'funded',
+      },
+      {
+        addr: 'bitcoincash:qz9zqgt9law6yep9keyf2q6w3lcvcnytdy9nqjfnrs',
+        wif: 'L1wYhqwLBaS1X7eD3kt8pLnkYE1D7zsn9a4RgZNqTHkaoLDTzo4r',
+        sats: 296463,
+        status: 'funded',
+      },
+    ];
 
     this.getCurrenciesOptions = this.getCurrenciesOptions.bind(this);
     this.handleSelectedCurrencyChange = this.handleSelectedCurrencyChange.bind(
@@ -154,7 +191,7 @@ class TipsPortal extends React.Component {
       },
       fundingAddress: '',
       selectedCurrency: 'USD',
-      tipWallets: [],
+      tipWallets: this.testTipsData,
       invoiceUrl: '',
       importedMnemonic: false,
       calculatedFiatAmount: null,
@@ -166,6 +203,7 @@ class TipsPortal extends React.Component {
       tipsClaimedCount: 0,
       showSweepForm: false,
       tipsAlreadySweptError: false,
+      showPdf: false,
     };
   }
 
@@ -1215,6 +1253,15 @@ class TipsPortal extends React.Component {
     return (
       <React.Fragment>
         <PrintableContentBlock>
+          <PDFDownloadLink
+            document={<TipPdf data={tipWallets} />}
+            fileName="gifts.pdf"
+          >
+            {({ blob, url, loading, error }) =>
+              loading ? 'Loading document...' : 'Download now!'
+            }
+          </PDFDownloadLink>
+
           <CustomCardContainer
             show={fundingAddress === '' || importedMnemonic}
             columns={!importedMnemonic ? 2 : 1}
