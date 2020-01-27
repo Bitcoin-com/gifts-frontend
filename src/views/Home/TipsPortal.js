@@ -17,7 +17,7 @@ import {
 import merge from 'lodash/merge';
 // import { PDFDownloadLink, Document } from 'react-pdf/dist/entry.webpack';
 // import { PDFDownloadLink, Document } from 'react-pdf/';
-import { PDFDownloadLink, Document, Page } from '@react-pdf/renderer';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import {
   PrintableContentBlock,
   CardButton,
@@ -1143,6 +1143,7 @@ class TipsPortal extends React.Component {
       showSweepForm,
       tipsAlreadySweptError,
       tipsClaimedCount,
+      showPdf,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
