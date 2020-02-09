@@ -2,13 +2,14 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Document, Page, View, Text } from '@react-pdf/renderer';
+import { Table, TdText } from './styled';
 
 const TipPdf = ({ data }) => (
   <Document>
     <Page>
-      <View>
-        <Text>{data[0].addr}</Text>
-      </View>
+      <Table>
+        <TdText>{data[0].addr}</TdText>
+      </Table>
     </Page>
   </Document>
 );

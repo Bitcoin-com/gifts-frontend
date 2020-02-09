@@ -13,11 +13,13 @@ import {
   Input,
   InputSelect,
   Select,
+  Loader,
 } from 'bitcoincom-storybook';
 import merge from 'lodash/merge';
 // import { PDFDownloadLink, Document } from 'react-pdf/dist/entry.webpack';
 // import { PDFDownloadLink, Document } from 'react-pdf/';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+
 import {
   PrintableContentBlock,
   CardButton,
@@ -1122,6 +1124,10 @@ class TipsPortal extends React.Component {
       );
   }
 
+  componentDidMount() {
+    this.setState({ showPdf: true });
+  }
+
   render() {
     const {
       intl: { formatMessage, messages },
@@ -1254,14 +1260,16 @@ class TipsPortal extends React.Component {
     return (
       <React.Fragment>
         <PrintableContentBlock>
-          <PDFDownloadLink
-            document={<TipPdf data={tipWallets} />}
-            fileName="gifts.pdf"
-          >
-            {({ blob, url, loading, error }) =>
-              loading ? 'Loading document...' : 'Download now!'
-            }
-          </PDFDownloadLink>
+          {showPdf && (
+            <PDFDownloadLink
+              document={<TipPdf data={tipWallets} />}
+              fileName="gifts.pdf"
+            >
+              {({ blob, url, loading, error }) =>
+                loading ? 'Loading document...' : 'Download now!'
+              }
+            </PDFDownloadLink>
+          )}
 
           <CustomCardContainer
             show={fundingAddress === '' || importedMnemonic}
