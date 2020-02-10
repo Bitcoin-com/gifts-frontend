@@ -2,15 +2,31 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Document, Page, View, Text } from '@react-pdf/renderer';
-import { Table, TdText } from './styled';
+import {
+  TipsPage,
+  Table,
+  TipAmount,
+  TdText,
+  TipsLogo,
+  TipLabel,
+  CryptoAmount,
+  FiatAmount,
+} from './styled';
+import bchLogo from '../../../../static/images/uploads/bch-logo-2.png';
+import tipsLogo from '../../../../static/images/uploads/bitcoin-cash-tips-logo-horizontal-grn.png';
 
 const TipPdf = ({ data }) => (
   <Document>
-    <Page>
+    <TipsPage size="LETTER">
       <Table>
-        <TdText>{data[0].addr}</TdText>
+        <TipsLogo src={tipsLogo} />
+        <TipLabel>Tip Amount</TipLabel>
       </Table>
-    </Page>
+      <TipAmount>
+        <CryptoAmount>{data[0].sats / 1e8} BCH</CryptoAmount>
+        <FiatAmount>~ 15 USD</FiatAmount>
+      </TipAmount>
+    </TipsPage>
   </Document>
 );
 

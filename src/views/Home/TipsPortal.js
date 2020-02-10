@@ -193,7 +193,7 @@ class TipsPortal extends React.Component {
       },
       fundingAddress: '',
       selectedCurrency: 'USD',
-      tipWallets: this.testTipsData,
+      tipWallets: [], // this.testTipsData,
       invoiceUrl: '',
       importedMnemonic: false,
       calculatedFiatAmount: null,
@@ -205,7 +205,6 @@ class TipsPortal extends React.Component {
       tipsClaimedCount: 0,
       showSweepForm: false,
       tipsAlreadySweptError: false,
-      showPdf: false,
     };
   }
 
@@ -1124,10 +1123,6 @@ class TipsPortal extends React.Component {
       );
   }
 
-  componentDidMount() {
-    this.setState({ showPdf: true });
-  }
-
   render() {
     const {
       intl: { formatMessage, messages },
@@ -1149,7 +1144,6 @@ class TipsPortal extends React.Component {
       showSweepForm,
       tipsAlreadySweptError,
       tipsClaimedCount,
-      showPdf,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1260,17 +1254,6 @@ class TipsPortal extends React.Component {
     return (
       <React.Fragment>
         <PrintableContentBlock>
-          {showPdf && (
-            <PDFDownloadLink
-              document={<TipPdf data={tipWallets} />}
-              fileName="gifts.pdf"
-            >
-              {({ blob, url, loading, error }) =>
-                loading ? 'Loading document...' : 'Download now!'
-              }
-            </PDFDownloadLink>
-          )}
-
           <CustomCardContainer
             show={fundingAddress === '' || importedMnemonic}
             columns={!importedMnemonic ? 2 : 1}
@@ -1643,6 +1626,16 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
+          {tipWallets.length > 0 && (
+            <PDFDownloadLink
+              document={<TipPdf data={tipWallets} />}
+              fileName="gifts.pdf"
+            >
+              {({ blob, url, loading, error }) =>
+                loading ? 'Loading...' : 'Print PDF'
+              }
+            </PDFDownloadLink>
+          )}
           <InputWrapper show={importedMnemonic}>
             <InputLabel>
               <FormattedMessage id="home.labels.changeCurrency" /> <Red>*</Red>
