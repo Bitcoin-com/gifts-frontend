@@ -6,6 +6,7 @@ import { BITBOX } from 'bitbox-sdk';
 import { BadgerButton } from 'badger-components-react';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
+import QRCode from 'qrcode';
 import PropTypes from 'prop-types';
 import {
   Card,
@@ -52,6 +53,7 @@ import {
 } from './styled';
 import Tip from './Tip';
 import TipPdf from './TipPdf';
+import TipPdfDocument from './TipPdfDocument';
 
 const bitbox = new BITBOX({
   restURL: 'https://rest.bitcoin.com/v2/',
@@ -180,6 +182,7 @@ class TipsPortal extends React.Component {
     this.handleSweepAllTipsButton = this.handleSweepAllTipsButton.bind(this);
     this.toggleSweepForm = this.toggleSweepForm.bind(this);
     this.appStateInitial = this.appStateInitial.bind(this);
+    this.createPdfQrCodes = this.createPdfQrCodes.bind(this);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -205,6 +208,8 @@ class TipsPortal extends React.Component {
       tipsClaimedCount: 0,
       showSweepForm: false,
       tipsAlreadySweptError: false,
+      networkError: '',
+      qrCodeImgs: [],
     };
   }
 
@@ -276,6 +281,7 @@ class TipsPortal extends React.Component {
       tipsSweptCount: 0,
       showSweepForm: false,
       tipsAlreadySweptError: false,
+      networkError: '',
     });
   }
 
@@ -933,7 +939,11 @@ class TipsPortal extends React.Component {
     } catch (err) {
       console.log(`Error in bitbox.Address.details(firstTipAddr)`);
       console.log(err);
-      return;
+      return this.setState({
+        networkError: formatMessage({
+          id: 'home.errors.networkError',
+        }),
+      });
     }
 
     // Calculate tip amounts
@@ -962,16 +972,44 @@ class TipsPortal extends React.Component {
       allTipsSwept = true;
     }
 
-    this.setState({
-      walletInfo,
-      fundingAddress,
-      tipWallets,
-      calculatedFiatAmount,
-      importedMnemonic: true,
-      tipsFunded: true,
-      tipsClaimedCount: claimedTipCount,
-      tipsAlreadySweptError: allTipsSwept,
-    });
+    this.setState(
+      {
+        walletInfo,
+        fundingAddress,
+        tipWallets,
+        calculatedFiatAmount,
+        importedMnemonic: true,
+        tipsFunded: true,
+        tipsClaimedCount: claimedTipCount,
+        tipsAlreadySweptError: allTipsSwept,
+      },
+      this.createPdfQrCodes(tipWallets),
+    );
+  }
+
+  createPdfQrCodes(tipWallets) {
+    console.log(`createPdfQrCodes()`);
+    // get array of wifs from tipWallets
+    // make array of promises
+    // promise.all with a .then to set state
+    const qrPromises = [];
+    for (let i = 0; i < tipWallets.length; i++) {
+      const wifToQr = tipWallets[i].wif;
+      const wifToQrPromise = QRCode.toDataURL(wifToQr);
+      qrPromises.push(wifToQrPromise);
+    }
+    Promise.all(qrPromises).then(
+      res => {
+        console.log(`qrPromises worked some crazy how`);
+        console.log(res);
+        this.setState({
+          qrCodeImgs: res,
+        });
+      },
+      err => {
+        console.log(err);
+      },
+    );
   }
 
   handleCreateTipSubmitButton() {
@@ -1031,7 +1069,7 @@ class TipsPortal extends React.Component {
       // error
       return this.setState({
         invoiceGenerationError: formatMessage({
-          id: 'home.errors.yourTooCheap',
+          id: 'home.errors.youreTooCheap',
         }),
       });
     }
@@ -1106,10 +1144,13 @@ class TipsPortal extends React.Component {
           console.log(`funding outputs used:`);
           console.log(fundingOutputs);
           const { paymentId } = res;
-          return this.setState({
-            invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
-            tipWallets,
-          });
+          return this.setState(
+            {
+              invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+              tipWallets,
+            },
+            this.createPdfQrCodes(tipWallets),
+          );
         },
         err => {
           console.log(`Error creating invoice`);
@@ -1144,6 +1185,8 @@ class TipsPortal extends React.Component {
       showSweepForm,
       tipsAlreadySweptError,
       tipsClaimedCount,
+      networkError,
+      qrCodeImgs,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1280,6 +1323,7 @@ class TipsPortal extends React.Component {
                   required
                 />
                 <InputError>{formData.importedMnemonic.error}</InputError>
+                {networkError !== '' && <InputError>{networkError}</InputError>}
               </InputWrapper>
               <Buttons show={!showSweepForm || sweptTxid !== null}>
                 <CardButton onClick={this.importMnemonic}>
@@ -1626,9 +1670,21 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
-          {tipWallets.length > 0 && (
+          {tipWallets.length > 0 && qrCodeImgs.length > 0 && (
             <PDFDownloadLink
-              document={<TipPdf data={tipWallets} />}
+              document={
+                <TipPdfDocument
+                  tipWallets={tipWallets}
+                  qrCodeImgs={qrCodeImgs}
+                  fiatAmount={
+                    calculatedFiatAmount === null
+                      ? formData.tipAmountFiat.value
+                      : calculatedFiatAmount
+                  }
+                  fiatCurrency={selectedCurrency}
+                  dateStr={dateStr}
+                />
+              }
               fileName="gifts.pdf"
             >
               {({ blob, url, loading, error }) =>

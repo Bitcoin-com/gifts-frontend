@@ -66,8 +66,9 @@
     "invalidUserMnemonic": "Must match 12-word seed created in previous step",
     "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
     "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",
-    "yourTooCheap": "Error: Value of tip is too low. Tips must be at least 0.0005 BCH. Increase your fiat amount per tip.",
-    "tipCountTooManyTips": "Tip creation is currently limited to 20."
+    "youreTooCheap": "Error: Value of tip is too low. Tips must be at least 0.0005 BCH. Increase your fiat amount per tip.",
+    "tipCountTooManyTips": "Tip creation is currently limited to 20.",
+    "networkError": "Network error, the API at rest.bitcoin.com did not respond."
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],
