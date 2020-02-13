@@ -16,6 +16,8 @@ import {
   Select,
   Loader,
 } from 'bitcoincom-storybook';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
 // import { PDFDownloadLink, Document } from 'react-pdf/dist/entry.webpack';
 // import { PDFDownloadLink, Document } from 'react-pdf/';
@@ -104,6 +106,11 @@ class TipsPortal extends React.Component {
         state: inputState.untouched,
         error: null,
       },
+      expirationDate: {
+        value: '',
+        state: inputState.untouched,
+        error: null,
+      },
     };
 
     this.testTipsData = [
@@ -183,6 +190,9 @@ class TipsPortal extends React.Component {
     this.toggleSweepForm = this.toggleSweepForm.bind(this);
     this.appStateInitial = this.appStateInitial.bind(this);
     this.createPdfQrCodes = this.createPdfQrCodes.bind(this);
+    this.handleExpirationDateChange = this.handleExpirationDateChange.bind(
+      this,
+    );
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -235,6 +245,60 @@ class TipsPortal extends React.Component {
       selectedCurrency,
     });
   }
+
+  componentDidMount() {
+    // Set expiration date to now + 3 months
+    const { formData } = this.state;
+    const expirationOffset = 3; // months
+    const expirationDefault = new Date();
+
+    expirationDefault.setMonth(expirationDefault.getMonth() + expirationOffset);
+
+    this.setState({
+      formData: {
+        ...formData,
+        [`expirationDate`]: expirationDefault,
+      },
+    });
+  }
+
+  handleExpirationDateChange(date) {
+    const { formData } = this.state;
+    this.setState({
+      formData: {
+        ...formData,
+        [`expirationDate`]: this.validateExpirationDateChange({ date }),
+      },
+    });
+  }
+
+  validateExpirationDateChange = ({ date }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData.expirationDate;
+
+    field.value = date;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // validation goes here
+    // If date is > 1 year from today, error
+    const expirationMaxOffset = 12; // months
+    const expirationMax = new Date();
+
+    expirationMax.setMonth(expirationMax.getMonth() + expirationMaxOffset);
+    if (date > expirationMax) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidExpirationDate',
+      });
+    }
+
+    return field;
+  };
 
   async handleSelectedCurrencyChangeFromSelect(e) {
     const { tipWallets } = this.state;
@@ -1526,6 +1590,18 @@ class TipsPortal extends React.Component {
                       />
                       <InputError>{formData.tipAmountFiat.error}</InputError>
                     </InputWrapper>
+
+                    <InputWrapper show>
+                      <InputLabel>
+                        <FormattedMessage id="home.labels.expirationDate" />{' '}
+                        <Red>*</Red>
+                      </InputLabel>
+                      <DatePicker
+                        selected={formData.expirationDate.value}
+                        onChange={this.handleExpirationDateChange} // only when value has changed
+                      />
+                      <InputError>{formData.expirationDate.error}</InputError>
+                    </InputWrapper>
                   </Form>
 
                   <CardButton
@@ -1692,7 +1768,7 @@ class TipsPortal extends React.Component {
               }
             </PDFDownloadLink>
             ) */}
-          <InputWrapper show={importedMnemonic}>
+          <InputWrapper className="noPrint" show={importedMnemonic}>
             <InputLabel>
               <FormattedMessage id="home.labels.changeCurrency" /> <Red>*</Red>
             </InputLabel>
