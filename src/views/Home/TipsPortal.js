@@ -1670,7 +1670,7 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
-          {tipWallets.length > 0 && qrCodeImgs.length > 0 && (
+          {/* tipWallets.length > 0 && qrCodeImgs.length > 0 && (
             <PDFDownloadLink
               document={
                 <TipPdfDocument
@@ -1691,7 +1691,7 @@ class TipsPortal extends React.Component {
                 loading ? 'Loading...' : 'Print PDF'
               }
             </PDFDownloadLink>
-          )}
+            ) */}
           <InputWrapper show={importedMnemonic}>
             <InputLabel>
               <FormattedMessage id="home.labels.changeCurrency" /> <Red>*</Red>

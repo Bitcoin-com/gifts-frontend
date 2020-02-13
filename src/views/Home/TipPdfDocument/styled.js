@@ -26,15 +26,15 @@ export const TipLabel = styled(Text)`
   font-style: italic;
   text-align: center;
 `;
+export const TipsWrapper = styled(View)`
+  display: inline-block;
+`;
 
 export const TipWrapper = styled(View)`
-  position: relative;
   border: 1px solid black;
   background-color: white;
   height: 3.75in;
   width: 2in;
-  align-self: center;
-  justify-self: center;
 `;
 export const TipHeader = styled(View)`
   margin: 0;
