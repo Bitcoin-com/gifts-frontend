@@ -111,6 +111,11 @@ class TipsPortal extends React.Component {
         state: inputState.untouched,
         error: null,
       },
+      emailAddress: {
+        value: '',
+        state: inputState.untouched,
+        error: null,
+      },
     };
 
     this.testTipsData = [
@@ -193,6 +198,7 @@ class TipsPortal extends React.Component {
     this.handleExpirationDateChange = this.handleExpirationDateChange.bind(
       this,
     );
+    this.handleEmailAddressChange = this.handleEmailAddressChange.bind(this);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -257,7 +263,11 @@ class TipsPortal extends React.Component {
     this.setState({
       formData: {
         ...formData,
-        [`expirationDate`]: expirationDefault,
+        [`expirationDate`]: {
+          value: expirationDefault,
+          state: inputState.untouched,
+          error: '',
+        },
       },
     });
   }
@@ -624,6 +634,45 @@ class TipsPortal extends React.Component {
         id: 'home.errors.invalidUserMnemonic',
       });
     }
+    return field;
+  };
+
+  handleEmailAddressChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateEmailAddress({ name, value }),
+      },
+    });
+  }
+
+  validateEmailAddress = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // Basic email address validation
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const isValidEmail = re.test(String(value).toLowerCase());
+
+    if (!isValidEmail && value !== '') {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidEmail',
+      });
+      return field;
+    }
+
     return field;
   };
 
@@ -1104,6 +1153,15 @@ class TipsPortal extends React.Component {
     const { masterHDNode, derivePath } = walletInfo;
 
     if (formData.tipAmountFiat.value === '') {
+      return;
+    }
+    // Date picker form validation doesn't work with onsubmit, catch here
+    if (
+      formData.tipAmountFiat.error !== null ||
+      formData.expirationDate.error !== null ||
+      formData.tipCount.error !== null ||
+      formData.emailAddress.error !== null
+    ) {
       return;
     }
 
@@ -1589,6 +1647,23 @@ class TipsPortal extends React.Component {
                         required
                       />
                       <InputError>{formData.tipAmountFiat.error}</InputError>
+                    </InputWrapper>
+
+                    <InputWrapper show>
+                      <InputLabel>
+                        <FormattedMessage id="home.labels.emailAddress" />
+                      </InputLabel>
+                      <Input
+                        id="emailAddress"
+                        name="emailAddress"
+                        type="text"
+                        value={formData.emailAddress.value}
+                        onChange={this.handleEmailAddressChange}
+                        placeholder={formatMessage({
+                          id: 'home.placeholders.emailAddress',
+                        })}
+                      />
+                      <InputError>{formData.emailAddress.error}</InputError>
                     </InputWrapper>
 
                     <InputWrapper show>
