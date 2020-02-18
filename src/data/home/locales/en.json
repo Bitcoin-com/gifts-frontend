@@ -56,7 +56,8 @@
     "importMnemonic": "Enter your 12-word seed",
     "userConfirmedMnemonic": "Enter your 12-word seed",
     "userRefundAddress": "All swept tips will be returned to this address.",
-    "emailAddress": "Enter your email address to receive notifications when your tips expire"
+    "userRefundAddressOnCreate": "Unclaimed tips return to this address",
+    "emailAddress": "Receive notifications"
   },
   "errors": {
     "tipCountNoTips": "Tip count must be greater than zero",

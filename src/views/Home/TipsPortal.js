@@ -106,6 +106,11 @@ class TipsPortal extends React.Component {
         state: inputState.untouched,
         error: null,
       },
+      userRefundAddressOnCreate: {
+        value: '',
+        state: inputState.untouched,
+        error: null,
+      },
       expirationDate: {
         value: '',
         state: inputState.untouched,
@@ -191,6 +196,9 @@ class TipsPortal extends React.Component {
     this.validateUserRefundAddressChange = this.validateUserRefundAddressChange.bind(
       this,
     );
+    this.handleUserRefundAddressOnCreateChange = this.handleUserRefundAddressOnCreateChange.bind(
+      this,
+    );
     this.handleSweepAllTipsButton = this.handleSweepAllTipsButton.bind(this);
     this.toggleSweepForm = this.toggleSweepForm.bind(this);
     this.appStateInitial = this.appStateInitial.bind(this);
@@ -199,6 +207,7 @@ class TipsPortal extends React.Component {
       this,
     );
     this.handleEmailAddressChange = this.handleEmailAddressChange.bind(this);
+    this.createExpirationTxs = this.createExpirationTxs.bind(this);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -226,6 +235,8 @@ class TipsPortal extends React.Component {
       tipsAlreadySweptError: false,
       networkError: '',
       qrCodeImgs: [],
+      invoiceTxid: '',
+      returnTxInfos: [],
     };
   }
 
@@ -266,7 +277,7 @@ class TipsPortal extends React.Component {
         [`expirationDate`]: {
           value: expirationDefault,
           state: inputState.untouched,
-          error: '',
+          error: null,
         },
       },
     });
@@ -366,7 +377,6 @@ class TipsPortal extends React.Component {
 
   async sweepAllTips(e) {
     e.preventDefault();
-    console.log(`sweepAllTips`);
     // Accept a validated cash address from user input
     // Scan addresses from this HD node for a balance
     // Use a tipCount var in state; if your tips were just created, you'll have it
@@ -395,6 +405,7 @@ class TipsPortal extends React.Component {
     // TODO can you get batch utxos from more than 20 addresses?
     // check balances of addresses in one async batch
     const u = await bitbox.Address.utxo(sweepAddresses);
+    // todo handle errors here with try/catch
     console.log(`utxos:`);
     console.log(u);
 
@@ -557,13 +568,179 @@ class TipsPortal extends React.Component {
   }
 
   invoiceSuccess() {
+    const { tipWallets } = this.state;
     console.log(`Invoice paid successfully`);
-    this.setState({
-      tipsFunded: true,
+    // build the output object for the tip claiming expiration here
+    // get txid of invoice funding transaction
+    bitbox.Address.details(tipWallets[0].addr).then(
+      res => {
+        console.log(res);
+        try {
+          const invoiceTxid = res.transactions[0];
+          return this.setState({ invoiceTxid, tipsFunded: true }, async () => {
+            try {
+              await this.createExpirationTxs();
+            } catch (e) {
+              console.log(`Error in createExpirationTxs()`);
+            }
+          });
+        } catch (err) {
+          console.log(`Error in collecting invoiceTxid`);
+          return this.setState(
+            { invoiceTxid: 'API_Error', tipsFunded: true },
+            async () => {
+              try {
+                await this.createExpirationTxs();
+              } catch (e) {
+                console.log(`Error in createExpirationTxs()`);
+              }
+            },
+          );
+        }
+      },
+      err => {
+        console.log(`Error in fetching txid of invoice payment transaction`);
+        console.log(err);
+        return this.setState(
+          { invoiceTxid: 'API_Error', tipsFunded: true },
+          async () => {
+            try {
+              await this.createExpirationTxs();
+            } catch (e) {
+              console.log(`Error in createExpirationTxs()`);
+            }
+          },
+        );
+      },
+    );
+  }
+
+  async createExpirationTxs() {
+    console.log(`createExpiratoinTxs`);
+    // Function is similar to sweepAllTips, however creates a rawTx for each input instead of one sweep tx
+    // Build this for the case of "you just made the tips" first; simpler than the import case
+    const {
+      formData,
+      tipWallets,
+      invoiceTxid,
+      selectedCurrency,
+      invoiceUrl,
+    } = this.state;
+    const refundAddress = formData.userRefundAddressOnCreate.value;
+    // Scan through tip wallets by wif, see if there is money to sweep, and output a new object
+    // of what you need to build your sweeping tx
+    const sweepBuilder = [];
+    const sweepAddresses = [];
+    tipWallets.forEach(tipWallet => {
+      const sweepChunk = {};
+      // get ec pair from wif
+      const ecPair = bitbox.ECPair.fromWIF(tipWallet.wif);
+      // get address from ecpair
+      const fromAddr = bitbox.ECPair.toCashAddress(ecPair);
+      sweepChunk.ecPair = ecPair;
+      sweepChunk.fromAddr = fromAddr;
+      sweepAddresses.push(fromAddr);
+      sweepBuilder.push(sweepChunk);
     });
+    // TODO can you get batch utxos from more than 20 addresses?
+    // check balances of addresses in one async batch
+    const u = await bitbox.Address.utxo(sweepAddresses);
+
+    // Add the utxos to the sweepbuilder array
+    // iterate over utxo object
+    // if the address matches a sweepbuilder entry, add it to that entry
+    // might be best to do this step in the txbuilder loop
+
+    for (let i = 0; i < u.length; i += 1) {
+      // utxos come back in same order they were sent
+      sweepBuilder[i].utxos = u[i].utxos;
+    }
+    // now make return txs
+    const returnRawTxs = [];
+    for (let i = 0; i < sweepBuilder.length; i += 1) {
+      const transactionBuilder = new bitbox.TransactionBuilder();
+      let originalAmount = 0;
+      // Only 1 utxo, what you just paid
+      const utxo = sweepBuilder[i].utxos[0];
+      originalAmount += utxo.satoshis;
+      transactionBuilder.addInput(utxo.txid, utxo.vout);
+      if (originalAmount < 1) {
+        returnRawTxs[
+          i
+        ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
+      }
+      // Calc fee for 1 input 1 output
+      const byteCount = bitbox.BitcoinCash.getByteCount(
+        { P2PKH: 1 },
+        { P2PKH: 1 },
+      );
+      const fee = Math.ceil(1.1 * byteCount);
+      // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+      const sendAmount = originalAmount - fee;
+
+      // add output w/ address and amount to send
+      transactionBuilder.addOutput(refundAddress, sendAmount);
+      // Loop through each input and sign
+      let redeemScript;
+      // Sign your input (only 1)
+
+      const keyPair = sweepBuilder[i].ecPair;
+
+      transactionBuilder.sign(
+        0,
+        keyPair,
+        redeemScript,
+        transactionBuilder.hashTypes.SIGHASH_ALL,
+        utxo.satoshis,
+      );
+
+      // build tx
+      const tx = transactionBuilder.build();
+      // output rawhex
+      const hex = tx.toHex();
+      returnRawTxs.push(hex);
+    }
+    console.log(returnRawTxs);
+
+    // Build & set the server broadcast object in state
+    const returnTxInfos = [];
+    for (let i = 0; i < returnRawTxs.length; i += 1) {
+      const returnTxInfo = {};
+      // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
+
+      const fiatAmount = formData.tipAmountFiat.value;
+      const fiatRate = parseFloat(
+        (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
+      );
+      const expirationStamp = formData.expirationDate.value.getTime() / 1000;
+      returnTxInfo.creationPaymentUrl = invoiceUrl;
+      returnTxInfo.creationTxid = invoiceTxid;
+      returnTxInfo.fiatCode = selectedCurrency;
+      returnTxInfo.fiatAmount = fiatAmount;
+      returnTxInfo.fiatRate = fiatRate;
+      returnTxInfo.email = formData.emailAddress.value;
+      returnTxInfo.rawTx = returnRawTxs[i];
+      returnTxInfo.expirationStamp = expirationStamp;
+      returnTxInfo.refundAddress = refundAddress;
+      returnTxInfos.push(returnTxInfo);
+    }
+    console.log(returnTxInfos);
+    this.setState({ returnTxInfos });
   }
 
   handleUserRefundAddressChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateUserRefundAddressChange({ name, value }),
+      },
+    });
+  }
+
+  handleUserRefundAddressOnCreateChange(e) {
     const { value, name } = e.target;
     const { formData } = this.state;
 
@@ -1309,6 +1486,7 @@ class TipsPortal extends React.Component {
       tipsClaimedCount,
       networkError,
       qrCodeImgs,
+      invoiceTxid,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1664,6 +1842,26 @@ class TipsPortal extends React.Component {
                         })}
                       />
                       <InputError>{formData.emailAddress.error}</InputError>
+                    </InputWrapper>
+
+                    <InputWrapper show>
+                      <InputLabel>
+                        <FormattedMessage id="home.labels.refundAddress" />{' '}
+                        <Red>*</Red>
+                      </InputLabel>
+                      <Input
+                        name="userRefundAddressOnCreate"
+                        type="text"
+                        value={formData.userRefundAddressOnCreate.value}
+                        onChange={this.handleUserRefundAddressOnCreateChange}
+                        placeholder={formatMessage({
+                          id: 'home.placeholders.userRefundAddressOnCreate',
+                        })}
+                        required
+                      />
+                      <InputError>
+                        {formData.userRefundAddressOnCreate.error}
+                      </InputError>
                     </InputWrapper>
 
                     <InputWrapper show>
