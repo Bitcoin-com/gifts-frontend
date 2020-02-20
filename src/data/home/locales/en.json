@@ -74,7 +74,8 @@
     "tipCountTooManyTips": "Tip creation is currently limited to 20.",
     "networkError": "Network error, the API at rest.bitcoin.com did not respond.",
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
-    "invalidEmail": "Please enter a valid email address (or none at all)"
+    "invalidEmail": "Please enter a valid email address (or none at all)",
+    "expirationMustBeFuture": "Expiration date must be in the future."
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],

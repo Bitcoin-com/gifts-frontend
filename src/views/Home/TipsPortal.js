@@ -285,6 +285,7 @@ class TipsPortal extends React.Component {
 
   handleExpirationDateChange(date) {
     const { formData } = this.state;
+
     this.setState({
       formData: {
         ...formData,
@@ -305,16 +306,22 @@ class TipsPortal extends React.Component {
     field.state = inputState.valid;
     field.error = null;
 
-    // validation goes here
     // If date is > 1 year from today, error
     const expirationMaxOffset = 12; // months
     const expirationMax = new Date();
-
     expirationMax.setMonth(expirationMax.getMonth() + expirationMaxOffset);
+
+    // If date is in the past, also error
+    const now = new Date();
     if (date > expirationMax) {
       field.state = inputState.invalid;
       field.error = formatMessage({
         id: 'home.errors.invalidExpirationDate',
+      });
+    } else if (date < now) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.expirationMustBeFuture',
       });
     }
 
@@ -428,9 +435,9 @@ class TipsPortal extends React.Component {
     let inputCount = 0;
 
     // loop over sweepBuilder
-    for (let j = 0; j < sweepBuilder.length; j++) {
+    for (let j = 0; j < sweepBuilder.length; j += 1) {
       // Loop through all for each tip with utxos and add as inputs
-      for (let i = 0; i < sweepBuilder[j].utxos.length; i++) {
+      for (let i = 0; i < sweepBuilder[j].utxos.length; i += 1) {
         const utxo = sweepBuilder[j].utxos[i];
 
         originalAmount += utxo.satoshis;
@@ -464,8 +471,8 @@ class TipsPortal extends React.Component {
     // Loop through each input and sign
     let redeemScript;
     let signedInputCount = 0;
-    for (let j = 0; j < sweepBuilder.length; j++) {
-      for (let i = 0; i < sweepBuilder[j].utxos.length; i++) {
+    for (let j = 0; j < sweepBuilder.length; j += 1) {
+      for (let i = 0; i < sweepBuilder[j].utxos.length; i += 1) {
         const utxo = sweepBuilder[j].utxos[i];
         // console.log(`utxo[${i}]: ${utxo.vout}`);
         // console.log(utxo);
@@ -709,10 +716,12 @@ class TipsPortal extends React.Component {
       // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
 
       const fiatAmount = formData.tipAmountFiat.value;
+      // Calculate this for each tip in case you add a feature for tips of diff value later
       const fiatRate = parseFloat(
         (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
       );
       const expirationStamp = formData.expirationDate.value.getTime() / 1000;
+      const tipAddress = tipWallets[i].addr;
       returnTxInfo.creationPaymentUrl = invoiceUrl;
       returnTxInfo.creationTxid = invoiceTxid;
       returnTxInfo.fiatCode = selectedCurrency;
@@ -721,6 +730,7 @@ class TipsPortal extends React.Component {
       returnTxInfo.email = formData.emailAddress.value;
       returnTxInfo.rawTx = returnRawTxs[i];
       returnTxInfo.expirationStamp = expirationStamp;
+      returnTxInfo.tipAddress = tipAddress;
       returnTxInfo.refundAddress = refundAddress;
       returnTxInfos.push(returnTxInfo);
     }
@@ -1283,7 +1293,7 @@ class TipsPortal extends React.Component {
     // make array of promises
     // promise.all with a .then to set state
     const qrPromises = [];
-    for (let i = 0; i < tipWallets.length; i++) {
+    for (let i = 0; i < tipWallets.length; i += 1) {
       const wifToQr = tipWallets[i].wif;
       const wifToQrPromise = QRCode.toDataURL(wifToQr);
       qrPromises.push(wifToQrPromise);
@@ -1872,6 +1882,8 @@ class TipsPortal extends React.Component {
                       <DatePicker
                         selected={formData.expirationDate.value}
                         onChange={this.handleExpirationDateChange} // only when value has changed
+                        showTimeSelect
+                        timeIntervals={5}
                       />
                       <InputError>{formData.expirationDate.error}</InputError>
                     </InputWrapper>
