@@ -208,6 +208,8 @@ class TipsPortal extends React.Component {
     );
     this.handleEmailAddressChange = this.handleEmailAddressChange.bind(this);
     this.createExpirationTxs = this.createExpirationTxs.bind(this);
+    this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
+    this.setDefaultExpirationDate = this.setDefaultExpirationDate.bind(this);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -264,6 +266,10 @@ class TipsPortal extends React.Component {
   }
 
   componentDidMount() {
+    // this.setDefaultExpirationDate();
+  }
+
+  setDefaultExpirationDate() {
     // Set expiration date to now + 3 months
     const { formData } = this.state;
     const expirationOffset = 3; // months
@@ -623,7 +629,7 @@ class TipsPortal extends React.Component {
   }
 
   async createExpirationTxs() {
-    console.log(`createExpiratoinTxs`);
+    console.log(`createExpirationTxs`);
     // Function is similar to sweepAllTips, however creates a rawTx for each input instead of one sweep tx
     // Build this for the case of "you just made the tips" first; simpler than the import case
     const {
@@ -720,7 +726,9 @@ class TipsPortal extends React.Component {
       const fiatRate = parseFloat(
         (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
       );
-      const expirationStamp = formData.expirationDate.value.getTime() / 1000;
+      const expirationStamp = Math.round(
+        formData.expirationDate.value.getTime() / 1000,
+      );
       const tipAddress = tipWallets[i].addr;
       returnTxInfo.creationPaymentUrl = invoiceUrl;
       returnTxInfo.creationTxid = invoiceTxid;
@@ -735,7 +743,30 @@ class TipsPortal extends React.Component {
       returnTxInfos.push(returnTxInfo);
     }
     console.log(returnTxInfos);
-    this.setState({ returnTxInfos });
+    return this.postReturnTxInfos(returnTxInfos);
+  }
+
+  postReturnTxInfos(returnTxInfos) {
+    const api = 'http://localhost:3001/setClaimChecks';
+    fetch(api, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(returnTxInfos),
+    }).then(
+      res => {
+        console.log(`returnTxInfos successully posted to API`);
+        console.log(res);
+        console.log(res.data);
+        return this.setState({ returnTxInfos });
+      },
+      err => {
+        console.log(`Error in postReturnTxInfos`);
+        console.log(err);
+      },
+    );
   }
 
   handleUserRefundAddressChange(e) {
@@ -989,6 +1020,7 @@ class TipsPortal extends React.Component {
   }
 
   generateNewWallet() {
+    this.setDefaultExpirationDate();
     const { walletInfo } = this.state;
     const entropy = bitbox.Crypto.randomBytes(16);
     //
