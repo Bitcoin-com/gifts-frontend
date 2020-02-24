@@ -1,4 +1,5 @@
 import React from 'react';
+import throttle from 'lodash.throttle';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import memoize from 'memoize-one';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -52,6 +53,7 @@ import {
   SweepNotice,
   AddressInputLabel,
   ErrorNotice,
+  CustomDatePicker,
 } from './styled';
 import Tip from './Tip';
 import TipPdf from './TipPdf';
@@ -178,6 +180,7 @@ class TipsPortal extends React.Component {
     this.importMnemonic = this.importMnemonic.bind(this);
     this.handleCancelInvoice = this.handleCancelInvoice.bind(this);
     this.invoiceSuccess = this.invoiceSuccess.bind(this);
+
     this.handleUserConfirmedMnemonicChange = this.handleUserConfirmedMnemonicChange.bind(
       this,
     );
@@ -210,6 +213,9 @@ class TipsPortal extends React.Component {
     this.createExpirationTxs = this.createExpirationTxs.bind(this);
     this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
     this.setDefaultExpirationDate = this.setDefaultExpirationDate.bind(this);
+    // Do not call invoiceSuccess more than once in a 10min window
+    // Should only ever be called once, but Badger can send this signal multiple times
+    this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 600000);
 
     this.state = {
       formData: merge({}, this.initialFormData),
@@ -759,12 +765,13 @@ class TipsPortal extends React.Component {
       res => {
         console.log(`returnTxInfos successully posted to API`);
         console.log(res);
-        console.log(res.data);
+
         return this.setState({ returnTxInfos });
       },
       err => {
         console.log(`Error in postReturnTxInfos`);
         console.log(err);
+        // should try to post it again here, mb email the error to admin
       },
     );
   }
@@ -1505,6 +1512,10 @@ class TipsPortal extends React.Component {
       );
   }
 
+  componentWillUnmount() {
+    this.invoiceSuccessThrottled.cancel();
+  }
+
   render() {
     const {
       intl: { formatMessage, messages },
@@ -1911,11 +1922,11 @@ class TipsPortal extends React.Component {
                         <FormattedMessage id="home.labels.expirationDate" />{' '}
                         <Red>*</Red>
                       </InputLabel>
-                      <DatePicker
+                      <CustomDatePicker
                         selected={formData.expirationDate.value}
                         onChange={this.handleExpirationDateChange} // only when value has changed
                         showTimeSelect
-                        timeIntervals={5}
+                        timeIntervals={1}
                       />
                       <InputError>{formData.expirationDate.error}</InputError>
                     </InputWrapper>
@@ -1961,7 +1972,7 @@ class TipsPortal extends React.Component {
                       currency={selectedCurrency}
                       paymentRequestUrl={invoiceUrl}
                       isRepeatable={false}
-                      successFn={this.invoiceSuccess}
+                      successFn={this.invoiceSuccessThrottled}
                     />
                   </BadgerWrap>
                   {tipsFunded ? (

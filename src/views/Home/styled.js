@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   theme,
   ContentBlock,
@@ -11,6 +11,63 @@ import {
   Input,
   InputLabel,
 } from 'bitcoincom-storybook';
+import DatePicker from 'react-datepicker';
+
+const reset = css`
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+`;
+
+export const CustomDatePicker = styled(DatePicker)`
+  ${reset};
+  border-radius: ${theme.border.radius.default}px;
+  padding: 0 ${theme.spacing.unit * 3}px;
+  height: 60px;
+  background-color: ${theme.palette.background.default};
+  border: ${theme.border.solid.default} ${theme.palette.border.default};
+  color: ${theme.palette.text.primary};
+  margin: ${theme.spacing.unit}px 0;
+  max-width: 450px;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.14);
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+  ${({ padding = false }) =>
+    padding &&
+    css`
+      padding-right: ${theme.spacing.unit * 7}px;
+    `};
+  &::placeholder {
+    color: ${theme.palette.text.placeholder};
+  }
+  &:focus,
+  &:focus-within {
+    border-color: ${theme.palette.primary.main};
+  }
+  ${({ disabled = false }) => {
+    if (disabled === false) return '';
+    return css`
+      background-color: ${theme.palette.background.headerLight};
+      border-color: ${theme.palette.text.disabled};
+      color: ${theme.palette.text.disabled};
+      pointer-events: none;
+      &:focus,
+      &:focus-within {
+        border-color: ${theme.palette.text.disabled};
+      }
+    `;
+  }};
+`;
 
 export const AddressInputLabel = styled(InputLabel)`
   text-align: left;
@@ -66,7 +123,9 @@ export const WalletCard = styled(Card)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
 
-export const MakeAndPayTipsCard = styled(Card)``;
+export const MakeAndPayTipsCard = styled(Card)`
+  overflow: visible;
+`;
 export const SeedCard = styled(Card)`
   & > div {
     margin: auto;
