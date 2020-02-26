@@ -48,7 +48,8 @@
     "goBack": "Back",
     "copySeed": "Copy to Clipboard",
     "sweepAll": "Sweep All",
-    "newTips": "Make new tips"
+    "newTips": "Make new tips",
+    "loading": "Generating invoice..."
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",

@@ -54,6 +54,7 @@ import {
   AddressInputLabel,
   ErrorNotice,
   CustomDatePicker,
+  CustomLoader,
 } from './styled';
 import Tip from './Tip';
 import TipPdf from './TipPdf';
@@ -245,6 +246,7 @@ class TipsPortal extends React.Component {
       qrCodeImgs: [],
       invoiceTxid: '',
       returnTxInfos: [],
+      generatingInvoice: false,
     };
   }
 
@@ -468,7 +470,8 @@ class TipsPortal extends React.Component {
       { P2PKH: inputCount },
       { P2PKH: 1 },
     );
-    const fee = Math.ceil(1.1 * byteCount);
+    // Use 2 sats/byte to avoid any mempool errors
+    const fee = Math.ceil(2 * byteCount);
     console.log(`fee: ${fee}`);
     // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
     const sendAmount = originalAmount - fee;
@@ -693,7 +696,8 @@ class TipsPortal extends React.Component {
         { P2PKH: 1 },
         { P2PKH: 1 },
       );
-      const fee = Math.ceil(1.1 * byteCount);
+      // Make fee 2 sat/byte to make sure even smallest tips get swept
+      const fee = Math.ceil(2 * byteCount);
       // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
       const sendAmount = originalAmount - fee;
 
@@ -1368,6 +1372,7 @@ class TipsPortal extends React.Component {
     if (invoiceGenerationError !== '') {
       this.setState({ invoiceGenerationError: '' });
     }
+    this.setState({ generatingInvoice: true });
   }
 
   async handleCreateTipSubmit(e) {
@@ -1379,7 +1384,7 @@ class TipsPortal extends React.Component {
     const { masterHDNode, derivePath } = walletInfo;
 
     if (formData.tipAmountFiat.value === '') {
-      return;
+      return this.setState({ generatingInvoice: false });
     }
     // Date picker form validation doesn't work with onsubmit, catch here
     if (
@@ -1388,7 +1393,7 @@ class TipsPortal extends React.Component {
       formData.tipCount.error !== null ||
       formData.emailAddress.error !== null
     ) {
-      return;
+      return this.setState({ generatingInvoice: true });
     }
 
     // Generate addresses and private keys for tips to be created
@@ -1416,6 +1421,7 @@ class TipsPortal extends React.Component {
     if (tipAmountSats < 5000) {
       // error
       return this.setState({
+        generatingInvoice: false,
         invoiceGenerationError: formatMessage({
           id: 'home.errors.youreTooCheap',
         }),
@@ -1484,6 +1490,7 @@ class TipsPortal extends React.Component {
             */
             // handle this error
             return this.setState({
+              generatingInvoice: false,
               invoiceGenerationError: formatMessage({
                 id: 'home.errors.invoiceGenerationError',
               }),
@@ -1494,6 +1501,7 @@ class TipsPortal extends React.Component {
           const { paymentId } = res;
           return this.setState(
             {
+              generatingInvoice: false,
               invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
               tipWallets,
             },
@@ -1504,6 +1512,7 @@ class TipsPortal extends React.Component {
           console.log(`Error creating invoice`);
           console.log(err);
           return this.setState({
+            generatingInvoice: false,
             invoiceGenerationError: formatMessage({
               id: 'home.errors.invoiceGenerationError',
             }),
@@ -1540,6 +1549,7 @@ class TipsPortal extends React.Component {
       networkError,
       qrCodeImgs,
       invoiceTxid,
+      generatingInvoice,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1931,7 +1941,6 @@ class TipsPortal extends React.Component {
                       <InputError>{formData.expirationDate.error}</InputError>
                     </InputWrapper>
                   </Form>
-
                   <CardButton
                     type="submit"
                     form="createTip"
@@ -1944,8 +1953,13 @@ class TipsPortal extends React.Component {
                     onClick={this.handleCreateTipSubmitButton}
                     action="submit"
                   >
-                    <FormattedMessage id="home.buttons.createTips" />
+                    {generatingInvoice ? (
+                      <FormattedMessage id="home.buttons.loading" />
+                    ) : (
+                      <FormattedMessage id="home.buttons.createTips" />
+                    )}
                   </CardButton>
+
                   <ErrorNotice>{invoiceGenerationError}</ErrorNotice>
                 </React.Fragment>
               ) : (

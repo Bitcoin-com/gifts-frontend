@@ -10,6 +10,7 @@ import {
   Table,
   Input,
   InputLabel,
+  Loader,
 } from 'bitcoincom-storybook';
 import DatePicker from 'react-datepicker';
 
@@ -26,6 +27,10 @@ const reset = css`
   box-sizing: border-box;
 `;
 
+export const CustomLoader = styled(Loader)`
+  width: 42px;
+  height: 42px;
+`;
 export const CustomDatePicker = styled(DatePicker)`
   ${reset};
   border-radius: ${theme.border.radius.default}px;
