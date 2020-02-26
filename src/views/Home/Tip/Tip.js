@@ -1,4 +1,6 @@
 import React from 'react';
+// Will use this after add localization to full app TODO
+// eslint-disable-next-line no-unused-vars
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { QRCode } from 'react-qrcode-logo';

@@ -39,21 +39,26 @@
     "tipAmountFiat": "Fiat amount (per tip) in your selected currency",
     "refundAddress": "Your refund address",
     "localCurrency": "Selected Currency",
-    "changeCurrency": "Change tip currency"
+    "changeCurrency": "Change tip currency",
+    "expirationDate": "Expiration date",
+    "emailAddress": "Email address (optional)"
   },
   "buttons": {
     "createTips": "Generate Tips",
     "goBack": "Back",
     "copySeed": "Copy to Clipboard",
     "sweepAll": "Sweep All",
-    "newTips": "Make new tips"
+    "newTips": "Make new tips",
+    "loading": "Generating invoice..."
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
     "tipAmountFiat": "Enter the fiat amount desired for each tip",
     "importMnemonic": "Enter your 12-word seed",
     "userConfirmedMnemonic": "Enter your 12-word seed",
-    "userRefundAddress": "All swept tips will be returned to this address."
+    "userRefundAddress": "All swept tips will be returned to this address.",
+    "userRefundAddressOnCreate": "Unclaimed tips return to this address",
+    "emailAddress": "Receive notifications"
   },
   "errors": {
     "tipCountNoTips": "Tip count must be greater than zero",
@@ -66,8 +71,12 @@
     "invalidUserMnemonic": "Must match 12-word seed created in previous step",
     "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
     "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",
-    "yourTooCheap": "Error: Value of tip is too low. Tips must be at least 0.0005 BCH. Increase your fiat amount per tip.",
-    "tipCountTooManyTips": "Tip creation is currently limited to 20."
+    "youreTooCheap": "Error: Value of tip is too low. Tips must be at least 0.0005 BCH. Increase your fiat amount per tip.",
+    "tipCountTooManyTips": "Tip creation is currently limited to 20.",
+    "networkError": "Network error, the API at rest.bitcoin.com did not respond.",
+    "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
+    "invalidEmail": "Please enter a valid email address (or none at all)",
+    "expirationMustBeFuture": "Expiration date must be in the future."
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],
