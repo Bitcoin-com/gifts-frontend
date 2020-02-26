@@ -15,14 +15,11 @@ import {
   Input,
   InputSelect,
   Select,
-  Loader,
 } from 'bitcoincom-storybook';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
-// import { PDFDownloadLink, Document } from 'react-pdf/dist/entry.webpack';
-// import { PDFDownloadLink, Document } from 'react-pdf/';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+
+// import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import {
   PrintableContentBlock,
@@ -54,11 +51,11 @@ import {
   AddressInputLabel,
   ErrorNotice,
   CustomDatePicker,
-  CustomLoader,
 } from './styled';
 import Tip from './Tip';
-import TipPdf from './TipPdf';
-import TipPdfDocument from './TipPdfDocument';
+// disable PDF functionality
+// import TipPdf from './TipPdf';
+// import TipPdfDocument from './TipPdfDocument';
 
 const bitbox = new BITBOX({
   restURL: 'https://rest.bitcoin.com/v2/',
@@ -243,9 +240,11 @@ class TipsPortal extends React.Component {
       showSweepForm: false,
       tipsAlreadySweptError: false,
       networkError: '',
+      // eslint-disable-next-line react/no-unused-state
       qrCodeImgs: [],
       invoiceTxid: '',
-      returnTxInfos: [],
+      // eslint-disable-next-line react/no-unused-state
+      returnTxInfos: [], // used for debugging
       generatingInvoice: false,
     };
   }
@@ -267,14 +266,12 @@ class TipsPortal extends React.Component {
     return currenciesOptions;
   });
 
-  handleSelectedCurrencyChange(selectedCurrency) {
-    this.setState({
-      selectedCurrency,
-    });
-  }
-
   componentDidMount() {
     // this.setDefaultExpirationDate();
+  }
+
+  componentWillUnmount() {
+    this.invoiceSuccessThrottled.cancel();
   }
 
   setDefaultExpirationDate() {
@@ -293,17 +290,6 @@ class TipsPortal extends React.Component {
           state: inputState.untouched,
           error: null,
         },
-      },
-    });
-  }
-
-  handleExpirationDateChange(date) {
-    const { formData } = this.state;
-
-    this.setState({
-      formData: {
-        ...formData,
-        [`expirationDate`]: this.validateExpirationDateChange({ date }),
       },
     });
   }
@@ -342,60 +328,496 @@ class TipsPortal extends React.Component {
     return field;
   };
 
-  async handleSelectedCurrencyChangeFromSelect(e) {
-    const { tipWallets } = this.state;
-    const currency = e.value;
-    const currencyCode = currency.toLowerCase();
-    const price = await fetch(
-      `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`,
-    );
+  validateUserRefundAddressChange = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
 
-    const priceJson = await price.json();
+    const field = formData[name];
 
-    const fiatPrice = priceJson.price / 100;
-    // console.log(`fiatPrice: ${fiatPrice}`);
-    const calculatedFiatAmount = parseFloat(
-      ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
-    );
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // validation goes here
+    try {
+      bitbox.Address.toLegacyAddress(value);
+    } catch (err) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidRefundAddress',
+      });
+    }
+
+    return field;
+  };
+
+  validateUserConfirmedMnemonic = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData, walletInfo } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    if (value !== walletInfo.mnemonic) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidUserMnemonic',
+      });
+    }
+    return field;
+  };
+
+  validateEmailAddress = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // Basic email address validation
+    // eslint-disable-next-line no-useless-escape
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const isValidEmail = re.test(String(value).toLowerCase());
+
+    if (!isValidEmail && value !== '') {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidEmail',
+      });
+      return field;
+    }
+
+    return field;
+  };
+
+  validateImportedMnemonic = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    const isValidMnemonic = bitbox.Mnemonic.validate(value);
+    if (isValidMnemonic !== 'Valid mnemonic') {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidMnemonic',
+      });
+      return field;
+    }
+
+    if (!value) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.noMnemonic',
+      });
+    }
+    return field;
+  };
+
+  // eslint-disable-next-line react/sort-comp
+  handleTipCountChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
     this.setState({
-      selectedCurrency: currency,
-      calculatedFiatAmount,
+      formData: { ...formData, [name]: this.validateTipCount({ name, value }) },
     });
   }
 
-  appStateInitial() {
+  validateTipCount = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+    if (!value) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.tipCountNum',
+      });
+    } else if (value <= 0) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.tipCountNoTips',
+      });
+    } else if (value > 20) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.tipCountTooManyTips',
+      });
+    }
+    return field;
+  };
+
+  handleTipAmountFiatChange(e) {
+    const value = e;
+    const name = 'tipAmountFiat';
+    const { formData } = this.state;
     this.setState({
-      formData: merge({}, this.initialFormData),
-      walletInfo: {
-        mnemonic: '',
-        // rootSeed: '',
-        masterHDNode: '',
-        derivePath: "m/44'/145'/0'/0/",
-        // account: '',
-        // change: '',
+      formData: {
+        ...formData,
+        [name]: this.validateTipAmountFiat({ name, value }),
       },
-      fundingAddress: '',
-      selectedCurrency: 'USD',
-      tipWallets: [],
-      invoiceUrl: '',
-      importedMnemonic: false,
-      calculatedFiatAmount: null,
-      tipsFunded: false,
-      appState: appStates.initial,
-      invoiceGenerationError: '',
-      sweptTxid: null,
-      tipsSweptCount: 0,
-      showSweepForm: false,
-      tipsAlreadySweptError: false,
-      networkError: '',
     });
   }
 
-  toggleSweepForm() {
-    const { showSweepForm } = this.state;
-    this.setState({ showSweepForm: !showSweepForm });
+  validateTipAmountFiat = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+    if (!value) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.fiatTipAmountNum',
+      });
+    } else if (value <= 0) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.fiatTipAmountRequired',
+      });
+    }
+    return field;
+  };
+
+  handleImportedMnemonicChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateImportedMnemonic({ name, value }),
+      },
+    });
   }
 
+  handleEmailAddressChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateEmailAddress({ name, value }),
+      },
+    });
+  }
+
+  handleUserConfirmedMnemonicChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateUserConfirmedMnemonic({ name, value }),
+      },
+    });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleSweepAllTipsButton() {
+    // stub method
+    // console.log(`handleSweepAllTipsButton`);
+  }
+
+  handleUserRefundAddressOnCreateChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateUserRefundAddressChange({ name, value }),
+      },
+    });
+  }
+
+  handleUserRefundAddressChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateUserRefundAddressChange({ name, value }),
+      },
+    });
+  }
+
+  postReturnTxInfos(returnTxInfos) {
+    // Dev
+    // const api = 'http://localhost:3001/setClaimChecks';
+    // Prod
+    const api = 'http://cashtips-api.btctest.net/setClaimChecks';
+    fetch(api, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(returnTxInfos),
+    }).then(
+      res => {
+        console.log(`returnTxInfos successully posted to API`);
+        console.log(res);
+
+        // eslint-disable-next-line react/no-unused-state
+        return this.setState({ returnTxInfos });
+      },
+      err => {
+        console.log(`Error in postReturnTxInfos`);
+        console.log(err);
+        // should try to post it again here, mb email the error to admin
+      },
+    );
+  }
+
+  async createExpirationTxs() {
+    console.log(`createExpirationTxs`);
+    // Function is similar to sweepAllTips, however creates a rawTx for each input instead of one sweep tx
+    // Build this for the case of "you just made the tips" first; simpler than the import case
+    const {
+      formData,
+      tipWallets,
+      invoiceTxid,
+      selectedCurrency,
+      invoiceUrl,
+    } = this.state;
+    const refundAddress = formData.userRefundAddressOnCreate.value;
+    // Scan through tip wallets by wif, see if there is money to sweep, and output a new object
+    // of what you need to build your sweeping tx
+    const sweepBuilder = [];
+    const sweepAddresses = [];
+    tipWallets.forEach(tipWallet => {
+      const sweepChunk = {};
+      // get ec pair from wif
+      const ecPair = bitbox.ECPair.fromWIF(tipWallet.wif);
+      // get address from ecpair
+      const fromAddr = bitbox.ECPair.toCashAddress(ecPair);
+      sweepChunk.ecPair = ecPair;
+      sweepChunk.fromAddr = fromAddr;
+      sweepAddresses.push(fromAddr);
+      sweepBuilder.push(sweepChunk);
+    });
+    // TODO can you get batch utxos from more than 20 addresses?
+    // check balances of addresses in one async batch
+    const u = await bitbox.Address.utxo(sweepAddresses);
+
+    // Add the utxos to the sweepbuilder array
+    // iterate over utxo object
+    // if the address matches a sweepbuilder entry, add it to that entry
+    // might be best to do this step in the txbuilder loop
+
+    for (let i = 0; i < u.length; i += 1) {
+      // utxos come back in same order they were sent
+      sweepBuilder[i].utxos = u[i].utxos;
+    }
+    // now make return txs
+    const returnRawTxs = [];
+    for (let i = 0; i < sweepBuilder.length; i += 1) {
+      const transactionBuilder = new bitbox.TransactionBuilder();
+      let originalAmount = 0;
+      // Only 1 utxo, what you just paid
+      const utxo = sweepBuilder[i].utxos[0];
+      originalAmount += utxo.satoshis;
+      transactionBuilder.addInput(utxo.txid, utxo.vout);
+      if (originalAmount < 1) {
+        returnRawTxs[
+          i
+        ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
+      }
+      // Calc fee for 1 input 1 output
+      const byteCount = bitbox.BitcoinCash.getByteCount(
+        { P2PKH: 1 },
+        { P2PKH: 1 },
+      );
+      // Make fee 2 sat/byte to make sure even smallest tips get swept
+      const fee = Math.ceil(2 * byteCount);
+      // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+      const sendAmount = originalAmount - fee;
+
+      // add output w/ address and amount to send
+      transactionBuilder.addOutput(refundAddress, sendAmount);
+      // Loop through each input and sign
+      let redeemScript;
+      // Sign your input (only 1)
+
+      const keyPair = sweepBuilder[i].ecPair;
+
+      transactionBuilder.sign(
+        0,
+        keyPair,
+        redeemScript,
+        transactionBuilder.hashTypes.SIGHASH_ALL,
+        utxo.satoshis,
+      );
+
+      // build tx
+      const tx = transactionBuilder.build();
+      // output rawhex
+      const hex = tx.toHex();
+      returnRawTxs.push(hex);
+    }
+    console.log(returnRawTxs);
+
+    // Build & set the server broadcast object in state
+    const returnTxInfos = [];
+    for (let i = 0; i < returnRawTxs.length; i += 1) {
+      const returnTxInfo = {};
+      // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
+
+      const fiatAmount = formData.tipAmountFiat.value;
+      // Calculate this for each tip in case you add a feature for tips of diff value later
+      const fiatRate = parseFloat(
+        (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
+      );
+      const expirationStamp = Math.round(
+        formData.expirationDate.value.getTime() / 1000,
+      );
+      const tipAddress = tipWallets[i].addr;
+      returnTxInfo.creationPaymentUrl = invoiceUrl;
+      returnTxInfo.creationTxid = invoiceTxid;
+      returnTxInfo.fiatCode = selectedCurrency;
+      returnTxInfo.fiatAmount = fiatAmount;
+      returnTxInfo.fiatRate = fiatRate;
+      returnTxInfo.email = formData.emailAddress.value;
+      returnTxInfo.rawTx = returnRawTxs[i];
+      returnTxInfo.expirationStamp = expirationStamp;
+      returnTxInfo.tipAddress = tipAddress;
+      returnTxInfo.refundAddress = refundAddress;
+      returnTxInfos.push(returnTxInfo);
+    }
+    console.log(returnTxInfos);
+    return this.postReturnTxInfos(returnTxInfos);
+  }
+
+  invoiceSuccess() {
+    const { tipWallets } = this.state;
+    console.log(`Invoice paid successfully`);
+    // build the output object for the tip claiming expiration here
+    // get txid of invoice funding transaction
+    bitbox.Address.details(tipWallets[0].addr).then(
+      res => {
+        console.log(res);
+        try {
+          const invoiceTxid = res.transactions[0];
+          return this.setState({ invoiceTxid, tipsFunded: true }, async () => {
+            try {
+              await this.createExpirationTxs();
+            } catch (e) {
+              console.log(`Error in createExpirationTxs()`);
+            }
+          });
+        } catch (err) {
+          console.log(`Error in collecting invoiceTxid`);
+          return this.setState(
+            { invoiceTxid: 'API_Error', tipsFunded: true },
+            async () => {
+              try {
+                await this.createExpirationTxs();
+              } catch (e) {
+                console.log(`Error in createExpirationTxs()`);
+              }
+            },
+          );
+        }
+      },
+      err => {
+        console.log(`Error in fetching txid of invoice payment transaction`);
+        console.log(err);
+        return this.setState(
+          { invoiceTxid: 'API_Error', tipsFunded: true },
+          async () => {
+            try {
+              await this.createExpirationTxs();
+            } catch (e) {
+              console.log(`Error in createExpirationTxs()`);
+            }
+          },
+        );
+      },
+    );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleConfirmSeedButton() {
+    // set state that seed is confirmed
+    // Leave in as stub method for now
+  }
+
+  handleConfirmedMnemonic(e) {
+    e.preventDefault();
+    const { formData } = this.state;
+
+    if (formData.userConfirmedMnemonic.state !== 1) {
+      return;
+    }
+
+    this.setState({
+      appState: appStates.seedConfirmed,
+    });
+    // make sure not error state
+    // if not, show next stuff
+  }
+
+  handleSeedSavedConfirmed() {
+    this.setState({
+      appState: appStates.seedSavedConfirmed,
+    });
+  }
+
+  goBackOneStep() {
+    const { appState } = this.state;
+
+    const backOne = appState - 1;
+
+    this.setState({ appState: backOne });
+  }
+
+  handleSeedCopied() {
+    const { appState } = this.state;
+
+    toast.notify('Recovery seed copied to clipboard', {
+      position: 'bottom-right',
+      duration: 1500,
+    });
+    if (appState === appStates.seedGenerated) {
+      this.setState({ appState: appStates.seedSaved });
+    }
+  }
+
+  // TODO refactor for try catch on the other await statement
+  // eslint-disable-next-line consistent-return
   async sweepAllTips(e) {
     e.preventDefault();
     // Accept a validated cash address from user input
@@ -529,7 +951,7 @@ class TipsPortal extends React.Component {
         }
         claimedTipWallets.push(claimedTipWallet);
       });
-      this.setState({
+      return this.setState({
         sweptTxid: txidStr,
         tipsSweptCount: signedInputCount,
         tipWallets: claimedTipWallets,
@@ -542,486 +964,76 @@ class TipsPortal extends React.Component {
     // ...a thought. you probably must make 1 tx for each tip. probably can't batch a tx from utxos from different addresses...? nah you definitely can...
   }
 
-  handleSeedCopied() {
-    const { appState } = this.state;
-
-    toast.notify('Recovery seed copied to clipboard', {
-      position: 'bottom-right',
-      duration: 1500,
-    });
-    if (appState === appStates.seedGenerated) {
-      this.setState({ appState: appStates.seedSaved });
-    }
+  toggleSweepForm() {
+    const { showSweepForm } = this.state;
+    this.setState({ showSweepForm: !showSweepForm });
   }
 
-  goBackOneStep() {
-    const { appState } = this.state;
-
-    const backOne = appState - 1;
-
-    this.setState({ appState: backOne });
-  }
-
-  handleSeedSavedConfirmed() {
+  appStateInitial() {
     this.setState({
-      appState: appStates.seedSavedConfirmed,
+      formData: merge({}, this.initialFormData),
+      walletInfo: {
+        mnemonic: '',
+        // rootSeed: '',
+        masterHDNode: '',
+        derivePath: "m/44'/145'/0'/0/",
+        // account: '',
+        // change: '',
+      },
+      fundingAddress: '',
+      selectedCurrency: 'USD',
+      tipWallets: [],
+      invoiceUrl: '',
+      importedMnemonic: false,
+      calculatedFiatAmount: null,
+      tipsFunded: false,
+      appState: appStates.initial,
+      invoiceGenerationError: '',
+      sweptTxid: null,
+      tipsSweptCount: 0,
+      showSweepForm: false,
+      tipsAlreadySweptError: false,
+      networkError: '',
     });
   }
 
-  handleConfirmedMnemonic(e) {
-    e.preventDefault();
-    const { formData } = this.state;
-
-    if (formData.userConfirmedMnemonic.state !== 1) {
-      return;
-    }
-
-    this.setState({
-      appState: appStates.seedConfirmed,
-    });
-    // make sure not error state
-    // if not, show next stuff
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  handleConfirmSeedButton() {
-    // set state that seed is confirmed
-    // Leave in as stub method for now
-  }
-
-  invoiceSuccess() {
+  async handleSelectedCurrencyChangeFromSelect(e) {
     const { tipWallets } = this.state;
-    console.log(`Invoice paid successfully`);
-    // build the output object for the tip claiming expiration here
-    // get txid of invoice funding transaction
-    bitbox.Address.details(tipWallets[0].addr).then(
-      res => {
-        console.log(res);
-        try {
-          const invoiceTxid = res.transactions[0];
-          return this.setState({ invoiceTxid, tipsFunded: true }, async () => {
-            try {
-              await this.createExpirationTxs();
-            } catch (e) {
-              console.log(`Error in createExpirationTxs()`);
-            }
-          });
-        } catch (err) {
-          console.log(`Error in collecting invoiceTxid`);
-          return this.setState(
-            { invoiceTxid: 'API_Error', tipsFunded: true },
-            async () => {
-              try {
-                await this.createExpirationTxs();
-              } catch (e) {
-                console.log(`Error in createExpirationTxs()`);
-              }
-            },
-          );
-        }
-      },
-      err => {
-        console.log(`Error in fetching txid of invoice payment transaction`);
-        console.log(err);
-        return this.setState(
-          { invoiceTxid: 'API_Error', tipsFunded: true },
-          async () => {
-            try {
-              await this.createExpirationTxs();
-            } catch (e) {
-              console.log(`Error in createExpirationTxs()`);
-            }
-          },
-        );
-      },
+    const currency = e.value;
+    const currencyCode = currency.toLowerCase();
+    const price = await fetch(
+      `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`,
     );
+
+    const priceJson = await price.json();
+
+    const fiatPrice = priceJson.price / 100;
+    // console.log(`fiatPrice: ${fiatPrice}`);
+    const calculatedFiatAmount = parseFloat(
+      ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
+    );
+    this.setState({
+      selectedCurrency: currency,
+      calculatedFiatAmount,
+    });
   }
 
-  async createExpirationTxs() {
-    console.log(`createExpirationTxs`);
-    // Function is similar to sweepAllTips, however creates a rawTx for each input instead of one sweep tx
-    // Build this for the case of "you just made the tips" first; simpler than the import case
-    const {
-      formData,
-      tipWallets,
-      invoiceTxid,
+  handleExpirationDateChange(date) {
+    const { formData } = this.state;
+
+    this.setState({
+      formData: {
+        ...formData,
+        [`expirationDate`]: this.validateExpirationDateChange({ date }),
+      },
+    });
+  }
+
+  handleSelectedCurrencyChange(selectedCurrency) {
+    this.setState({
       selectedCurrency,
-      invoiceUrl,
-    } = this.state;
-    const refundAddress = formData.userRefundAddressOnCreate.value;
-    // Scan through tip wallets by wif, see if there is money to sweep, and output a new object
-    // of what you need to build your sweeping tx
-    const sweepBuilder = [];
-    const sweepAddresses = [];
-    tipWallets.forEach(tipWallet => {
-      const sweepChunk = {};
-      // get ec pair from wif
-      const ecPair = bitbox.ECPair.fromWIF(tipWallet.wif);
-      // get address from ecpair
-      const fromAddr = bitbox.ECPair.toCashAddress(ecPair);
-      sweepChunk.ecPair = ecPair;
-      sweepChunk.fromAddr = fromAddr;
-      sweepAddresses.push(fromAddr);
-      sweepBuilder.push(sweepChunk);
-    });
-    // TODO can you get batch utxos from more than 20 addresses?
-    // check balances of addresses in one async batch
-    const u = await bitbox.Address.utxo(sweepAddresses);
-
-    // Add the utxos to the sweepbuilder array
-    // iterate over utxo object
-    // if the address matches a sweepbuilder entry, add it to that entry
-    // might be best to do this step in the txbuilder loop
-
-    for (let i = 0; i < u.length; i += 1) {
-      // utxos come back in same order they were sent
-      sweepBuilder[i].utxos = u[i].utxos;
-    }
-    // now make return txs
-    const returnRawTxs = [];
-    for (let i = 0; i < sweepBuilder.length; i += 1) {
-      const transactionBuilder = new bitbox.TransactionBuilder();
-      let originalAmount = 0;
-      // Only 1 utxo, what you just paid
-      const utxo = sweepBuilder[i].utxos[0];
-      originalAmount += utxo.satoshis;
-      transactionBuilder.addInput(utxo.txid, utxo.vout);
-      if (originalAmount < 1) {
-        returnRawTxs[
-          i
-        ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
-      }
-      // Calc fee for 1 input 1 output
-      const byteCount = bitbox.BitcoinCash.getByteCount(
-        { P2PKH: 1 },
-        { P2PKH: 1 },
-      );
-      // Make fee 2 sat/byte to make sure even smallest tips get swept
-      const fee = Math.ceil(2 * byteCount);
-      // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
-      const sendAmount = originalAmount - fee;
-
-      // add output w/ address and amount to send
-      transactionBuilder.addOutput(refundAddress, sendAmount);
-      // Loop through each input and sign
-      let redeemScript;
-      // Sign your input (only 1)
-
-      const keyPair = sweepBuilder[i].ecPair;
-
-      transactionBuilder.sign(
-        0,
-        keyPair,
-        redeemScript,
-        transactionBuilder.hashTypes.SIGHASH_ALL,
-        utxo.satoshis,
-      );
-
-      // build tx
-      const tx = transactionBuilder.build();
-      // output rawhex
-      const hex = tx.toHex();
-      returnRawTxs.push(hex);
-    }
-    console.log(returnRawTxs);
-
-    // Build & set the server broadcast object in state
-    const returnTxInfos = [];
-    for (let i = 0; i < returnRawTxs.length; i += 1) {
-      const returnTxInfo = {};
-      // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
-
-      const fiatAmount = formData.tipAmountFiat.value;
-      // Calculate this for each tip in case you add a feature for tips of diff value later
-      const fiatRate = parseFloat(
-        (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
-      );
-      const expirationStamp = Math.round(
-        formData.expirationDate.value.getTime() / 1000,
-      );
-      const tipAddress = tipWallets[i].addr;
-      returnTxInfo.creationPaymentUrl = invoiceUrl;
-      returnTxInfo.creationTxid = invoiceTxid;
-      returnTxInfo.fiatCode = selectedCurrency;
-      returnTxInfo.fiatAmount = fiatAmount;
-      returnTxInfo.fiatRate = fiatRate;
-      returnTxInfo.email = formData.emailAddress.value;
-      returnTxInfo.rawTx = returnRawTxs[i];
-      returnTxInfo.expirationStamp = expirationStamp;
-      returnTxInfo.tipAddress = tipAddress;
-      returnTxInfo.refundAddress = refundAddress;
-      returnTxInfos.push(returnTxInfo);
-    }
-    console.log(returnTxInfos);
-    return this.postReturnTxInfos(returnTxInfos);
-  }
-
-  postReturnTxInfos(returnTxInfos) {
-    const api = 'http://localhost:3001/setClaimChecks';
-    fetch(api, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(returnTxInfos),
-    }).then(
-      res => {
-        console.log(`returnTxInfos successully posted to API`);
-        console.log(res);
-
-        return this.setState({ returnTxInfos });
-      },
-      err => {
-        console.log(`Error in postReturnTxInfos`);
-        console.log(err);
-        // should try to post it again here, mb email the error to admin
-      },
-    );
-  }
-
-  handleUserRefundAddressChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateUserRefundAddressChange({ name, value }),
-      },
     });
   }
-
-  handleUserRefundAddressOnCreateChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateUserRefundAddressChange({ name, value }),
-      },
-    });
-  }
-
-  validateUserRefundAddressChange = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    // validation goes here
-    try {
-      bitbox.Address.toLegacyAddress(value);
-    } catch (err) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidRefundAddress',
-      });
-    }
-
-    return field;
-  };
-
-  handleSweepAllTipsButton() {
-    console.log(`handleSweepAllTipsButton`);
-  }
-
-  handleUserConfirmedMnemonicChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateUserConfirmedMnemonic({ name, value }),
-      },
-    });
-  }
-
-  validateUserConfirmedMnemonic = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData, walletInfo } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    if (value !== walletInfo.mnemonic) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidUserMnemonic',
-      });
-    }
-    return field;
-  };
-
-  handleEmailAddressChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateEmailAddress({ name, value }),
-      },
-    });
-  }
-
-  validateEmailAddress = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    // Basic email address validation
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    const isValidEmail = re.test(String(value).toLowerCase());
-
-    if (!isValidEmail && value !== '') {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidEmail',
-      });
-      return field;
-    }
-
-    return field;
-  };
-
-  handleImportedMnemonicChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateImportedMnemonic({ name, value }),
-      },
-    });
-  }
-
-  validateImportedMnemonic = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    const isValidMnemonic = bitbox.Mnemonic.validate(value);
-    if (isValidMnemonic !== 'Valid mnemonic') {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidMnemonic',
-      });
-      return field;
-    }
-
-    if (!value) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.noMnemonic',
-      });
-    }
-    return field;
-  };
-
-  // eslint-disable-next-line react/sort-comp
-  handleTipCountChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-    this.setState({
-      formData: { ...formData, [name]: this.validateTipCount({ name, value }) },
-    });
-  }
-
-  validateTipCount = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-    if (!value) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.tipCountNum',
-      });
-    } else if (value <= 0) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.tipCountNoTips',
-      });
-    } else if (value > 20) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.tipCountTooManyTips',
-      });
-    }
-    return field;
-  };
-
-  handleTipAmountFiatChange(e) {
-    const value = e;
-    const name = 'tipAmountFiat';
-    const { formData } = this.state;
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateTipAmountFiat({ name, value }),
-      },
-    });
-  }
-
-  validateTipAmountFiat = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData, selectedCurrency } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-    if (!value) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.fiatTipAmountNum',
-      });
-    } else if (value <= 0) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.fiatTipAmountRequired',
-      });
-    }
-    return field;
-  };
 
   handleCancelInvoice() {
     this.setState({
@@ -1266,6 +1278,7 @@ class TipsPortal extends React.Component {
             id: 'home.errors.noTipsAtMnemonic',
           }),
         };
+        // eslint-disable-next-line consistent-return
         return this.setState({
           formData: {
             ...formData,
@@ -1282,6 +1295,7 @@ class TipsPortal extends React.Component {
     } catch (err) {
       console.log(`Error in bitbox.Address.details(firstTipAddr)`);
       console.log(err);
+      // eslint-disable-next-line consistent-return
       return this.setState({
         networkError: formatMessage({
           id: 'home.errors.networkError',
@@ -1346,6 +1360,8 @@ class TipsPortal extends React.Component {
         console.log(`qrPromises worked some crazy how`);
         console.log(res);
         this.setState({
+          // TODO get rid of this function if you do not need it for pdf generation
+          // eslint-disable-next-line react/no-unused-state
           qrCodeImgs: res,
         });
       },
@@ -1375,6 +1391,8 @@ class TipsPortal extends React.Component {
     this.setState({ generatingInvoice: true });
   }
 
+  // TODO deal with this error
+  // eslint-disable-next-line consistent-return
   async handleCreateTipSubmit(e) {
     e.preventDefault();
     const {
@@ -1521,10 +1539,6 @@ class TipsPortal extends React.Component {
       );
   }
 
-  componentWillUnmount() {
-    this.invoiceSuccessThrottled.cancel();
-  }
-
   render() {
     const {
       intl: { formatMessage, messages },
@@ -1547,8 +1561,8 @@ class TipsPortal extends React.Component {
       tipsAlreadySweptError,
       tipsClaimedCount,
       networkError,
-      qrCodeImgs,
-      invoiceTxid,
+      // qrCodeImgs,
+      // invoiceTxid,
       generatingInvoice,
     } = this.state;
 
