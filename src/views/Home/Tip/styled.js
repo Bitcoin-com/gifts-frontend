@@ -15,7 +15,7 @@ export const TipWrapper = styled.div`
       display: none;
     }
     display: inline-block;
-    height: 3.18in;
+    height: 3.33in;
     page-break-inside: avoid !important;
   }
 `;
