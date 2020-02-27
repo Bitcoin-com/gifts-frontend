@@ -744,34 +744,24 @@ class TipsPortal extends React.Component {
     bitbox.Address.details(tipWallets[0].addr).then(
       res => {
         console.log(res);
-        try {
-          const invoiceTxid = res.transactions[0];
-          return this.setState({ invoiceTxid, tipsFunded: true }, async () => {
-            try {
-              await this.createExpirationTxs();
-            } catch (e) {
-              console.log(`Error in createExpirationTxs()`);
-            }
-          });
-        } catch (err) {
-          console.log(`Error in collecting invoiceTxid`);
-          return this.setState(
-            { invoiceTxid: 'API_Error', tipsFunded: true },
-            async () => {
-              try {
-                await this.createExpirationTxs();
-              } catch (e) {
-                console.log(`Error in createExpirationTxs()`);
-              }
-            },
-          );
+        let invoiceTxid = null;
+        if (res.transactions.length > 0) {
+          // eslint-disable-next-line prefer-destructuring
+          invoiceTxid = res.transactions[0];
         }
+        return this.setState({ invoiceTxid, tipsFunded: true }, async () => {
+          try {
+            await this.createExpirationTxs();
+          } catch (e) {
+            console.log(`Error in createExpirationTxs()`);
+          }
+        });
       },
       err => {
         console.log(`Error in fetching txid of invoice payment transaction`);
         console.log(err);
         return this.setState(
-          { invoiceTxid: 'API_Error', tipsFunded: true },
+          { invoiceTxid: null, tipsFunded: true },
           async () => {
             try {
               await this.createExpirationTxs();
@@ -1361,7 +1351,7 @@ class TipsPortal extends React.Component {
   }
 
   createPdfQrCodes(tipWallets) {
-    console.log(`createPdfQrCodes()`);
+    // console.log(`createPdfQrCodes()`);
     // get array of wifs from tipWallets
     // make array of promises
     // promise.all with a .then to set state
@@ -1373,8 +1363,7 @@ class TipsPortal extends React.Component {
     }
     Promise.all(qrPromises).then(
       res => {
-        console.log(`qrPromises worked some crazy how`);
-        console.log(res);
+        // console.log(res);
         this.setState({
           // TODO get rid of this function if you do not need it for pdf generation
           // eslint-disable-next-line react/no-unused-state

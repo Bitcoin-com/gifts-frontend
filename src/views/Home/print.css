@@ -16,3 +16,6 @@
   max-width: 600px !important;
   border-radius: 5px !important;
 }
+.react-datepicker-popper {
+  z-index: 2 !important;
+}

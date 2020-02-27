@@ -8,6 +8,7 @@ import {
   TipWrapper,
   TipHeader,
   TipLabel,
+  ScanLabel,
   TipAmount,
   CryptoAmount,
   FiatAmount,
@@ -39,7 +40,7 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
     )}
     {tipWallet.status === 'funded' ? (
       <React.Fragment>
-        <TipLabel>Scan to claim</TipLabel>
+        <ScanLabel>Download the Bitcoin.com wallet and scan to claim</ScanLabel>
         <QRCode
           id="borderedQRCode"
           value={tipWallet.wif}

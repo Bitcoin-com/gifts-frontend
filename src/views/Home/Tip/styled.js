@@ -41,6 +41,12 @@ export const TipLabel = styled.div`
   font-weight: 700;
   font-style: italic;
 `;
+export const ScanLabel = styled.div`
+  color: #0fcb97;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 15px;
+`;
 export const TipAmount = styled.div`
   margin-top: 0px;
   padding: 6px 0px 4px;
