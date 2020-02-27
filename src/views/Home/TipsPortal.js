@@ -187,9 +187,9 @@ class TipsPortal extends React.Component {
     this.processRetryPostReturnTxInfos = this.processRetryPostReturnTxInfos.bind(
       this,
     );
-    // Do not call invoiceSuccess more than once in a 10min window
+    // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
-    this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 600000);
+    this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
 
     this.state = {
       formData: merge({}, this.initialFormData),
