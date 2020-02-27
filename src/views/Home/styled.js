@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import Popup from 'reactjs-popup';
 import {
   theme,
   ContentBlock,
@@ -24,6 +25,43 @@ const reset = css`
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+`;
+
+export const ApiErrorPopup = styled(Popup)``;
+export const ApiErrorPopupCloser = styled.div`
+  position: absolute;
+  right: -18px;
+  top: -18px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid black;
+  color: black;
+  background-color: grey;
+  opacity: 75%;
+  pointer-events: none;
+`;
+export const ApiErrorPopupMsg = styled.div`
+  background-color: #ffbaba;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+  padding: 20px;
+  text-align: center;
+  border-radius: 5px;
+`;
+
+export const ApiErrorCard = styled(Card)`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  margin-top: ${theme.spacing.unit * 3}px;
+  padding: ${theme.spacing.unit * 3}px;
+  padding-top: ${theme.spacing.unit * 1}px;
+  background-color: #ffbaba;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+`;
+export const ApiErrorWarning = styled.p`
+  max-width: 600px;
+  margin-block-start: 0em;
 `;
 
 export const CustomDatePicker = styled(DatePicker)`
@@ -126,6 +164,7 @@ export const WalletCard = styled(Card)`
 export const MakeAndPayTipsCard = styled(Card)`
   overflow: visible;
 `;
+
 export const SeedCard = styled(Card)`
   & > div {
     margin: auto;
@@ -143,6 +182,7 @@ export const SeedWrapper = styled.div`
   }
 `;
 export const SeedWarning = styled.p``;
+
 export const CustomCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
   @media print {

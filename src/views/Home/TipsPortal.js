@@ -51,6 +51,11 @@ import {
   AddressInputLabel,
   ErrorNotice,
   CustomDatePicker,
+  ApiErrorPopup,
+  ApiErrorPopupCloser,
+  ApiErrorCard,
+  ApiErrorWarning,
+  ApiErrorPopupMsg,
 } from './styled';
 import Tip from './Tip';
 // disable PDF functionality
@@ -123,39 +128,6 @@ class TipsPortal extends React.Component {
       },
     };
 
-    this.testTipsData = [
-      {
-        addr: 'bitcoincash:qph7qlnqv4mt7nxfquw488n4vj8c78glsgw2qjhhgm',
-        wif: 'Kyb5PbaeRgqRSScYvtq9hNXWuAQdyadF57QPF6mN2duu2tctojJf',
-        sats: 296463,
-        status: 'funded',
-      },
-      {
-        addr: 'bitcoincash:qrdm05ke7rvd07mdyu5gxzemqj0fxk4wdsz3k6xr9e',
-        wif: 'L3Xbr7nYwYrmQBzn64MhiPakSjvYGLDmcbYQCdzCyD7nSmyQx3Wg',
-        sats: 296463,
-        status: 'funded',
-      },
-      {
-        addr: 'bitcoincash:qpj9msemkf0kpzrgvzvh86wkvfm5dghd6qsvjydrp6',
-        wif: 'KxJo2sMmRtRfYZ91wnDw8Vj6EKALbiQWJpWXTKvBBWJ7ZcFYEwyr',
-        sats: 296463,
-        status: 'funded',
-      },
-      {
-        addr: 'bitcoincash:qp35urpthpenvcxddkh9uyxxaa505jqn4qztlwh4hv',
-        wif: 'L5TUczJdU5UkgXi3rFApQE8xSddYkjqiLxQhfR6MaBdf21qnUsjY',
-        sats: 296463,
-        status: 'funded',
-      },
-      {
-        addr: 'bitcoincash:qz9zqgt9law6yep9keyf2q6w3lcvcnytdy9nqjfnrs',
-        wif: 'L1wYhqwLBaS1X7eD3kt8pLnkYE1D7zsn9a4RgZNqTHkaoLDTzo4r',
-        sats: 296463,
-        status: 'funded',
-      },
-    ];
-
     this.getCurrenciesOptions = this.getCurrenciesOptions.bind(this);
     this.handleSelectedCurrencyChange = this.handleSelectedCurrencyChange.bind(
       this,
@@ -211,6 +183,10 @@ class TipsPortal extends React.Component {
     this.createExpirationTxs = this.createExpirationTxs.bind(this);
     this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
     this.setDefaultExpirationDate = this.setDefaultExpirationDate.bind(this);
+    this.retryPostReturnTxInfos = this.retryPostReturnTxInfos.bind(this);
+    this.processRetryPostReturnTxInfos = this.processRetryPostReturnTxInfos.bind(
+      this,
+    );
     // Do not call invoiceSuccess more than once in a 10min window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 600000);
@@ -246,6 +222,7 @@ class TipsPortal extends React.Component {
       // eslint-disable-next-line react/no-unused-state
       returnTxInfos: [], // used for debugging
       generatingInvoice: false,
+      apiPostFailed: false,
     };
   }
 
@@ -598,6 +575,44 @@ class TipsPortal extends React.Component {
         console.log(`Error in postReturnTxInfos`);
         console.log(err);
         // should try to post it again here, mb email the error to admin
+        return this.setState({ apiPostFailed: true, returnTxInfos });
+      },
+    );
+  }
+
+  retryPostReturnTxInfos() {
+    this.setState(
+      { apiPostFailed: false },
+      this.processRetryPostReturnTxInfos(),
+    );
+  }
+
+  processRetryPostReturnTxInfos() {
+    const api = 'https://cashtips-api.btctest.net/setClaimChecks';
+    const { returnTxInfos } = this.state;
+    fetch(api, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(returnTxInfos),
+    }).then(
+      res => {
+        console.log(`returnTxInfos successully posted to API`);
+        console.log(res);
+
+        // eslint-disable-next-line react/no-unused-state
+        return this.setState({ apiPostFailed: false });
+      },
+      err => {
+        console.log(`Error in postReturnTxInfos`);
+        console.log(err);
+        // should try to post it again here, mb email the error to admin
+        return this.setState(
+          { apiPostFailed: true, returnTxInfos },
+          this.handleReturnTxInfosError(),
+        );
       },
     );
   }
@@ -994,6 +1009,7 @@ class TipsPortal extends React.Component {
       showSweepForm: false,
       tipsAlreadySweptError: false,
       networkError: '',
+      apiPostFailed: false,
     });
   }
 
@@ -1564,6 +1580,7 @@ class TipsPortal extends React.Component {
       // qrCodeImgs,
       // invoiceTxid,
       generatingInvoice,
+      apiPostFailed,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1674,6 +1691,16 @@ class TipsPortal extends React.Component {
     return (
       <React.Fragment>
         <PrintableContentBlock>
+          <ApiErrorPopup open={apiPostFailed}>
+            <ApiErrorPopupCloser>X</ApiErrorPopupCloser>
+            <ApiErrorPopupMsg>
+              <ApiErrorWarning>Warning!</ApiErrorWarning>
+              <ApiErrorWarning>
+                Tip information failed to post to backend. Your tips will not be
+                automatically returned to you on expiration.
+              </ApiErrorWarning>
+            </ApiErrorPopupMsg>
+          </ApiErrorPopup>
           <CustomCardContainer
             show={fundingAddress === '' || importedMnemonic}
             columns={!importedMnemonic ? 2 : 1}
@@ -2093,6 +2120,32 @@ class TipsPortal extends React.Component {
                 </React.Fragment>
               )}
             </MakeAndPayTipsCard>
+          </CustomFlexCardContainer>
+          <CustomFlexCardContainer show={apiPostFailed}>
+            <ApiErrorCard show={apiPostFailed}>
+              <ApiErrorWarning>
+                Failed to post your tip expiration claim transactions to the
+                server.
+              </ApiErrorWarning>{' '}
+              <ApiErrorWarning>
+                Tips will not automatically expire!
+              </ApiErrorWarning>{' '}
+              <ApiErrorWarning>
+                Please try to repost your tip information. If the issue
+                persists, contact tips-support@bitcoin.com
+              </ApiErrorWarning>
+              <CardButton
+                dark
+                style={{
+                  margin: 'auto',
+                  marginTop: '12px',
+                  zIndex: '1',
+                }}
+                onClick={this.retryPostReturnTxInfos}
+              >
+                Repost
+              </CardButton>
+            </ApiErrorCard>
           </CustomFlexCardContainer>
           <TipContainerWrapper maxWidth={displayWidth}>
             <TipContainer
