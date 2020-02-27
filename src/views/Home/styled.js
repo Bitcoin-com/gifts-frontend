@@ -77,7 +77,7 @@ export const PrintableContentBlock = styled(ContentBlock)`
     margin: 0mm;
     padding: 0mm;
     & > div {
-      margin: 0mm;
+      margin: 10mm 42mm;
       padding: 0mm;
       & > div {
         margin: 0mm;

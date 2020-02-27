@@ -578,7 +578,7 @@ class TipsPortal extends React.Component {
     // Dev
     // const api = 'http://localhost:3001/setClaimChecks';
     // Prod
-    const api = 'http://cashtips-api.btctest.net/setClaimChecks';
+    const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     fetch(api, {
       method: 'POST',
       headers: {
