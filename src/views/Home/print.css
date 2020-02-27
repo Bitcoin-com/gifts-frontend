@@ -10,3 +10,9 @@
     padding: 0mm;
   }
 }
+.popup-content {
+  padding: 0px !important;
+  border: 0px !important;
+  max-width: 600px !important;
+  border-radius: 5px !important;
+}
