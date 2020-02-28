@@ -444,6 +444,11 @@ class TipsPortal extends React.Component {
       field.error = formatMessage({
         id: 'home.errors.tipCountTooManyTips',
       });
+    } else if (!Number.isInteger(parseFloat(value))) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.tipCountNotInteger',
+      });
     }
     return field;
   };
@@ -551,11 +556,22 @@ class TipsPortal extends React.Component {
     });
   }
 
+  // eslint-disable-next-line consistent-return
   postReturnTxInfos(returnTxInfos) {
+    // Before posting, check to make sure it hasn't happened already
+    // eslint-disable-next-line react/destructuring-assignment
+    const returnTxInfosInState = this.state.returnTxInfos.length;
+    const { apiPostFailed } = this.state;
+
+    // If the api post did not fail and the returnTxInfos in state are identical to what went to this function
+    if (!apiPostFailed && returnTxInfosInState > 0) {
+      // Then the API post has already happened, don't do it again
+      return console.log(`Packet already sent to server, not re-sending`);
+    }
     // Dev
-    // const api = 'http://localhost:3001/setClaimChecks';
+    const api = 'http://localhost:3001/setClaimChecks';
     // Prod
-    const api = 'https://cashtips-api.btctest.net/setClaimChecks';
+    // const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     fetch(api, {
       method: 'POST',
       headers: {
@@ -1393,7 +1409,6 @@ class TipsPortal extends React.Component {
     if (invoiceGenerationError !== '') {
       this.setState({ invoiceGenerationError: '' });
     }
-    this.setState({ generatingInvoice: true });
   }
 
   // TODO deal with this error
@@ -1405,6 +1420,7 @@ class TipsPortal extends React.Component {
     } = this.props;
     const { formData, walletInfo, selectedCurrency } = this.state;
     const { masterHDNode, derivePath } = walletInfo;
+    this.setState({ generatingInvoice: true });
 
     if (formData.tipAmountFiat.value === '') {
       return this.setState({ generatingInvoice: false });
@@ -1416,7 +1432,7 @@ class TipsPortal extends React.Component {
       formData.tipCount.error !== null ||
       formData.emailAddress.error !== null
     ) {
-      return this.setState({ generatingInvoice: true });
+      return this.setState({ generatingInvoice: false });
     }
 
     // Generate addresses and private keys for tips to be created
