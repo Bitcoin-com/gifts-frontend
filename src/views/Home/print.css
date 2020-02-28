@@ -1,9 +1,12 @@
 @media print {
   .noPrint {
-    display: none;
+    display: none !important;
+  }
+  .printHide {
+    display: none !important;
   }
   footer {
-    display: none;
+    display: none !important;
   }
   .print {
     margin: 0mm;

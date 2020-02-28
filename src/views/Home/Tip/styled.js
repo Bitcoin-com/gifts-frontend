@@ -11,9 +11,6 @@ export const TipWrapper = styled.div`
   justify-self: center;
 
   @media print {
-    .printHide {
-      display: none;
-    }
     display: inline-block;
     height: 3.33in;
     page-break-inside: avoid !important;
