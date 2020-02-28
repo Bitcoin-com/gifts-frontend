@@ -1017,6 +1017,8 @@ class TipsPortal extends React.Component {
       tipsAlreadySweptError: false,
       networkError: '',
       apiPostFailed: false,
+      importingMnemonic: false,
+      generatingInvoice: false,
     });
   }
 
