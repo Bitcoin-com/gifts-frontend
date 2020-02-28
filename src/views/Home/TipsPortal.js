@@ -222,6 +222,7 @@ class TipsPortal extends React.Component {
       // eslint-disable-next-line react/no-unused-state
       returnTxInfos: [], // used for debugging
       generatingInvoice: false,
+      importingMnemonic: false,
       apiPostFailed: false,
     };
   }
@@ -569,9 +570,9 @@ class TipsPortal extends React.Component {
       return console.log(`Packet already sent to server, not re-sending`);
     }
     // Dev
-    const api = 'http://localhost:3001/setClaimChecks';
+    // const api = 'http://localhost:3001/setClaimChecks';
     // Prod
-    // const api = 'https://cashtips-api.btctest.net/setClaimChecks';
+    const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     fetch(api, {
       method: 'POST',
       headers: {
@@ -1105,6 +1106,7 @@ class TipsPortal extends React.Component {
     });
   }
 
+  // eslint-disable-next-line consistent-return
   async importMnemonic() {
     const {
       intl: { formatMessage },
@@ -1119,13 +1121,14 @@ class TipsPortal extends React.Component {
     } = this.state;
     const { derivePath } = walletInfo;
     let claimedTipCount = 0;
+    this.setState({ importingMnemonic: true });
 
     // reset to 0 in case the user is importing with tips already on the page
     const tipWallets = [];
 
     if (formData.importedMnemonic.state !== 1) {
       // console.log(`Invalid Mnemonic, kicked out of function`);
-      return;
+      return this.setState({ importingMnemonic: false });
     }
 
     // If user has already swept tips, remove that notice on refresh
@@ -1287,7 +1290,7 @@ class TipsPortal extends React.Component {
         } catch (err) {
           console.log(`Error in bitbox.Address.details[potentialTipDetails]`);
           console.log(err);
-          return;
+          return this.setState({ importingMnemonic: false });
         }
       } else {
         // there is no tx history at the first address
@@ -1306,6 +1309,7 @@ class TipsPortal extends React.Component {
             ...formData,
             importedMnemonic: noTipsAtMnemonic,
           },
+          importingMnemonic: false,
         });
       }
 
@@ -1322,6 +1326,7 @@ class TipsPortal extends React.Component {
         networkError: formatMessage({
           id: 'home.errors.networkError',
         }),
+        importingMnemonic: false,
       });
     }
 
@@ -1361,6 +1366,7 @@ class TipsPortal extends React.Component {
         tipsFunded: true,
         tipsClaimedCount: claimedTipCount,
         tipsAlreadySweptError: allTipsSwept,
+        importingMnemonic: false,
       },
       this.createPdfQrCodes(tipWallets),
     );
@@ -1585,6 +1591,7 @@ class TipsPortal extends React.Component {
       // qrCodeImgs,
       // invoiceTxid,
       generatingInvoice,
+      importingMnemonic,
       apiPostFailed,
     } = this.state;
 
@@ -1736,7 +1743,11 @@ class TipsPortal extends React.Component {
               </InputWrapper>
               <Buttons show={!showSweepForm || sweptTxid !== null}>
                 <CardButton onClick={this.importMnemonic}>
-                  {!importedMnemonic ? `Load Tips` : `Refresh`}
+                  {!importingMnemonic ? (
+                    <FormattedMessage id="home.buttons.loadTips" />
+                  ) : (
+                    <FormattedMessage id="home.buttons.processing" />
+                  )}
                 </CardButton>
                 {sweptTxid === null &&
                   importedMnemonic &&
@@ -2016,6 +2027,7 @@ class TipsPortal extends React.Component {
                         <TipTh>Quantity</TipTh>
                         <TipTh>Value per tip</TipTh>
                         <TipTh>Currency</TipTh>
+                        <TipTh>Expiration</TipTh>
                       </tr>
                     </thead>
                     <tbody>
@@ -2023,6 +2035,9 @@ class TipsPortal extends React.Component {
                         <TipTd>{formData.tipCount.value}</TipTd>
                         <TipTd>{formData.tipAmountFiat.value.toFixed(2)}</TipTd>
                         <TipTd>{selectedCurrency}</TipTd>
+                        <TipTd>
+                          {formData.expirationDate.value.toString()}
+                        </TipTd>
                       </tr>
                     </tbody>
                   </TipTable>

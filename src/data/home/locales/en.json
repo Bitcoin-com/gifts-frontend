@@ -49,7 +49,10 @@
     "copySeed": "Copy to Clipboard",
     "sweepAll": "Sweep All",
     "newTips": "Make new tips",
-    "loading": "Generating invoice..."
+    "loading": "Generating invoice...",
+    "loadTips": "Load tips",
+    "refresh": "Refresh",
+    "processing": "Processing..."
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
