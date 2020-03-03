@@ -2423,12 +2423,13 @@ backo2@1.0.2:
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
   integrity sha1-MasayLEpNjRj41s+u2n038+6eUc=
 
-badger-components-react@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/badger-components-react/-/badger-components-react-0.8.0.tgz#aeaead39e5ed9ba997dafd9a477cdf06eacdeee5"
-  integrity sha512-wXA7K1oE4TaLRkOOucNwIYqPKveC7eDPgBlo4vVjN4AObhVD2X2inlmN2TKL/taVZmso+ficReuP53HL39VAOQ==
+badger-components-react@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/badger-components-react/-/badger-components-react-0.9.0.tgz#f1b06d247649323359b02ae1b031bc8e9ba5d7ef"
+  integrity sha512-z6i6G32n4JG5YFNUUrhwUKb0Iv6QYdEZ9u15+2kbWIKyfJmP6QtzLov6xLyrk4pkOd5Vm297e4YeqWmwCBsUMA==
   dependencies:
     bignumber.js "^9.0.0"
+    bitcoin-wallet-api "^0.1.9"
     lodash "^4.17.15"
     qrcode.react "^0.9.3"
 
@@ -2657,6 +2658,13 @@ bitbox-sdk@^8.11.2:
     socket.io "^2.2.0"
     socket.io-client "^2.2.0"
     wif "^2.0.6"
+
+bitcoin-wallet-api@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/bitcoin-wallet-api/-/bitcoin-wallet-api-0.1.9.tgz#cb519773e8f31a0e50476422ef7411e5201f383a"
+  integrity sha512-bO7Zgq6OkXMgGOUB/SXWqS6cGNNx+/qUYY+43jhS8rz9AhHn0SWjJv+rw/71rgqRNH0ybtxUKFoz/fBt6Uu/8w==
+  dependencies:
+    bignumber.js "^9.0.0"
 
 bitcoincash-ops@Bitcoin-com/bitcoincash-ops#2.0.0, "bitcoincash-ops@github:Bitcoin-com/bitcoincash-ops#2.0.0":
   version "2.0.0"
