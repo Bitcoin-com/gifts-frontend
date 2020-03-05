@@ -5,14 +5,14 @@ export const TipWrapper = styled.div`
   position: relative;
   border: 1px solid black;
   background-color: white;
-  height: 3.75in;
+  height: 3.04in;
   width: 2in;
   align-self: center;
   justify-self: center;
 
   @media print {
     display: inline-block;
-    height: 3.33in;
+    height: auto;
     page-break-inside: avoid !important;
   }
 `;

@@ -25,7 +25,7 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
     <TipHeader>
       <img src={tipsLogo} alt="Bitcoin Cash Tips" />
     </TipHeader>
-    <TipLabel>Tip Amount</TipLabel>
+
     <TipAmount>
       <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
       <FiatAmount>
@@ -40,7 +40,7 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
     )}
     {tipWallet.status === 'funded' ? (
       <React.Fragment>
-        <ScanLabel>Download the Bitcoin.com wallet and scan to claim</ScanLabel>
+        {/* <ScanLabel>Download the Bitcoin.com wallet and scan to claim</ScanLabel> */}
         <QRCode
           id="borderedQRCode"
           value={tipWallet.wif}
