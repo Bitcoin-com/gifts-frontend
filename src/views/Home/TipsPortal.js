@@ -605,6 +605,9 @@ class TipsPortal extends React.Component {
   }
 
   processRetryPostReturnTxInfos() {
+    // Dev
+    // const api = 'http://localhost:3001/setClaimChecks';
+    // Prod
     const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     const { returnTxInfos } = this.state;
     fetch(api, {
