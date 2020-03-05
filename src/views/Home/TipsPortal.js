@@ -501,7 +501,12 @@ class TipsPortal extends React.Component {
     const node = document.getElementById(elementId);
     htmlToImage.toPng(node).then(
       dataUrl => {
-        document.location.href = dataUrl;
+        const imageType = 'image/png';
+        // Download the image
+        document.location.href = dataUrl.replace(
+          imageType,
+          'image/octet-stream',
+        );
       },
       err => {
         console.log(err);
