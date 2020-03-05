@@ -18,6 +18,7 @@ import {
 } from 'bitcoincom-storybook';
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
+import htmlToImage from 'html-to-image';
 
 // import { PDFDownloadLink } from '@react-pdf/renderer';
 
@@ -189,6 +190,7 @@ class TipsPortal extends React.Component {
     this.processRetryPostReturnTxInfos = this.processRetryPostReturnTxInfos.bind(
       this,
     );
+    this.shareTip = this.shareTip.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -492,6 +494,42 @@ class TipsPortal extends React.Component {
     }
     return field;
   };
+
+  // eslint-disable-next-line class-methods-use-this
+  shareTip(e) {
+    const elementId = e.target.dataset.id;
+    const node = document.getElementById(elementId);
+    htmlToImage.toPng(node).then(
+      dataUrl => {
+        document.location.href = dataUrl;
+      },
+      err => {
+        console.log(err);
+      },
+    );
+  }
+  /*
+    html2canvas(document.querySelector(`#${elementId}`)).then(
+      canvasElm => {
+        console.log(`canvas generation success!`);
+
+        // Get a base64 data string
+        const imageType = 'image/png';
+        const imageData = canvasElm.toDataURL(imageType); // Open the data string in the current window
+        console.log(imageData);
+        // Download the image
+
+        document.location.href = imageData.replace(
+          imageType,
+          'image/octet-stream',
+        );
+      },
+      err => {
+        console.log(`error in shareTip(#${tipId})`);
+        console.log(err);
+      },
+    );
+    */
 
   handleImportedMnemonicChange(e) {
     const { value, name } = e.target;
@@ -1691,6 +1729,7 @@ class TipsPortal extends React.Component {
             dateStr={dateStr}
             expirationDate={expirationDate}
             status={tipWallet.status}
+            share={this.shareTip}
           ></Tip>,
         );
       });

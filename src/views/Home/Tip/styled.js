@@ -4,6 +4,22 @@ import appIcon from '../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../static/images/uploads/gear.png';
 import sweepIcon from '../../../../static/images/uploads/sweep.png';
 
+export const SnapshotHolder = styled.div`
+  background-color: #fff;
+`;
+
+export const ShareButton = styled.button`
+  & :hover {
+    background-color: white;
+  }
+  background-color: transparent;
+  cursor: pointer;
+  float: right;
+  border: 1px solid black;
+  margin: 8px;
+  border-radius: 5px;
+`;
+
 export const TipWrapper = styled.div`
   position: relative;
   border: 1px solid black;
@@ -54,8 +70,7 @@ export const StatusTd = styled.td`
   font-weight: ${({ funded = false }) => (funded === true ? 'bold;' : 'none')};
 `;
 export const ShareIcon = styled.img`
-  float: right;
-  padding: 12px 8px;
+  padding: 3px 3px 0px 5px;
 `;
 export const ClaimedSpan = styled.div`
   padding: 65px 20px;
@@ -129,6 +144,8 @@ export const HowToList = styled.ul`
   text-align: left;
   list-style: none;
   padding-left: 4px;
+  padding-bottom: 12px;
+  margin-bottom: 0px;
 `;
 export const StepOne = styled.li`
   background: url(${appIcon}) no-repeat left center;
@@ -143,7 +160,7 @@ export const StepTwo = styled.li`
 export const StepThree = styled.li`
   background: url(${sweepIcon}) no-repeat left center;
   padding-left: 24px;
-  margin: 12px 6px;
+  margin: 12px 6px 0px 6px;
 `;
 export const DotComImg = styled.img`
   height: 10px;

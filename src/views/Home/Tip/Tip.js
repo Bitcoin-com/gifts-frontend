@@ -24,6 +24,8 @@ import {
   LabelTd,
   StatusTd,
   ShareIcon,
+  SnapshotHolder,
+  ShareButton,
 } from './styled';
 // import bchLogo from '../../../../static/images/uploads/bch-logo.png';
 import bchLogo from '../../../../static/images/uploads/bch-logo-2.png';
@@ -37,59 +39,61 @@ const Tip = ({
   fiatCurrency,
   dateStr,
   expirationDate,
+  share,
 }) => (
   <TipWrapper className={tipWallet.status === 'funded' ? 'print' : 'printHide'}>
-    <TipHeader>
-      <img src={tipsLogo} alt="Bitcoin Cash Tips" />
-    </TipHeader>
+    <SnapshotHolder id={tipWallet.addr.substr(12)}>
+      <TipHeader>
+        <img src={tipsLogo} alt="Bitcoin Cash Tips" />
+      </TipHeader>
 
-    <TipAmount>
-      <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
-      <FiatAmount>
-        ~ {fiatAmount} {fiatCurrency}
-      </FiatAmount>
-    </TipAmount>
-    {dateStr !== null && (
-      <TipExchangeRate>
-        1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-        {fiatCurrency} on {dateStr}
-      </TipExchangeRate>
-    )}
-    {tipWallet.status === 'funded' ? (
-      <React.Fragment>
-        {/* <ScanLabel>Download the Bitcoin.com wallet and scan to claim</ScanLabel> */}
-        <QRCode
-          id="borderedQRCode"
-          value={tipWallet.wif}
-          size={125}
-          logoImage={bchLogo}
-          logoWidth={32}
-          qrStyle="squares"
-          ecLevel="M"
-          quietZone={10}
-          bgColor="#fff"
-        />
-        {expirationDate !== '' && (
-          <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
-        )}
+      <TipAmount>
+        <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+        <FiatAmount>
+          ~ {fiatAmount} {fiatCurrency}
+        </FiatAmount>
+      </TipAmount>
+      {dateStr !== null && (
+        <TipExchangeRate>
+          1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+          {fiatCurrency} on {dateStr}
+        </TipExchangeRate>
+      )}
+      {tipWallet.status === 'funded' ? (
+        <React.Fragment>
+          {/* <ScanLabel>Download the Bitcoin.com wallet and scan to claim</ScanLabel> */}
+          <QRCode
+            id="borderedQRCode"
+            value={tipWallet.wif}
+            size={125}
+            logoImage={bchLogo}
+            logoWidth={32}
+            qrStyle="squares"
+            ecLevel="M"
+            quietZone={10}
+            bgColor="#fff"
+          />
+          {expirationDate !== '' && (
+            <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
+          )}
 
-        <HowToClaim>
-          <HowToList>
-            <StepOne>
-              Download the <DotComImg src={dotComLogo} /> wallet
-            </StepOne>
-            <StepTwo>Select &quot;Settings&quot;</StepTwo>
-            <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
-          </HowToList>
-        </HowToClaim>
-      </React.Fragment>
-    ) : (
-      <React.Fragment>
-        <TipLabel>Already claimed</TipLabel>
-        <ClaimedBlock></ClaimedBlock>
-      </React.Fragment>
-    )}
-
+          <HowToClaim>
+            <HowToList>
+              <StepOne>
+                Download the <DotComImg src={dotComLogo} /> wallet
+              </StepOne>
+              <StepTwo>Select &quot;Settings&quot;</StepTwo>
+              <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
+            </HowToList>
+          </HowToClaim>
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <TipLabel>Already claimed</TipLabel>
+          <ClaimedBlock></ClaimedBlock>
+        </React.Fragment>
+      )}
+    </SnapshotHolder>
     <StatusWrap className="printHide">
       <StatusTable>
         <tbody>
@@ -122,7 +126,9 @@ const Tip = ({
           </tr>
         </tbody>
       </StatusTable>
-      <ShareIcon src={shareIcon} />
+      <ShareButton type="button" data-save="test" onClick={share}>
+        <ShareIcon data-id={tipWallet.addr.substr(12)} src={shareIcon} />
+      </ShareButton>
     </StatusWrap>
   </TipWrapper>
 );
@@ -140,6 +146,7 @@ Tip.propTypes = {
     callsign: PropTypes.string,
     claimedTxid: PropTypes.string,
   }).isRequired,
+  share: PropTypes.func.isRequired,
 };
 
 Tip.defaultProps = {
