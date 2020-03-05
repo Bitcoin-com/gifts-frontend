@@ -115,7 +115,7 @@ export const PrintableContentBlock = styled(ContentBlock)`
     margin: 0mm;
     padding: 0mm;
     & > div {
-      margin: 10mm 60mm;
+      margin: 10mm 7.5mm;
       padding: 0mm;
       & > div {
         margin: 0mm;
@@ -145,7 +145,12 @@ export const Buttons = styled.div`
     }
   `}
 `;
-export const TipTable = styled(Table)``;
+export const TipTable = styled(Table)`
+  @media screen and (max-width: 555px) {
+    display: none;
+  }
+`;
+
 export const TipTh = styled.td`
   text-align: center;
 `;
@@ -220,16 +225,16 @@ export const TipContainerWrapper = styled.div`
   margin-top: ${theme.spacing.unit * 6}px;
   width: ${props => props.maxWidth || '100%'};
   @media only screen and (max-width: 424px) {
-  max-width: 2in;
+  max-width: 2.5in;
 }
   ${media.sm`
-    max-width: 4in;
+    max-width: 5in;
   `}
   ${media.smmd`
-    max-width: 6in;
+    max-width: 7.5in;
   `}
   ${media.md`
-  max-width: 6in;
+  max-width: 7.5in;
   `}
   ${media.lg`
   max-width: ${props => props.maxWidth || '100%'};
@@ -249,7 +254,7 @@ export const TipContainer = styled.div`
    margin: 0mm;
    padding: 0mm;
    width: 10in;
-   grid-template-columns: repeat(4,0fr) !important;
+   grid-template-columns: repeat(5,0fr) !important;
   }
 
     @media only screen and (max-width: 424px) {

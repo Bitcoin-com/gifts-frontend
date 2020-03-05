@@ -8,19 +8,36 @@ import {
   TipWrapper,
   TipHeader,
   TipLabel,
-  ScanLabel,
   TipAmount,
   CryptoAmount,
   FiatAmount,
   TipExchangeRate,
   StatusWrap,
   ClaimedBlock,
+  HowToClaim,
+  HowToList,
+  StepOne,
+  StepTwo,
+  StepThree,
+  DotComImg,
+  StatusTable,
+  LabelTd,
+  StatusTd,
+  ShareIcon,
 } from './styled';
 // import bchLogo from '../../../../static/images/uploads/bch-logo.png';
 import bchLogo from '../../../../static/images/uploads/bch-logo-2.png';
-import tipsLogo from '../../../../static/images/uploads/bitcoin-cash-tips-logo-horizontal-grn.png';
+import tipsLogo from '../../../../static/images/uploads/logo-min.png';
+import dotComLogo from '../../../../static/images/uploads/logo_black.png';
+import shareIcon from '../../../../static/images/uploads/share-24px.svg';
 
-const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
+const Tip = ({
+  tipWallet,
+  fiatAmount,
+  fiatCurrency,
+  dateStr,
+  expirationDate,
+}) => (
   <TipWrapper className={tipWallet.status === 'funded' ? 'print' : 'printHide'}>
     <TipHeader>
       <img src={tipsLogo} alt="Bitcoin Cash Tips" />
@@ -52,6 +69,19 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
           quietZone={10}
           bgColor="#fff"
         />
+        {expirationDate !== '' && (
+          <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
+        )}
+
+        <HowToClaim>
+          <HowToList>
+            <StepOne>
+              Download the <DotComImg src={dotComLogo} /> wallet
+            </StepOne>
+            <StepTwo>Select &quot;Settings&quot;</StepTwo>
+            <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
+          </HowToList>
+        </HowToClaim>
       </React.Fragment>
     ) : (
       <React.Fragment>
@@ -60,25 +90,39 @@ const Tip = ({ tipWallet, fiatAmount, fiatCurrency, dateStr }) => (
       </React.Fragment>
     )}
 
-    <StatusWrap funded={tipWallet.status === 'funded'} className="printHide">
-      {tipWallet.status === 'funded' ? (
-        'Funded'
-      ) : (
-        <React.Fragment>
-          {tipWallet.claimedTxid !== undefined &&
-          tipWallet.claimedTxid !== '' ? (
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
-            >
-              Claimed
-            </a>
-          ) : (
-            `Claimed`
-          )}
-        </React.Fragment>
-      )}
+    <StatusWrap className="printHide">
+      <StatusTable>
+        <tbody>
+          <tr>
+            <LabelTd>Status:</LabelTd>
+            <StatusTd funded={tipWallet.status === 'funded'}>
+              {tipWallet.status === 'funded' ? (
+                'Funded'
+              ) : (
+                <React.Fragment>
+                  {tipWallet.claimedTxid !== undefined &&
+                  tipWallet.claimedTxid !== '' ? (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
+                    >
+                      Claimed
+                    </a>
+                  ) : (
+                    `Claimed`
+                  )}
+                </React.Fragment>
+              )}
+            </StatusTd>
+          </tr>
+          <tr>
+            <LabelTd>Label:</LabelTd>
+            <StatusTd>{tipWallet.callsign}</StatusTd>
+          </tr>
+        </tbody>
+      </StatusTable>
+      <ShareIcon src={shareIcon} />
     </StatusWrap>
   </TipWrapper>
 );
@@ -87,17 +131,20 @@ Tip.propTypes = {
   fiatAmount: PropTypes.number.isRequired,
   fiatCurrency: PropTypes.string.isRequired,
   dateStr: PropTypes.string,
+  expirationDate: PropTypes.string,
   tipWallet: PropTypes.shape({
     addr: PropTypes.string.isRequired,
     wif: PropTypes.string.isRequired,
     sats: PropTypes.number.isRequired,
     status: PropTypes.string.isRequired,
+    callsign: PropTypes.string,
     claimedTxid: PropTypes.string,
   }).isRequired,
 };
 
 Tip.defaultProps = {
   dateStr: null,
+  expirationDate: null,
 };
 
 export default Tip;

@@ -61,6 +61,8 @@ import Tip from './Tip';
 // disable PDF functionality
 // import TipPdf from './TipPdf';
 // import TipPdfDocument from './TipPdfDocument';
+const Chance = require('chance');
+const callsigns = require('./Tip/callsigns');
 
 const bitbox = new BITBOX({
   restURL: 'https://rest.bitcoin.com/v2/',
@@ -740,15 +742,19 @@ class TipsPortal extends React.Component {
         formData.expirationDate.value.getTime() / 1000,
       );
       const tipAddress = tipWallets[i].addr;
+      const tipNote = tipWallets[i].callsign;
+
       returnTxInfo.creationPaymentUrl = invoiceUrl;
       returnTxInfo.creationTxid = invoiceTxid;
       returnTxInfo.fiatCode = selectedCurrency;
       returnTxInfo.fiatAmount = fiatAmount;
       returnTxInfo.fiatRate = fiatRate;
+
       returnTxInfo.email = formData.emailAddress.value;
       returnTxInfo.rawTx = returnRawTxs[i];
       returnTxInfo.expirationStamp = expirationStamp;
       returnTxInfo.tipAddress = tipAddress;
+      returnTxInfo.tipNote = tipNote;
       returnTxInfo.refundAddress = refundAddress;
       returnTxInfos.push(returnTxInfo);
     }
@@ -1213,6 +1219,10 @@ class TipsPortal extends React.Component {
         }
 
         firstTipWallet.addr = fundingAddress;
+        const callsignPicker = new Chance(`${fundingAddress}BCHPLS`);
+        const callsign =
+          callsigns[Math.floor(callsignPicker.random() * callsigns.length)];
+        firstTipWallet.callsign = callsign;
         if (addrDetails.totalReceivedSat > 0) {
           firstTipWallet.sats = addrDetails.totalReceivedSat;
         } else {
@@ -1231,6 +1241,7 @@ class TipsPortal extends React.Component {
             sats: '',
             status: '',
             claimedTxid: '',
+            callsign: '',
           };
           const potentialChildNode = masterHDNode.derivePath(
             `${derivePath}${i}`,
@@ -1238,10 +1249,18 @@ class TipsPortal extends React.Component {
           const potentialTipAddress = bitbox.HDNode.toCashAddress(
             potentialChildNode,
           );
+          const potentialTipCallsignPicker = new Chance(
+            `${potentialTipAddress}BCHPLS`,
+          );
+          const potentialTipCallsign =
+            callsigns[
+              Math.floor(potentialTipCallsignPicker.random() * callsigns.length)
+            ];
           const potentialTipWif = bitbox.HDNode.toWIF(potentialChildNode);
           // console.log(`${derivePath}${i}: ${potentialTipAddress}`);
 
           potentialTipWallet.addr = potentialTipAddress;
+          potentialTipWallet.callsign = potentialTipCallsign;
           potentialTipWallet.wif = potentialTipWif;
 
           // Note that using push and not the specific index only works because everything is in HD order
@@ -1496,8 +1515,14 @@ class TipsPortal extends React.Component {
       // get the priv key in wallet import format
       const wif = bitbox.HDNode.toWIF(childNode);
 
+      // Assign a human readable name based on the address
+      const callsignPicker = new Chance(`${fundingAddress}BCHPLS`);
+      const callsign =
+        callsigns[Math.floor(callsignPicker.random() * callsigns.length)];
+
       // Build tip object
       tipWallet.addr = fundingAddress;
+      tipWallet.callsign = callsign;
       tipWallet.wif = wif;
       tipWallet.sats = tipAmountSats;
 
@@ -1618,20 +1643,30 @@ class TipsPortal extends React.Component {
     const date = today.getDate();
     const year = today.getFullYear();
     const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
       'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     const dateStr = `${monthNames[today.getMonth()]} ${date}, ${year}`;
+    let expirationDate = formData.expirationDate.value;
+    if (expirationDate !== '') {
+      expirationDate = new Date(expirationDate);
+      const expirationDay = expirationDate.getDate();
+      const expirationYear = expirationDate.getFullYear();
+      expirationDate = `${
+        monthNames[expirationDate.getMonth()]
+      } ${expirationDay}, ${expirationYear}`;
+    }
+
     const tipWidth = 2;
     let displayWidth = '500px';
     if (tipWallets.length >= 6) {
@@ -1654,6 +1689,7 @@ class TipsPortal extends React.Component {
             }
             fiatCurrency={selectedCurrency}
             dateStr={dateStr}
+            expirationDate={expirationDate}
             status={tipWallet.status}
           ></Tip>,
         );
@@ -2175,7 +2211,7 @@ class TipsPortal extends React.Component {
           <TipContainerWrapper maxWidth={displayWidth}>
             <TipContainer
               show={tipWallets.length > 0 && tipsFunded}
-              columns={6}
+              columns={5}
             >
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
