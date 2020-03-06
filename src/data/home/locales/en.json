@@ -81,7 +81,8 @@
     "networkError": "Network error, the API at rest.bitcoin.com did not respond.",
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
     "invalidEmail": "Please enter a valid email address (or none at all)",
-    "expirationMustBeFuture": "Expiration date must be in the future."
+    "expirationMustBeFuture": "Expiration date must be in the future.",
+    "priceApiError": "Error obtaining BCH price in selected currency from price API."
   },
   "defaultCurrency": "USD",
   "initialCurrencies": ["EUR", "USD", "GBP", "JPY", "CNY", "AUD", "HKD"],

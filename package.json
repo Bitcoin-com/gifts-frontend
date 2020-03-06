@@ -61,7 +61,6 @@
     "moment": "^2.24.0",
     "netlify-cms-app": "^2.9.7",
     "prop-types": "^15.7.2",
-    "qrcode": "^1.4.4",
     "react": "^16.10.2",
     "react-copy-to-clipboard": "^5.0.2",
     "react-datepicker": "^2.12.1",

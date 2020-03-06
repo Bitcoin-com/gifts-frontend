@@ -7,7 +7,6 @@ import { BITBOX } from 'bitbox-sdk';
 import { BadgerButton } from 'badger-components-react';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
-import QRCode from 'qrcode';
 import PropTypes from 'prop-types';
 import {
   Card,
@@ -181,7 +180,6 @@ class TipsPortal extends React.Component {
     this.handleSweepAllTipsButton = this.handleSweepAllTipsButton.bind(this);
     this.toggleSweepForm = this.toggleSweepForm.bind(this);
     this.appStateInitial = this.appStateInitial.bind(this);
-    this.createPdfQrCodes = this.createPdfQrCodes.bind(this);
     this.handleExpirationDateChange = this.handleExpirationDateChange.bind(
       this,
     );
@@ -226,8 +224,6 @@ class TipsPortal extends React.Component {
       showSweepForm: false,
       tipsAlreadySweptError: false,
       networkError: '',
-      // eslint-disable-next-line react/no-unused-state
-      qrCodeImgs: [],
       invoiceTxid: '',
       // eslint-disable-next-line react/no-unused-state
       returnTxInfos: [], // used for debugging
@@ -733,7 +729,7 @@ class TipsPortal extends React.Component {
   }
 
   async createExpirationTxs() {
-    console.log(`createExpirationTxs`);
+    // console.log(`createExpirationTxs`);
     // Function is similar to sweepAllTips, however creates a rawTx for each input instead of one sweep tx
     // Build this for the case of "you just made the tips" first; simpler than the import case
     const {
@@ -761,6 +757,7 @@ class TipsPortal extends React.Component {
     });
     // TODO can you get batch utxos from more than 20 addresses?
     // check balances of addresses in one async batch
+
     const u = await bitbox.Address.utxo(sweepAddresses);
 
     // Add the utxos to the sweepbuilder array
@@ -818,7 +815,7 @@ class TipsPortal extends React.Component {
       const hex = tx.toHex();
       returnRawTxs.push(hex);
     }
-    console.log(returnRawTxs);
+    // console.log(returnRawTxs);
 
     // Build & set the server broadcast object in state
     const returnTxInfos = [];
@@ -857,12 +854,12 @@ class TipsPortal extends React.Component {
 
   invoiceSuccess() {
     const { tipWallets } = this.state;
-    console.log(`Invoice paid successfully`);
+    // console.log(`Invoice paid successfully`);
     // build the output object for the tip claiming expiration here
     // get txid of invoice funding transaction
     bitbox.Address.details(tipWallets[0].addr).then(
       res => {
-        console.log(res);
+        // console.log(res);
         let invoiceTxid = null;
         if (res.transactions.length > 0) {
           // eslint-disable-next-line prefer-destructuring
@@ -1131,17 +1128,32 @@ class TipsPortal extends React.Component {
 
     const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${currency}`;
     // const priceSource = `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`;
-    const price = await fetch(priceSource);
+    let price;
+    let priceJson;
+    try {
+      price = await fetch(priceSource);
+    } catch (err) {
+      console.log(
+        `Error fetching price in handleSelectedCurrencyChangeFromSelect()`,
+      );
+      return console.log(err);
+    }
 
-    const priceJson = await price.json();
+    try {
+      priceJson = await price.json();
+    } catch (err) {
+      console.log(
+        `Error converting price api output to JSON in handleSelectedCurrencyChangeFromSelect()`,
+      );
+      return console.log(err);
+    }
 
-    // const fiatPrice = priceJson.price / 100;
     const fiatPrice = priceJson[currency].rate;
     // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
     );
-    this.setState({
+    return this.setState({
       selectedCurrency: currency,
       calculatedFiatAmount,
     });
@@ -1178,29 +1190,22 @@ class TipsPortal extends React.Component {
     //
     // turn entropy to 12 word mnemonic
     const mnemonic = bitbox.Mnemonic.fromEntropy(entropy);
-    // const mnemonic = 'road adapt scorpion buzz home sentence puzzle bracket carry potato fault arrow';
-    // const mnemonic ='report enact exclude useless fun scale recipe moral join lobster wasp flower';
-    console.log(`test: has latest code been pushed to testnet?`);
-    console.log(mnemonic);
+
+    // console.log(mnemonic);
 
     // root seed buffer
     const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
-    console.log(`rootSeed generated`);
 
     // master HDNode
     const masterHDNode = bitbox.HDNode.fromSeed(rootSeed, 'mainnet');
-    console.log(`masterHDNode generated`);
 
     // HDNode of BIP44 account
     const account = bitbox.HDNode.derivePath(
       masterHDNode,
       `${walletInfo.derivePath}0`,
     );
-    console.log(`account generated`);
 
     const fundingAddress = bitbox.HDNode.toCashAddress(account);
-
-    console.log(`cashAddress: ${fundingAddress}`);
 
     walletInfo.mnemonic = mnemonic;
     walletInfo.masterHDNode = masterHDNode;
@@ -1251,7 +1256,7 @@ class TipsPortal extends React.Component {
     const mnemonic = formData.importedMnemonic.value;
     // const mnemonic = 'road adapt scorpion buzz home sentence puzzle bracket carry potato fault arrow';
     // const mnemonic ='report enact exclude useless fun scale recipe moral join lobster wasp flower';
-    console.log(mnemonic);
+    // console.log(mnemonic);
 
     // root seed buffer
     const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
@@ -1277,7 +1282,7 @@ class TipsPortal extends React.Component {
     const fundingAddress = bitbox.HDNode.toCashAddress(childNode);
     const fundingWif = bitbox.HDNode.toWIF(childNode);
 
-    console.log(`cashAddress: ${fundingAddress}`);
+    // console.log(`cashAddress: ${fundingAddress}`);
 
     // Check if tips have already been created for this mnemonic
     // 1 - check balance of the first address
@@ -1288,7 +1293,7 @@ class TipsPortal extends React.Component {
 
     try {
       const addrDetails = await bitbox.Address.details(fundingAddress);
-      console.log(addrDetails);
+      // console.log(addrDetails);
       const txHistory = addrDetails.transactions;
       // check tx history
       // actually what you need to do first is get an object with all the tips
@@ -1370,7 +1375,7 @@ class TipsPortal extends React.Component {
           const potentialTipDetails = await bitbox.Address.details(
             potentialTipAddresses,
           );
-          console.log(potentialTipDetails);
+          // console.log(potentialTipDetails);
 
           for (let i = 0; i < potentialTipDetails.length; i += 1) {
             if (potentialTipDetails[i].transactions.length > 0) {
@@ -1400,12 +1405,12 @@ class TipsPortal extends React.Component {
               }
               tipWallets.push(tipWallet);
             } else {
-              console.log(`You have ${i} tips in this wallet`);
+              // console.log(`You have ${i} tips in this wallet`);
               break;
             }
           }
-          console.log(`tipWallets:`);
-          console.log(tipWallets);
+          // console.log(`tipWallets:`);
+          // console.log(tipWallets);
         } catch (err) {
           console.log(`Error in bitbox.Address.details[potentialTipDetails]`);
           console.log(err);
@@ -1452,8 +1457,35 @@ class TipsPortal extends React.Component {
     // Calculate tip amounts
 
     const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${selectedCurrency}`;
-    const price = await fetch(priceSource);
-    const priceJson = await price.json();
+    let price;
+    let priceJson;
+    try {
+      price = await fetch(priceSource);
+    } catch (err) {
+      console.log(`Error fetching price in importMnemonic()`);
+      console.log(err);
+      return this.setState({
+        networkError: formatMessage({
+          id: 'home.errors.priceApiError',
+        }),
+        importingMnemonic: false,
+      });
+    }
+
+    try {
+      priceJson = await price.json();
+    } catch (err) {
+      console.log(
+        `Error converting price api output to JSON in importMnemonic()`,
+      );
+      console.log(err);
+      return this.setState({
+        networkError: formatMessage({
+          id: 'home.errors.priceApiError',
+        }),
+        importingMnemonic: false,
+      });
+    }
 
     // NEXT STEP
     // get the forex endpoint working, you can use legacy
@@ -1469,51 +1501,22 @@ class TipsPortal extends React.Component {
     walletInfo.mnemonic = mnemonic;
     walletInfo.masterHDNode = masterHDNode;
     let allTipsSwept = false;
-    console.log(`claimedTipCount: ${claimedTipCount}`);
+    // console.log(`claimedTipCount: ${claimedTipCount}`);
     if (claimedTipCount === tipWallets.length) {
       allTipsSwept = true;
     }
 
-    this.setState(
-      {
-        walletInfo,
-        fundingAddress,
-        tipWallets,
-        calculatedFiatAmount,
-        importedMnemonic: true,
-        tipsFunded: true,
-        tipsClaimedCount: claimedTipCount,
-        tipsAlreadySweptError: allTipsSwept,
-        importingMnemonic: false,
-      },
-      this.createPdfQrCodes(tipWallets),
-    );
-  }
-
-  createPdfQrCodes(tipWallets) {
-    // console.log(`createPdfQrCodes()`);
-    // get array of wifs from tipWallets
-    // make array of promises
-    // promise.all with a .then to set state
-    const qrPromises = [];
-    for (let i = 0; i < tipWallets.length; i += 1) {
-      const wifToQr = tipWallets[i].wif;
-      const wifToQrPromise = QRCode.toDataURL(wifToQr);
-      qrPromises.push(wifToQrPromise);
-    }
-    Promise.all(qrPromises).then(
-      res => {
-        // console.log(res);
-        this.setState({
-          // TODO get rid of this function if you do not need it for pdf generation
-          // eslint-disable-next-line react/no-unused-state
-          qrCodeImgs: res,
-        });
-      },
-      err => {
-        console.log(err);
-      },
-    );
+    this.setState({
+      walletInfo,
+      fundingAddress,
+      tipWallets,
+      calculatedFiatAmount,
+      importedMnemonic: true,
+      tipsFunded: true,
+      tipsClaimedCount: claimedTipCount,
+      tipsAlreadySweptError: allTipsSwept,
+      importingMnemonic: false,
+    });
   }
 
   handleCreateTipSubmitButton() {
@@ -1565,20 +1568,47 @@ class TipsPortal extends React.Component {
     const tipAmountFiat = formData.tipAmountFiat.value;
 
     const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${selectedCurrency}`;
-    const price = await fetch(priceSource);
-    const priceJson = await price.json();
+    let price;
+    let priceJson;
+    try {
+      price = await fetch(priceSource);
+    } catch (err) {
+      console.log(`Error fetching price in handleCreateTipSubmit()`);
+      console.log(err);
+      return this.setState({
+        generatingInvoice: false,
+        invoiceGenerationError: formatMessage({
+          id: 'home.errors.priceApiError',
+        }),
+      });
+    }
+
+    try {
+      priceJson = await price.json();
+    } catch (err) {
+      console.log(
+        `Error converting price api output to JSON in handleCreateTipSubmit()`,
+      );
+      console.log(err);
+      return this.setState({
+        generatingInvoice: false,
+        invoiceGenerationError: formatMessage({
+          id: 'home.errors.priceApiError',
+        }),
+      });
+    }
 
     // NEXT STEP
     // get the forex endpoint working, you can use legacy
     // get tips created with forex and all the data you want on them
     // log in with a mnemonic
     const fiatPrice = priceJson[selectedCurrency].rate;
-    console.log(`fiatPrice: ${fiatPrice}`);
+    // console.log(`fiatPrice: ${fiatPrice}`);
     // convert this to sats
     // given, 1.0 BCH in local currency
     // find, tipAmountFiat in satoshis
     const tipAmountSats = Math.round((tipAmountFiat / fiatPrice) * 1e8);
-    console.log(`tipAmountSats: ${tipAmountSats}`);
+    // console.log(`tipAmountSats: ${tipAmountSats}`);
     if (tipAmountSats < 5000) {
       // error
       return this.setState({
@@ -1602,7 +1632,7 @@ class TipsPortal extends React.Component {
 
       // get the cash address
       const fundingAddress = bitbox.HDNode.toCashAddress(childNode);
-      console.log(`${derivePath}${i}: ${fundingAddress}`);
+      // console.log(`${derivePath}${i}: ${fundingAddress}`);
 
       // get the priv key in wallet import format
       const wif = bitbox.HDNode.toWIF(childNode);
@@ -1624,8 +1654,8 @@ class TipsPortal extends React.Component {
       fundingOutput.amount = tipAmountSats;
       fundingOutputs.push(fundingOutput);
     }
-    console.log(`Building invoice with these funding outputs:`);
-    console.log(fundingOutputs);
+    // console.log(`Building invoice with these funding outputs:`);
+    // console.log(fundingOutputs);
 
     // get invoice
     fetch('https://pay.bitcoin.com/create_invoice', {
@@ -1642,7 +1672,7 @@ class TipsPortal extends React.Component {
       .then(response => response.json())
       .then(
         res => {
-          console.log(res);
+          // console.log(res);
           // catch errors that aren't handled by pay.bitcoin.com
           if (res.cause) {
             console.log(`Error in BIP070 invoice generation`);
@@ -1663,17 +1693,14 @@ class TipsPortal extends React.Component {
               }),
             });
           }
-          console.log(`funding outputs used:`);
-          console.log(fundingOutputs);
+          // console.log(`funding outputs used:`);
+          // console.log(fundingOutputs);
           const { paymentId } = res;
-          return this.setState(
-            {
-              generatingInvoice: false,
-              invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
-              tipWallets,
-            },
-            this.createPdfQrCodes(tipWallets),
-          );
+          return this.setState({
+            generatingInvoice: false,
+            invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+            tipWallets,
+          });
         },
         err => {
           console.log(`Error creating invoice`);
@@ -1710,7 +1737,6 @@ class TipsPortal extends React.Component {
       tipsAlreadySweptError,
       tipsClaimedCount,
       networkError,
-      // qrCodeImgs,
       // invoiceTxid,
       generatingInvoice,
       importingMnemonic,
