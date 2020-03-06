@@ -9,8 +9,8 @@
     display: none !important;
   }
   .print {
-    margin: 0mm;
-    padding: 0mm;
+    margin: 0mm !important;
+    padding: 0mm !important;
   }
 }
 .popup-content {
