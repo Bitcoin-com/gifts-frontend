@@ -11,6 +11,7 @@ import {
   Table,
   Input,
   InputLabel,
+  Select,
 } from 'bitcoincom-storybook';
 import DatePicker from 'react-datepicker';
 
@@ -25,6 +26,10 @@ const reset = css`
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+`;
+
+export const CustomSelect = styled(Select)`
+  z-index: 2;
 `;
 
 export const ApiErrorPopup = styled(Popup)``;
