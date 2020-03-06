@@ -146,19 +146,19 @@ export const HowToList = styled.ul`
 `;
 export const StepOne = styled.li`
   background: url(${appIcon}) no-repeat left center;
-  background-size: 18px;
+  background-size: 16px;
   padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepTwo = styled.li`
   background: url(${gearIcon}) no-repeat left center;
-  background-size: 18px;
+  background-size: 16px;
   padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepThree = styled.li`
   background: url(${sweepIcon}) no-repeat left center;
-  background-size: 18px;
+  background-size: 16px;
   padding-left: 24px;
   margin: 12px 6px 0px 6px;
 `;
