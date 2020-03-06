@@ -89,6 +89,9 @@ const Tip = ({
       ) : (
         <React.Fragment>
           <ClaimedBlock>[Claimed]</ClaimedBlock>
+          {expirationDate !== '' && (
+            <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
+          )}
           <HowToClaim>
             <HowToList>
               <StepOne>
