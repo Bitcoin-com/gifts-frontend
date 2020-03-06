@@ -2398,7 +2398,7 @@ class TipsPortal extends React.Component {
             ) */}
 
           <SweepAllCard
-            title="Changed your mind?"
+            title="Want your money back?"
             className="noPrint"
             show={!importedMnemonic && tipWallets.length > 0 && tipsFunded}
           >
