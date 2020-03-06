@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { theme, media, Paragraph } from 'bitcoincom-storybook';
 import appIcon from '../../../../static/images/uploads/appLogoDot.png';
-import gearIcon from '../../../../static/images/uploads/gear.png';
-import sweepIcon from '../../../../static/images/uploads/sweep.png';
+import gearIcon from '../../../../static/images/uploads/gear3x.png';
+import sweepIcon from '../../../../static/images/uploads/sweep3x.png';
 
 export const SnapshotHolder = styled.div`
   background-color: #fff;
@@ -146,16 +146,19 @@ export const HowToList = styled.ul`
 `;
 export const StepOne = styled.li`
   background: url(${appIcon}) no-repeat left center;
+  background-size: 18px;
   padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepTwo = styled.li`
   background: url(${gearIcon}) no-repeat left center;
+  background-size: 18px;
   padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepThree = styled.li`
   background: url(${sweepIcon}) no-repeat left center;
+  background-size: 18px;
   padding-left: 24px;
   margin: 12px 6px 0px 6px;
 `;
