@@ -7,7 +7,6 @@ import { QRCode } from 'react-qrcode-logo';
 import {
   TipWrapper,
   TipHeader,
-  TipLabel,
   TipAmount,
   CryptoAmount,
   FiatAmount,
@@ -89,8 +88,16 @@ const Tip = ({
         </React.Fragment>
       ) : (
         <React.Fragment>
-          <TipLabel>Already claimed</TipLabel>
-          <ClaimedBlock></ClaimedBlock>
+          <ClaimedBlock>[Claimed]</ClaimedBlock>
+          <HowToClaim>
+            <HowToList>
+              <StepOne>
+                Download the <DotComImg src={dotComLogo} /> wallet
+              </StepOne>
+              <StepTwo>Select &quot;Settings&quot;</StepTwo>
+              <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
+            </HowToList>
+          </HowToClaim>
         </React.Fragment>
       )}
     </SnapshotHolder>
@@ -101,7 +108,7 @@ const Tip = ({
             <LabelTd>Status:</LabelTd>
             <StatusTd funded={tipWallet.status === 'funded'}>
               {tipWallet.status === 'funded' ? (
-                'Funded'
+                'Unclaimed'
               ) : (
                 <React.Fragment>
                   {tipWallet.claimedTxid !== undefined &&

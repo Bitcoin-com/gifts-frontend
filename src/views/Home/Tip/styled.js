@@ -51,8 +51,7 @@ export const StatusLabel = styled.div`
 `;
 export const TipStatus = styled.div``;
 export const ClaimedBlock = styled.div`
-  height: 175px;
-  width: 145px;
+  padding: 63px 0px;
 `;
 export const StatusTable = styled.table`
   max-width: 2.5in;
@@ -77,9 +76,7 @@ export const ClaimedSpan = styled.div`
   height: 145px;
 `;
 export const TipLabel = styled.div`
-  color: #0fcb97;
   font-weight: 700;
-  font-style: italic;
 `;
 export const ScanLabel = styled.div`
   color: #0fcb97;

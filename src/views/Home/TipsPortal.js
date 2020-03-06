@@ -1077,14 +1077,15 @@ class TipsPortal extends React.Component {
   async handleSelectedCurrencyChangeFromSelect(e) {
     const { tipWallets } = this.state;
     const currency = e.value;
-    const currencyCode = currency.toLowerCase();
-    const price = await fetch(
-      `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`,
-    );
+
+    const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${currency}`;
+    // const priceSource = `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`;
+    const price = await fetch(priceSource);
 
     const priceJson = await price.json();
 
-    const fiatPrice = priceJson.price / 100;
+    // const fiatPrice = priceJson.price / 100;
+    const fiatPrice = priceJson[currency].rate;
     // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
@@ -1398,17 +1399,16 @@ class TipsPortal extends React.Component {
     }
 
     // Calculate tip amounts
-    const currencyCode = selectedCurrency.toLowerCase();
-    const price = await fetch(
-      `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`,
-    );
+
+    const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${selectedCurrency}`;
+    const price = await fetch(priceSource);
     const priceJson = await price.json();
 
     // NEXT STEP
     // get the forex endpoint working, you can use legacy
     // get tips created with forex and all the data you want on them
     // log in with a mnemonic
-    const fiatPrice = priceJson.price / 100;
+    const fiatPrice = priceJson[selectedCurrency].rate;
     // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
@@ -1513,17 +1513,15 @@ class TipsPortal extends React.Component {
     const tipCount = formData.tipCount.value;
     const tipAmountFiat = formData.tipAmountFiat.value;
 
-    const currencyCode = selectedCurrency.toLowerCase();
-    const price = await fetch(
-      `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`,
-    );
+    const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${selectedCurrency}`;
+    const price = await fetch(priceSource);
     const priceJson = await price.json();
 
     // NEXT STEP
     // get the forex endpoint working, you can use legacy
     // get tips created with forex and all the data you want on them
     // log in with a mnemonic
-    const fiatPrice = priceJson.price / 100;
+    const fiatPrice = priceJson[selectedCurrency].rate;
     console.log(`fiatPrice: ${fiatPrice}`);
     // convert this to sats
     // given, 1.0 BCH in local currency
@@ -1710,7 +1708,7 @@ class TipsPortal extends React.Component {
       } ${expirationDay}, ${expirationYear}`;
     }
 
-    const tipWidth = 2;
+    const tipWidth = 2.5;
     let displayWidth = '500px';
     if (tipWallets.length >= 6) {
       displayWidth = `${6 * tipWidth}in`;
