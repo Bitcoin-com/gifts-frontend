@@ -1935,7 +1935,7 @@ class TipsPortal extends React.Component {
                 </CopyToClipboard>
                 <ButtonHider show={appState === appStates.seedSaved}>
                   <CardButton dark onClick={this.handleSeedSavedConfirmed}>
-                    Fund Tips
+                    Next
                   </CardButton>
                 </ButtonHider>
               </Buttons>
