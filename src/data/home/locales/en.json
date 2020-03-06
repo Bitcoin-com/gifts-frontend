@@ -40,7 +40,8 @@
     "refundAddress": "Your refund address",
     "localCurrency": "Selected Currency",
     "changeCurrency": "Change tip currency",
-    "expirationDate": "Expiration date",
+    "expirationDate": "Choose custom expiration date",
+    "expirationDateSelect": "Expiration date",
     "emailAddress": "Email address (optional)"
   },
   "buttons": {

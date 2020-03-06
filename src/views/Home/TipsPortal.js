@@ -57,6 +57,7 @@ import {
   ApiErrorCard,
   ApiErrorWarning,
   ApiErrorPopupMsg,
+  CustomSelect,
 } from './styled';
 import Tip from './Tip';
 // disable PDF functionality
@@ -191,6 +192,9 @@ class TipsPortal extends React.Component {
       this,
     );
     this.shareTip = this.shareTip.bind(this);
+    this.handleSelectedExpirationDateChange = this.handleSelectedExpirationDateChange.bind(
+      this,
+    );
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -228,6 +232,7 @@ class TipsPortal extends React.Component {
       generatingInvoice: false,
       importingMnemonic: false,
       apiPostFailed: false,
+      customExpirationDate: false,
     };
   }
 
@@ -257,9 +262,9 @@ class TipsPortal extends React.Component {
   }
 
   setDefaultExpirationDate() {
-    // Set expiration date to now + 3 months
+    // Set expiration date to now + 1 month
     const { formData } = this.state;
-    const expirationOffset = 3; // months
+    const expirationOffset = 1; // months
     const expirationDefault = new Date();
 
     expirationDefault.setMonth(expirationDefault.getMonth() + expirationOffset);
@@ -494,6 +499,49 @@ class TipsPortal extends React.Component {
     }
     return field;
   };
+
+  handleSelectedExpirationDateChange(e) {
+    const { formData, customExpirationDate } = this.state;
+    // today
+    const now = new Date();
+
+    const dateSelection = e.value;
+    if (dateSelection === 'custom') {
+      return this.setState({ customExpirationDate: true });
+    }
+    if (customExpirationDate) {
+      this.setState({ customExpirationDate: false });
+    }
+    let expirationDate;
+
+    switch (dateSelection) {
+      case 'tenMinutes':
+        expirationDate = new Date(now.setTime(now.getTime() + 10 * 60000));
+        break;
+      case 'twoWeeks':
+        expirationDate = new Date(now.setDate(now.getDate() + 14));
+        break;
+      case 'oneMonth':
+        expirationDate = new Date(now.setMonth(now.getMonth() + 1));
+        break;
+      case 'threeMonths':
+        expirationDate = new Date(now.setMonth(now.getMonth() + 3));
+        break;
+      default:
+        // 3 months
+        expirationDate = new Date(now.setMonth(now.getMonth() + 3));
+    }
+    const field = {};
+    field.value = expirationDate;
+    field.error = null;
+    field.state = inputState.valid;
+    return this.setState({
+      formData: {
+        ...formData,
+        [`expirationDate`]: field,
+      },
+    });
+  }
 
   // eslint-disable-next-line class-methods-use-this
   shareTip(e) {
@@ -1071,6 +1119,7 @@ class TipsPortal extends React.Component {
       apiPostFailed: false,
       importingMnemonic: false,
       generatingInvoice: false,
+      customExpirationDate: false,
     });
   }
 
@@ -1664,6 +1713,7 @@ class TipsPortal extends React.Component {
       generatingInvoice,
       importingMnemonic,
       apiPostFailed,
+      customExpirationDate,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1677,6 +1727,20 @@ class TipsPortal extends React.Component {
       { value: 'AUD', label: 'AUD' },
       { value: 'HKD', label: 'HKD' },
       { value: 'CAD', label: 'CAD' },
+    ];
+
+    const tenMinutes = 'tenMinutes';
+    const twoWeeks = 'twoWeeks';
+    const oneMonth = 'oneMonth';
+    const threeMonths = 'threeMonths';
+    const custom = 'custom';
+
+    const expirationDateOptions = [
+      { value: tenMinutes, label: '10 minutes' },
+      { value: twoWeeks, label: '2 weeks' },
+      { value: oneMonth, label: '1 month' },
+      { value: threeMonths, label: '3 months' },
+      { value: custom, label: 'Custom' },
     ];
 
     const printingTips = [];
@@ -2069,14 +2133,24 @@ class TipsPortal extends React.Component {
 
                     <InputWrapper show>
                       <InputLabel>
+                        <FormattedMessage id="home.labels.expirationDateSelect" />{' '}
+                        <Red>*</Red>
+                      </InputLabel>
+                      <CustomSelect
+                        onChange={this.handleSelectedExpirationDateChange}
+                        options={expirationDateOptions}
+                        defaultValue={expirationDateOptions[2]}
+                      />
+                    </InputWrapper>
+
+                    <InputWrapper show={customExpirationDate}>
+                      <InputLabel>
                         <FormattedMessage id="home.labels.expirationDate" />{' '}
                         <Red>*</Red>
                       </InputLabel>
                       <CustomDatePicker
                         selected={formData.expirationDate.value}
                         onChange={this.handleExpirationDateChange} // only when value has changed
-                        showTimeSelect
-                        timeIntervals={1}
                       />
                       <InputError>{formData.expirationDate.error}</InputError>
                     </InputWrapper>
@@ -2287,7 +2361,7 @@ class TipsPortal extends React.Component {
             <Select
               onChange={this.handleSelectedCurrencyChangeFromSelect}
               options={selectCurrencies}
-              selectedOption={selectCurrencies[0]}
+              defaultValue={selectCurrencies[0]}
               isSearchable
             />
           </InputWrapper>
