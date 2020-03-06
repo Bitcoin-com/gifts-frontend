@@ -72,6 +72,16 @@ const bitbox = new BITBOX({
 });
 
 const inputState = { untouched: 0, valid: 1, invalid: 2 };
+
+// set api here
+// Prod
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
+// Dev
+// const giftsBackendBase = 'http://localhost:3001';
+
+const giftsBackend = `${giftsBackendBase}/setClaimChecks`;
+const giftsQuery = `${giftsBackendBase}/tips`; // :creationTxid
+
 const appStates = {
   initial: 0,
   seedGenerated: 1,
@@ -228,6 +238,7 @@ class TipsPortal extends React.Component {
       invoiceTxid: '',
       // eslint-disable-next-line react/no-unused-state
       returnTxInfos: [], // used for debugging
+      importedGiftInfo: [],
       generatingInvoice: false,
       importingMnemonic: false,
       apiPostFailed: false,
@@ -515,6 +526,9 @@ class TipsPortal extends React.Component {
     let expirationDate;
 
     switch (dateSelection) {
+      case 'twoMinutes':
+        expirationDate = new Date(now.setTime(now.getTime() + 2 * 60000));
+        break;
       case 'tenMinutes':
         expirationDate = new Date(now.setTime(now.getTime() + 10 * 60000));
         break;
@@ -665,8 +679,8 @@ class TipsPortal extends React.Component {
     // Dev
     // const api = 'http://localhost:3001/setClaimChecks';
     // Prod
-    const api = 'https://cashtips-api.btctest.net/setClaimChecks';
-    fetch(api, {
+    // const api = 'https://cashtips-api.btctest.net/setClaimChecks';
+    fetch(giftsBackend, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -701,9 +715,9 @@ class TipsPortal extends React.Component {
     // Dev
     // const api = 'http://localhost:3001/setClaimChecks';
     // Prod
-    const api = 'https://cashtips-api.btctest.net/setClaimChecks';
+    // const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     const { returnTxInfos } = this.state;
-    fetch(api, {
+    fetch(giftsBackend, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -1133,6 +1147,7 @@ class TipsPortal extends React.Component {
       generatingInvoice: false,
       customExpirationDate: false,
       returnTxInfos: [],
+      importedGiftInfo: [],
       createExpirationTxsFailed: false,
     });
   }
@@ -1323,14 +1338,44 @@ class TipsPortal extends React.Component {
           claimedTxid: '',
         };
         // determine status
+        let creationTxid;
 
         if (
           txHistory.length === 1 &&
           (addrDetails.balance > 0 || addrDetails.unconfirmedBalanceSat > 0)
         ) {
           firstTipWallet.status = 'funded';
+          // get creation txid
+          // eslint-disable-next-line prefer-destructuring
+          creationTxid = txHistory[0];
         } else if (txHistory.length > 1 && addrDetails.balance === 0) {
           firstTipWallet.status = 'claimed';
+          creationTxid = txHistory[txHistory.length - 1];
+        }
+
+        // console.log(`Creation txid: ${creationTxid}`);
+        const queryApi = `${giftsQuery}/${creationTxid}`;
+        let importedGiftInfo;
+        let importedGiftInfoJson;
+
+        try {
+          importedGiftInfo = await fetch(queryApi);
+          // console.log(`Fetched importedGiftInfo:`);
+          // console.log(importedGiftInfo);
+          try {
+            importedGiftInfoJson = await importedGiftInfo.json();
+            // console.log(`Fetched importedGiftInfo:`);
+            // console.log(importedGiftInfoJson);
+            // console.log(`Server Data for Gifts at Imported Seed:`);
+            const importedGifts = importedGiftInfoJson.result;
+            // console.log(importedGifts);
+
+            this.setState({ importedGiftInfo: importedGifts });
+          } catch (err) {
+            console.log(`Error parsing gift info from server to json`);
+          }
+        } catch (err) {
+          console.log(`Error getting tip info from server`);
         }
 
         firstTipWallet.addr = fundingAddress;
@@ -1470,6 +1515,8 @@ class TipsPortal extends React.Component {
     }
 
     // Calculate tip amounts
+
+    // If imported successfully, use those
 
     const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${selectedCurrency}`;
     let price;
@@ -1742,6 +1789,7 @@ class TipsPortal extends React.Component {
       tipWallets,
       invoiceUrl,
       importedMnemonic,
+      importedGiftInfo,
       calculatedFiatAmount,
       tipsFunded,
       appState,
@@ -1773,6 +1821,7 @@ class TipsPortal extends React.Component {
       { value: 'CAD', label: 'CAD' },
     ];
 
+    const twoMinutes = 'twoMinutes';
     const tenMinutes = 'tenMinutes';
     const twoWeeks = 'twoWeeks';
     const oneMonth = 'oneMonth';
@@ -1780,6 +1829,7 @@ class TipsPortal extends React.Component {
     const custom = 'custom';
 
     const expirationDateOptions = [
+      { value: twoMinutes, label: '2 minutes' },
       { value: tenMinutes, label: '10 minutes' },
       { value: twoWeeks, label: '2 weeks' },
       { value: oneMonth, label: '1 month' },
@@ -1806,7 +1856,25 @@ class TipsPortal extends React.Component {
       'Dec',
     ];
     const dateStr = `${monthNames[today.getMonth()]} ${date}, ${year}`;
-    let expirationDate = formData.expirationDate.value;
+
+    let expirationDate;
+    let giftInfoSuccess = false;
+    let giftInfoFiatCurrency = selectedCurrency;
+    let giftInfoFiatAmount = calculatedFiatAmount;
+
+    if (importedMnemonic) {
+      try {
+        expirationDate = importedGiftInfo[0].expirationStamp * 1000;
+        giftInfoFiatCurrency = importedGiftInfo[0].fiatCode;
+        giftInfoFiatAmount = importedGiftInfo[0].fiatAmount;
+        giftInfoSuccess = true;
+      } catch (err) {
+        expirationDate = formData.expirationDate.value;
+      }
+    } else {
+      expirationDate = formData.expirationDate.value;
+    }
+
     if (expirationDate !== '') {
       expirationDate = new Date(expirationDate);
       const expirationDay = expirationDate.getDate();
@@ -1834,9 +1902,9 @@ class TipsPortal extends React.Component {
             fiatAmount={
               calculatedFiatAmount === null
                 ? formData.tipAmountFiat.value
-                : calculatedFiatAmount
+                : giftInfoFiatAmount
             }
-            fiatCurrency={selectedCurrency}
+            fiatCurrency={giftInfoFiatCurrency}
             dateStr={dateStr}
             expirationDate={expirationDate}
             status={tipWallet.status}
@@ -1967,7 +2035,7 @@ class TipsPortal extends React.Component {
               {showSweepForm && (
                 <React.Fragment>
                   <AddressForm
-                    id="userRefundAddressForm"
+                    id="userRefundAddressFormOnImport"
                     onSubmit={this.sweepAllTips}
                     show={sweptTxid === null && !tipsAlreadySweptError}
                   >
@@ -1994,7 +2062,7 @@ class TipsPortal extends React.Component {
                   <Buttons show={sweptTxid === null && !tipsAlreadySweptError}>
                     <CardButton
                       type="submit"
-                      form="userRefundAddressForm"
+                      form="userRefundAddressFormOnImport"
                       primary
                       onClick={this.handleSweepAllTipsButton}
                       action="submit"
@@ -2193,7 +2261,7 @@ class TipsPortal extends React.Component {
                       <CustomSelect
                         onChange={this.handleSelectedExpirationDateChange}
                         options={expirationDateOptions}
-                        defaultValue={expirationDateOptions[2]}
+                        defaultValue={expirationDateOptions[3]}
                       />
                     </InputWrapper>
 
@@ -2400,7 +2468,7 @@ class TipsPortal extends React.Component {
           <SweepAllCard
             title="Want your money back?"
             className="noPrint"
-            show={!importedMnemonic && tipWallets.length > 0 && tipsFunded}
+            show={tipWallets.length > 0 && tipsFunded}
           >
             <SweepInstructions>
               You can send all the BCH from your unclaimed tips to a single
@@ -2463,7 +2531,10 @@ class TipsPortal extends React.Component {
               </React.Fragment>
             )}
           </SweepAllCard>
-          <InputWrapper className="noPrint" show={importedMnemonic}>
+          <InputWrapper
+            className="noPrint"
+            show={importedMnemonic && !giftInfoSuccess}
+          >
             <InputLabel>
               <FormattedMessage id="home.labels.changeCurrency" /> <Red>*</Red>
             </InputLabel>
