@@ -55,6 +55,11 @@ export const ApiErrorPopupMsg = styled.div`
   border-radius: 5px;
 `;
 
+export const SweepAllCard = styled(Card)`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  margin-top: 24px;
+`;
+
 export const ApiErrorCard = styled(Card)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   margin-top: ${theme.spacing.unit * 3}px;
@@ -192,6 +197,10 @@ export const SeedWrapper = styled.div`
   }
 `;
 export const SeedWarning = styled.p``;
+export const SweepInstructions = styled.p`
+  margin-top: 0px;
+  padding: 0px 24px;
+`;
 
 export const CustomCardContainer = styled(CardContainer)`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
