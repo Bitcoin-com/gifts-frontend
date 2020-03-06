@@ -195,6 +195,7 @@ class TipsPortal extends React.Component {
     this.handleSelectedExpirationDateChange = this.handleSelectedExpirationDateChange.bind(
       this,
     );
+    this.retryInvoiceSuccess = this.retryInvoiceSuccess.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -230,6 +231,7 @@ class TipsPortal extends React.Component {
       generatingInvoice: false,
       importingMnemonic: false,
       apiPostFailed: false,
+      createExpirationTxsFailed: false,
       customExpirationDate: false,
     };
   }
@@ -728,7 +730,11 @@ class TipsPortal extends React.Component {
     );
   }
 
-  async createExpirationTxs() {
+  retryInvoiceSuccess() {
+    this.setState({ createExpirationTxsFailed: false }, this.invoiceSuccess);
+  }
+
+  createExpirationTxs() {
     // console.log(`createExpirationTxs`);
     // Function is similar to sweepAllTips, however creates a rawTx for each input instead of one sweep tx
     // Build this for the case of "you just made the tips" first; simpler than the import case
@@ -757,99 +763,106 @@ class TipsPortal extends React.Component {
     });
     // TODO can you get batch utxos from more than 20 addresses?
     // check balances of addresses in one async batch
+    bitbox.Address.utxo(sweepAddresses).then(
+      u => {
+        for (let i = 0; i < u.length; i += 1) {
+          // utxos come back in same order they were sent
+          sweepBuilder[i].utxos = u[i].utxos;
+        }
+        // now make return txs
+        const returnRawTxs = [];
+        for (let i = 0; i < sweepBuilder.length; i += 1) {
+          const transactionBuilder = new bitbox.TransactionBuilder();
+          let originalAmount = 0;
+          // Only 1 utxo, what you just paid
+          const utxo = sweepBuilder[i].utxos[0];
+          originalAmount += utxo.satoshis;
+          transactionBuilder.addInput(utxo.txid, utxo.vout);
+          if (originalAmount < 1) {
+            returnRawTxs[
+              i
+            ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
+          }
+          // Calc fee for 1 input 1 output
+          const byteCount = bitbox.BitcoinCash.getByteCount(
+            { P2PKH: 1 },
+            { P2PKH: 1 },
+          );
+          // Make fee 2 sat/byte to make sure even smallest tips get swept
+          const fee = Math.ceil(2 * byteCount);
+          // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+          const sendAmount = originalAmount - fee;
 
-    const u = await bitbox.Address.utxo(sweepAddresses);
+          // add output w/ address and amount to send
+          transactionBuilder.addOutput(refundAddress, sendAmount);
+          // Loop through each input and sign
+          let redeemScript;
+          // Sign your input (only 1)
+
+          const keyPair = sweepBuilder[i].ecPair;
+
+          transactionBuilder.sign(
+            0,
+            keyPair,
+            redeemScript,
+            transactionBuilder.hashTypes.SIGHASH_ALL,
+            utxo.satoshis,
+          );
+
+          // build tx
+          const tx = transactionBuilder.build();
+          // output rawhex
+          const hex = tx.toHex();
+          returnRawTxs.push(hex);
+        }
+        // console.log(returnRawTxs);
+
+        // Build & set the server broadcast object in state
+        const returnTxInfos = [];
+        for (let i = 0; i < returnRawTxs.length; i += 1) {
+          const returnTxInfo = {};
+          // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
+
+          const fiatAmount = formData.tipAmountFiat.value;
+          // Calculate this for each tip in case you add a feature for tips of diff value later
+          const fiatRate = parseFloat(
+            (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
+          );
+          const expirationStamp = Math.round(
+            formData.expirationDate.value.getTime() / 1000,
+          );
+          const tipAddress = tipWallets[i].addr;
+          const tipNote = tipWallets[i].callsign;
+
+          returnTxInfo.creationPaymentUrl = invoiceUrl;
+          returnTxInfo.creationTxid = invoiceTxid;
+          returnTxInfo.fiatCode = selectedCurrency;
+          returnTxInfo.fiatAmount = fiatAmount;
+          returnTxInfo.fiatRate = fiatRate;
+
+          returnTxInfo.email = formData.emailAddress.value;
+          returnTxInfo.rawTx = returnRawTxs[i];
+          returnTxInfo.expirationStamp = expirationStamp;
+          returnTxInfo.tipAddress = tipAddress;
+          returnTxInfo.tipNote = tipNote;
+          returnTxInfo.refundAddress = refundAddress;
+          returnTxInfos.push(returnTxInfo);
+        }
+        console.log(returnTxInfos);
+        return this.postReturnTxInfos(returnTxInfos);
+      },
+      err => {
+        console.log(`Error in bitbox.Address.utxo(sweepAddresses)`);
+        console.log(err);
+        return this.setState({ createExpirationTxsFailed: true });
+        // Handle this error, let user retry invoiceSuccess
+      },
+    );
 
     // Add the utxos to the sweepbuilder array
     // iterate over utxo object
     // if the address matches a sweepbuilder entry, add it to that entry
     // might be best to do this step in the txbuilder loop
-
-    for (let i = 0; i < u.length; i += 1) {
-      // utxos come back in same order they were sent
-      sweepBuilder[i].utxos = u[i].utxos;
-    }
-    // now make return txs
-    const returnRawTxs = [];
-    for (let i = 0; i < sweepBuilder.length; i += 1) {
-      const transactionBuilder = new bitbox.TransactionBuilder();
-      let originalAmount = 0;
-      // Only 1 utxo, what you just paid
-      const utxo = sweepBuilder[i].utxos[0];
-      originalAmount += utxo.satoshis;
-      transactionBuilder.addInput(utxo.txid, utxo.vout);
-      if (originalAmount < 1) {
-        returnRawTxs[
-          i
-        ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
-      }
-      // Calc fee for 1 input 1 output
-      const byteCount = bitbox.BitcoinCash.getByteCount(
-        { P2PKH: 1 },
-        { P2PKH: 1 },
-      );
-      // Make fee 2 sat/byte to make sure even smallest tips get swept
-      const fee = Math.ceil(2 * byteCount);
-      // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
-      const sendAmount = originalAmount - fee;
-
-      // add output w/ address and amount to send
-      transactionBuilder.addOutput(refundAddress, sendAmount);
-      // Loop through each input and sign
-      let redeemScript;
-      // Sign your input (only 1)
-
-      const keyPair = sweepBuilder[i].ecPair;
-
-      transactionBuilder.sign(
-        0,
-        keyPair,
-        redeemScript,
-        transactionBuilder.hashTypes.SIGHASH_ALL,
-        utxo.satoshis,
-      );
-
-      // build tx
-      const tx = transactionBuilder.build();
-      // output rawhex
-      const hex = tx.toHex();
-      returnRawTxs.push(hex);
-    }
-    // console.log(returnRawTxs);
-
-    // Build & set the server broadcast object in state
-    const returnTxInfos = [];
-    for (let i = 0; i < returnRawTxs.length; i += 1) {
-      const returnTxInfo = {};
-      // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
-
-      const fiatAmount = formData.tipAmountFiat.value;
-      // Calculate this for each tip in case you add a feature for tips of diff value later
-      const fiatRate = parseFloat(
-        (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
-      );
-      const expirationStamp = Math.round(
-        formData.expirationDate.value.getTime() / 1000,
-      );
-      const tipAddress = tipWallets[i].addr;
-      const tipNote = tipWallets[i].callsign;
-
-      returnTxInfo.creationPaymentUrl = invoiceUrl;
-      returnTxInfo.creationTxid = invoiceTxid;
-      returnTxInfo.fiatCode = selectedCurrency;
-      returnTxInfo.fiatAmount = fiatAmount;
-      returnTxInfo.fiatRate = fiatRate;
-
-      returnTxInfo.email = formData.emailAddress.value;
-      returnTxInfo.rawTx = returnRawTxs[i];
-      returnTxInfo.expirationStamp = expirationStamp;
-      returnTxInfo.tipAddress = tipAddress;
-      returnTxInfo.tipNote = tipNote;
-      returnTxInfo.refundAddress = refundAddress;
-      returnTxInfos.push(returnTxInfo);
-    }
-    console.log(returnTxInfos);
-    return this.postReturnTxInfos(returnTxInfos);
   }
 
   invoiceSuccess() {
@@ -865,26 +878,17 @@ class TipsPortal extends React.Component {
           // eslint-disable-next-line prefer-destructuring
           invoiceTxid = res.transactions[0];
         }
-        return this.setState({ invoiceTxid, tipsFunded: true }, async () => {
-          try {
-            await this.createExpirationTxs();
-          } catch (e) {
-            console.log(`Error in createExpirationTxs()`);
-          }
-        });
+        return this.setState(
+          { invoiceTxid, tipsFunded: true },
+          this.createExpirationTxs,
+        );
       },
       err => {
         console.log(`Error in fetching txid of invoice payment transaction`);
         console.log(err);
         return this.setState(
           { invoiceTxid: null, tipsFunded: true },
-          async () => {
-            try {
-              await this.createExpirationTxs();
-            } catch (e) {
-              console.log(`Error in createExpirationTxs()`);
-            }
-          },
+          this.createExpirationTxs,
         );
       },
     );
@@ -965,13 +969,20 @@ class TipsPortal extends React.Component {
       sweepAddresses.push(fromAddr);
       sweepBuilder.push(sweepChunk);
     });
-    console.log(sweepBuilder);
+    // console.log(sweepBuilder);
     // TODO can you get batch utxos from more than 20 addresses?
     // check balances of addresses in one async batch
-    const u = await bitbox.Address.utxo(sweepAddresses);
+    let u;
+    try {
+      u = await bitbox.Address.utxo(sweepAddresses);
+    } catch (err) {
+      console.log(`Error in fetching utxos in sweepAll()`);
+      console.log(err);
+    }
+
     // todo handle errors here with try/catch
-    console.log(`utxos:`);
-    console.log(u);
+    // console.log(`utxos:`);
+    // console.log(u);
 
     // Add the utxos to the sweepbuilder array
     // iterate over utxo object
@@ -983,8 +994,8 @@ class TipsPortal extends React.Component {
       // handle case that not all addresses will have utxos later
       sweepBuilder[i].utxos = u[i].utxos;
     }
-    console.log(`completed sweepBuilder:`);
-    console.log(sweepBuilder);
+    // console.log(`completed sweepBuilder:`);
+    // console.log(sweepBuilder);
 
     // now make that return tx
     const transactionBuilder = new bitbox.TransactionBuilder();
@@ -998,7 +1009,7 @@ class TipsPortal extends React.Component {
         const utxo = sweepBuilder[j].utxos[i];
 
         originalAmount += utxo.satoshis;
-        console.log(`Input ${inputCount + 1}: { ${utxo.txid} , ${utxo.vout}}`);
+        // console.log(`Input ${inputCount + 1}: { ${utxo.txid} , ${utxo.vout}}`);
 
         transactionBuilder.addInput(utxo.txid, utxo.vout);
         inputCount += 1;
@@ -1008,17 +1019,17 @@ class TipsPortal extends React.Component {
       console.log(`originalAmount is 0, handle as error`);
       return this.setState({ tipsAlreadySweptError: true });
     }
-    console.log(`Total inputs: ${inputCount}`);
+    // console.log(`Total inputs: ${inputCount}`);
     const byteCount = bitbox.BitcoinCash.getByteCount(
       { P2PKH: inputCount },
       { P2PKH: 1 },
     );
     // Use 2 sats/byte to avoid any mempool errors
     const fee = Math.ceil(2 * byteCount);
-    console.log(`fee: ${fee}`);
+    // console.log(`fee: ${fee}`);
     // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
     const sendAmount = originalAmount - fee;
-    console.log(`sendAmount: ${sendAmount}`);
+    // console.log(`sendAmount: ${sendAmount}`);
 
     // add output w/ address and amount to send
     transactionBuilder.addOutput(
@@ -1044,23 +1055,24 @@ class TipsPortal extends React.Component {
           utxo.satoshis,
         );
         signedInputCount += 1;
+        /*
         console.log(
           `Signed input ${i} round ${j} with ${sweepBuilder[j].ecPair.d[0]}`,
-        );
+        ); */
       }
     }
     // build tx
     const tx = transactionBuilder.build();
     // output rawhex
     const hex = tx.toHex();
-    console.log(hex);
+    // console.log(hex);
 
     try {
       const txid = await bitbox.RawTransactions.sendRawTransaction([hex]);
       const txidStr = txid[0];
-      console.log(typeof txid);
-      console.log(`txidStr: ${txidStr}`);
-      console.log(`txid: ${txid}`);
+      // console.log(typeof txid);
+      // console.log(`txidStr: ${txidStr}`);
+      // console.log(`txid: ${txid}`);
       // set tips as claimed by this txid
       const claimedTipWallets = [];
       tipWallets.forEach(tipWallet => {
@@ -1080,6 +1092,7 @@ class TipsPortal extends React.Component {
     } catch (err) {
       console.log(`Error in broadcasting transaction:`);
       console.log(err);
+      // TODO handle error
     }
 
     // ...a thought. you probably must make 1 tx for each tip. probably can't batch a tx from utxos from different addresses...? nah you definitely can...
@@ -1119,6 +1132,8 @@ class TipsPortal extends React.Component {
       importingMnemonic: false,
       generatingInvoice: false,
       customExpirationDate: false,
+      returnTxInfos: [],
+      createExpirationTxsFailed: false,
     });
   }
 
@@ -1741,6 +1756,7 @@ class TipsPortal extends React.Component {
       generatingInvoice,
       importingMnemonic,
       apiPostFailed,
+      createExpirationTxsFailed,
       customExpirationDate,
     } = this.state;
 
@@ -1884,6 +1900,16 @@ class TipsPortal extends React.Component {
               <ApiErrorWarning>Warning!</ApiErrorWarning>
               <ApiErrorWarning>
                 Tip information failed to post to backend. Your tips will not be
+                automatically returned to you on expiration.
+              </ApiErrorWarning>
+            </ApiErrorPopupMsg>
+          </ApiErrorPopup>
+          <ApiErrorPopup open={createExpirationTxsFailed}>
+            <ApiErrorPopupCloser>X</ApiErrorPopupCloser>
+            <ApiErrorPopupMsg>
+              <ApiErrorWarning>Warning!</ApiErrorWarning>
+              <ApiErrorWarning>
+                Error creating your reclaim transactions. Your tips will not be
                 automatically returned to you on expiration.
               </ApiErrorWarning>
             </ApiErrorPopupMsg>
@@ -2285,10 +2311,15 @@ class TipsPortal extends React.Component {
               <ApiErrorWarning>
                 Failed to post your tip expiration claim transactions to the
                 server.
-              </ApiErrorWarning>{' '}
+              </ApiErrorWarning>
               <ApiErrorWarning>
-                Tips will not automatically expire!
-              </ApiErrorWarning>{' '}
+                Your tips will not automatically be returned to your refund
+                address after their expiration date!
+              </ApiErrorWarning>
+              <ApiErrorWarning>
+                Make sure to save your 12-word backup seed above. You can still
+                access your tips with this phrase.
+              </ApiErrorWarning>
               <ApiErrorWarning>
                 Please try to repost your tip information. If the issue
                 persists, contact tips-support@bitcoin.com
@@ -2303,6 +2334,35 @@ class TipsPortal extends React.Component {
                 onClick={this.retryPostReturnTxInfos}
               >
                 Repost
+              </CardButton>
+            </ApiErrorCard>
+          </CustomFlexCardContainer>
+          <CustomFlexCardContainer show={createExpirationTxsFailed}>
+            <ApiErrorCard show={createExpirationTxsFailed}>
+              <ApiErrorWarning>
+                API error while creating your auto-reclaim transactions.
+              </ApiErrorWarning>
+              <ApiErrorWarning>
+                Your tips will not be automatically returned on their expiration
+                date!
+              </ApiErrorWarning>
+              <ApiErrorWarning>
+                Make sure you have written down your 12-word backup seed.
+              </ApiErrorWarning>
+              <ApiErrorWarning>
+                Please try again with the button below. If the issue persists,
+                contact tips-support@bitcoin.com
+              </ApiErrorWarning>
+              <CardButton
+                dark
+                style={{
+                  margin: 'auto',
+                  marginTop: '12px',
+                  zIndex: '1',
+                }}
+                onClick={this.retryInvoiceSuccess}
+              >
+                Retry
               </CardButton>
             </ApiErrorCard>
           </CustomFlexCardContainer>
@@ -2338,7 +2398,7 @@ class TipsPortal extends React.Component {
             ) */}
 
           <SweepAllCard
-            title="Changed your mind?"
+            title="Want your money back?"
             className="noPrint"
             show={!importedMnemonic && tipWallets.length > 0 && tipsFunded}
           >
