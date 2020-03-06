@@ -58,6 +58,8 @@ import {
   ApiErrorWarning,
   ApiErrorPopupMsg,
   CustomSelect,
+  SweepAllCard,
+  SweepInstructions,
 } from './styled';
 import Tip from './Tip';
 // disable PDF functionality
@@ -2229,52 +2231,6 @@ class TipsPortal extends React.Component {
                       <SeedReminder>
                         Save this seed to access your tips in the future.
                       </SeedReminder>
-                      {sweptTxid === null && (
-                        <React.Fragment>
-                          <AddressForm
-                            id="userRefundAddressForm"
-                            onSubmit={this.sweepAllTips}
-                            show={sweptTxid === null}
-                          >
-                            <AddressInputWrapper show>
-                              <AddressInputLabel>
-                                <FormattedMessage id="home.labels.refundAddress" />{' '}
-                                <Red>*</Red>
-                              </AddressInputLabel>
-                              <Input
-                                name="userRefundAddress"
-                                type="text"
-                                value={formData.userRefundAddress.value}
-                                onChange={this.handleUserRefundAddressChange}
-                                placeholder={formatMessage({
-                                  id: 'home.placeholders.userRefundAddress',
-                                })}
-                                required
-                              />
-                              <InputError>
-                                {formData.userRefundAddress.error}
-                              </InputError>
-                            </AddressInputWrapper>
-                          </AddressForm>
-                          <CardButton
-                            type="submit"
-                            form="userRefundAddressForm"
-                            primary
-                            style={{ margin: 'auto', marginBottom: '12px' }}
-                            onClick={this.handleSweepAllTipsButton}
-                            action="submit"
-                          >
-                            <FormattedMessage id="home.buttons.sweepAll" />
-                          </CardButton>
-                        </React.Fragment>
-                      )}
-
-                      <ButtonHider show={sweptTxid !== null}>
-                        {sweepNotice}
-                      </ButtonHider>
-                      <ButtonHider show={tipsAlreadySweptError}>
-                        {tipsAlreadySweptNotice}
-                      </ButtonHider>
                     </React.Fragment>
                   ) : (
                     <React.Fragment>
@@ -2354,6 +2310,73 @@ class TipsPortal extends React.Component {
               }
             </PDFDownloadLink>
             ) */}
+
+          <SweepAllCard
+            title="Changed your mind?"
+            className="noPrint"
+            show={!importedMnemonic && tipWallets.length > 0 && tipsFunded}
+          >
+            <SweepInstructions>
+              You can send all the BCH from your unclaimed tips to a single
+              address in one transaction.
+            </SweepInstructions>
+            <ButtonHider show={!showSweepForm}>
+              <CardButton
+                primary
+                onClick={this.toggleSweepForm}
+                style={{ margin: 'auto' }}
+              >
+                <FormattedMessage id="home.buttons.sweepAll" />
+              </CardButton>
+            </ButtonHider>
+            {showSweepForm && (
+              <React.Fragment>
+                <AddressForm
+                  id="userRefundAddressForm"
+                  onSubmit={this.sweepAllTips}
+                  show={sweptTxid === null && !tipsAlreadySweptError}
+                >
+                  <AddressInputWrapper show>
+                    <AddressInputLabel>
+                      <FormattedMessage id="home.labels.refundAddress" />{' '}
+                      <Red>*</Red>
+                    </AddressInputLabel>
+                    <Input
+                      name="userRefundAddress"
+                      type="text"
+                      value={formData.userRefundAddress.value}
+                      onChange={this.handleUserRefundAddressChange}
+                      placeholder={formatMessage({
+                        id: 'home.placeholders.userRefundAddress',
+                      })}
+                      required
+                    />
+                    <InputError>{formData.userRefundAddress.error}</InputError>
+                  </AddressInputWrapper>
+                </AddressForm>
+                <Buttons show={sweptTxid === null && !tipsAlreadySweptError}>
+                  <CardButton
+                    type="submit"
+                    form="userRefundAddressForm"
+                    primary
+                    onClick={this.handleSweepAllTipsButton}
+                    action="submit"
+                  >
+                    <FormattedMessage id="home.buttons.sweepAll" />
+                  </CardButton>
+                  <CardButton dark onClick={this.toggleSweepForm}>
+                    <FormattedMessage id="home.buttons.goBack" />
+                  </CardButton>
+                </Buttons>
+                <ButtonHider show={sweptTxid !== null}>
+                  {sweepNotice}
+                </ButtonHider>
+                <ButtonHider show={tipsAlreadySweptError}>
+                  {tipsAlreadySweptNotice}
+                </ButtonHider>
+              </React.Fragment>
+            )}
+          </SweepAllCard>
           <InputWrapper className="noPrint" show={importedMnemonic}>
             <InputLabel>
               <FormattedMessage id="home.labels.changeCurrency" /> <Red>*</Red>
