@@ -155,6 +155,11 @@ export const Buttons = styled.div`
     }
   `}
 `;
+export const MobileTipTable = styled(Table)`
+  @media screen and (min-width: 556px) {
+    display: none;
+  }
+`;
 export const TipTable = styled(Table)`
   @media screen and (max-width: 555px) {
     display: none;
@@ -164,12 +169,23 @@ export const TipTable = styled(Table)`
 export const TipTh = styled.td`
   text-align: center;
 `;
+export const MobileTipTh = styled.td`
+  font-weight: bold;
+  text-align: center;
+`;
 export const TipTd = styled.td`
   text-align: center;
 `;
 export const CardButton = styled(Button)``;
+export const MobileButton = styled(Button)``;
 
 export const ButtonHider = styled.div`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+`;
+export const MobileButtonHider = styled.div`
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
 export const WalletCard = styled(Card)`
