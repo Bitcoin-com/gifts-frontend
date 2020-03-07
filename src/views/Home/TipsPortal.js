@@ -41,6 +41,9 @@ import {
   TipTh,
   MobileTipTh,
   BadgerWrap,
+  MobileBadgerCover,
+  DesktopBadgerCover,
+  MobileBadgerUriOpener,
   ButtonHider,
   MobileButtonHider,
   TipContainerWrapper,
@@ -2360,6 +2363,12 @@ class TipsPortal extends React.Component {
                     </tbody>
                   </MobileTipTable>
                   <BadgerWrap>
+                    <MobileBadgerCover>
+                      <a href={invoiceUri}>
+                        <MobileBadgerUriOpener></MobileBadgerUriOpener>
+                      </a>
+                    </MobileBadgerCover>
+                    <DesktopBadgerCover></DesktopBadgerCover>
                     <BadgerButton
                       text={tipsFunded ? 'Tips Funded' : 'Fund Your Tips'}
                       currency={selectedCurrency}
