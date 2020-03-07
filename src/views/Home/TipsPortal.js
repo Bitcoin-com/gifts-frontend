@@ -24,6 +24,7 @@ import htmlToImage from 'html-to-image';
 import {
   PrintableContentBlock,
   CardButton,
+  MobileButton,
   CustomCardContainer,
   CustomFlexCardContainer,
   InputWrapper,
@@ -35,16 +36,19 @@ import {
   WalletCard,
   MakeAndPayTipsCard,
   TipTable,
+  MobileTipTable,
   TipTd,
   TipTh,
+  MobileTipTh,
   BadgerWrap,
   ButtonHider,
+  MobileButtonHider,
   TipContainerWrapper,
   SeedCard,
   SeedWrapper,
   SeedWarning,
   Buttons,
-  CustomInfo,
+  // CustomInfo,
   SeedReminder,
   AddressForm,
   SweepNotice,
@@ -175,6 +179,7 @@ class TipsPortal extends React.Component {
     this.handleConfirmSeedButton = this.handleConfirmSeedButton.bind(this);
     this.handleConfirmedMnemonic = this.handleConfirmedMnemonic.bind(this);
     this.handleSeedCopied = this.handleSeedCopied.bind(this);
+    this.handleUriCopied = this.handleUriCopied.bind(this);
     this.handleSeedSavedConfirmed = this.handleSeedSavedConfirmed.bind(this);
     this.goBackOneStep = this.goBackOneStep.bind(this);
     this.sweepAllTips = this.sweepAllTips.bind(this);
@@ -953,6 +958,14 @@ class TipsPortal extends React.Component {
     if (appState === appStates.seedGenerated) {
       this.setState({ appState: appStates.seedSaved });
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleUriCopied() {
+    toast.notify('Invoice URI copied to clipboard', {
+      position: 'bottom-right',
+      duration: 1500,
+    });
   }
 
   // TODO refactor for try catch on the other await statement
@@ -1857,6 +1870,9 @@ class TipsPortal extends React.Component {
     ];
     const dateStr = `${monthNames[today.getMonth()]} ${date}, ${year}`;
 
+    // Invoice URI
+    const invoiceUri = `bitcoincash:?r=${invoiceUrl}`;
+
     let expirationDate;
     let giftInfoSuccess = false;
     let giftInfoFiatCurrency = selectedCurrency;
@@ -2100,7 +2116,8 @@ class TipsPortal extends React.Component {
             <SeedCard title="Save Your Recovery Seed">
               <SeedWarning>
                 Please write down your recovery seed. This 12-word phrase will
-                be the only way to recover your tips!
+                be the only way to manage your Gifts after closing your browser
+                window!
               </SeedWarning>
               <CopyToClipboard
                 text={walletInfo.mnemonic}
@@ -2320,6 +2337,28 @@ class TipsPortal extends React.Component {
                       </tr>
                     </tbody>
                   </TipTable>
+                  <MobileTipTable>
+                    <tbody>
+                      <tr>
+                        <MobileTipTh>Quantity</MobileTipTh>
+                        <TipTd>{formData.tipCount.value}</TipTd>
+                      </tr>
+                      <tr>
+                        <MobileTipTh>Value per tip</MobileTipTh>
+                        <TipTd>{formData.tipAmountFiat.value.toFixed(2)}</TipTd>
+                      </tr>
+                      <tr>
+                        <MobileTipTh>Currency</MobileTipTh>
+                        <TipTd>{selectedCurrency}</TipTd>
+                      </tr>
+                      <tr>
+                        <MobileTipTh>Expiration</MobileTipTh>
+                        <TipTd>
+                          {formData.expirationDate.value.toString()}
+                        </TipTd>
+                      </tr>
+                    </tbody>
+                  </MobileTipTable>
                   <BadgerWrap>
                     <BadgerButton
                       text={tipsFunded ? 'Tips Funded' : 'Fund Your Tips'}
@@ -2354,8 +2393,33 @@ class TipsPortal extends React.Component {
                     </React.Fragment>
                   ) : (
                     <React.Fragment>
+                      <MobileButtonHider show={!tipsFunded}>
+                        <MobileButton
+                          primary
+                          link
+                          href={invoiceUri}
+                          style={{
+                            margin: 'auto',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <FormattedMessage id="home.buttons.mobilePay" />
+                        </MobileButton>
+                      </MobileButtonHider>
                       <ButtonHider show={!tipsFunded}>
-                        <CustomInfo>Not what you wanted?</CustomInfo>
+                        <CopyToClipboard
+                          text={invoiceUri}
+                          onCopy={() => this.handleUriCopied()}
+                        >
+                          <CardButton
+                            style={{
+                              margin: 'auto',
+                              marginBottom: '12px',
+                            }}
+                          >
+                            <FormattedMessage id="home.buttons.copyUri" />
+                          </CardButton>
+                        </CopyToClipboard>
                       </ButtonHider>
                       <ButtonHider show={!tipsFunded}>
                         <CardButton

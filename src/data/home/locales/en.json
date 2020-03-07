@@ -47,13 +47,15 @@
   "buttons": {
     "createTips": "Generate Tips",
     "goBack": "Back",
-    "copySeed": "Copy to Clipboard",
+    "copyUri": "Copy Invoice",
+    "copySeed": "Copy",
     "sweepAll": "Sweep All",
     "newTips": "Make new tips",
     "loading": "Generating invoice...",
     "loadTips": "Load tips",
     "refresh": "Refresh",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "mobilePay": "Pay in app"
   },
   "placeholders": {
     "tipCount": "Enter desired number of tips",
