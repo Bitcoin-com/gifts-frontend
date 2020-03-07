@@ -135,8 +135,51 @@ export const PrintableContentBlock = styled(ContentBlock)`
   }
 `;
 export const BadgerWrap = styled.div`
+  position: relative;
   margin: auto;
   padding: ${theme.spacing.unit * 3}px;
+  @media screen and (max-width: 768px) {
+    & > div > div > div > div > button > div {
+      display: none;
+    }
+  }
+`;
+export const MobileBadgerCover = styled.div`
+  @media screen and (min-width: 769px) {
+    display: none;
+  }
+  position: absolute;
+  border-radius: 5px;
+  top: 52px;
+  left: 30px;
+  width: 158px;
+  height: 226px;
+  z-index: 2;
+  background-color: transparent;
+`;
+export const DesktopBadgerCover = styled.div`
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+  position: absolute;
+  border-radius: 5px;
+  top: 52px;
+  left: 30px;
+  width: 158px;
+  height: 150px;
+  z-index: 2;
+  background-color: transparent;
+`;
+export const MobileBadgerUriOpener = styled.span`
+  @media screen and (min-width: 769px) {
+    display: none;
+  }
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
 `;
 export const Buttons = styled.div`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
@@ -183,7 +226,7 @@ export const ButtonHider = styled.div`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
 export const MobileButtonHider = styled.div`
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 769px) {
     display: none;
   }
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
