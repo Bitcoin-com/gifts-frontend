@@ -3,6 +3,9 @@ import { theme, media, Paragraph } from 'bitcoincom-storybook';
 import appIcon from '../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../static/images/uploads/gear3x.png';
 import sweepIcon from '../../../../static/images/uploads/sweep3x.png';
+import appIconOG from '../../../../static/images/uploads/applogogrey.png';
+import gearIconOG from '../../../../static/images/uploads/ic_settings_active_orange.svg';
+import sweepIconOG from '../../../../static/images/uploads/ic_receive_orange.svg';
 
 export const SnapshotHolder = styled.div`
   background-color: #fff;
@@ -167,6 +170,24 @@ export const StepTwo = styled.li`
 export const StepThree = styled.li`
   background: url(${sweepIcon}) no-repeat left center;
   background-size: 16px;
+  padding-left: 24px;
+  margin: 12px 6px 0px 6px;
+`;
+export const StepOneOG = styled.li`
+  background: url(${appIconOG}) no-repeat left center;
+  background-size: 16px;
+  padding-left: 24px;
+  margin: 12px 6px;
+`;
+export const StepTwoOG = styled.li`
+  background: url(${gearIconOG}) no-repeat left center;
+  background-size: 16px;
+  padding-left: 24px;
+  margin: 12px 6px;
+`;
+export const StepThreeOG = styled.li`
+  background: url(${sweepIconOG}) no-repeat left center;
+  background-size: 15px;
   padding-left: 24px;
   margin: 12px 6px 0px 6px;
 `;

@@ -526,14 +526,16 @@ class TipsPortal extends React.Component {
     return field;
   };
 
-  toggleGiftNames() {
-    const { showGiftNames } = this.state;
-    this.setState({ showGiftNames: !showGiftNames });
+  toggleGiftNames(e) {
+    const { target } = e;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    this.setState({ showGiftNames: value });
   }
 
-  toggleOldSchool() {
-    const { oldSchool } = this.state;
-    this.setState({ oldSchool: !oldSchool });
+  toggleOldSchool(e) {
+    const { target } = e;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    this.setState({ oldSchool: value });
   }
 
   handleSelectedExpirationDateChange(e) {
@@ -2589,7 +2591,9 @@ class TipsPortal extends React.Component {
             <ControlPanelForm style={{ margin: 'auto' }}>
               <InputWrapper show>
                 <Checkbox
+                  name="showGiftNames"
                   text="Show gift names?"
+                  checked={showGiftNames}
                   onChange={this.toggleGiftNames}
                 ></Checkbox>
               </InputWrapper>

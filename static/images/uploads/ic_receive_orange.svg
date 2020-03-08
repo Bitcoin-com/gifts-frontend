@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="15px" viewBox="0 0 15 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 60 (88103) - https://sketch.com -->
+    <title>ic_receive_green</title>
+    <desc>Created with Sketch.</desc>
+    <g id="ic_receive_green" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="qr-code-scan" stroke="#a8a8a8">
+            <rect id="Rectangle" x="3.28125" y="3.28125" width="1.875" height="1.875"></rect>
+            <rect id="Rectangle" x="3.28125" y="9.84375" width="1.875" height="1.875"></rect>
+            <rect id="Rectangle" x="9.84375" y="3.28125" width="1.875" height="1.875"></rect>
+            <polyline id="Path" points="3.28125 7.96875 7.03125 7.96875 7.03125 8.90625"></polyline>
+            <polyline id="Path" points="8.90625 8.90625 8.90625 11.71875 11.71875 11.71875 11.71875 8.90625 10.78125 8.90625"></polyline>
+            <line x1="7.03125" y1="10.78125" x2="7.03125" y2="11.71875" id="Path"></line>
+            <polyline id="Path" points="7.03125 3.28125 7.03125 6.09375 7.96875 6.09375"></polyline>
+            <line x1="9.84375" y1="7.03125" x2="11.71875" y2="7.03125" id="Path"></line>
+            <path d="M0.46875,3.75 L0.46875,1.40625 C0.46875,0.888483047 0.888483047,0.46875 1.40625,0.46875 L3.75,0.46875" id="Path"></path>
+            <path d="M11.25,0.46875 L13.59375,0.46875 C14.111517,0.46875 14.53125,0.888483047 14.53125,1.40625 L14.53125,3.75" id="Path"></path>
+            <path d="M14.53125,11.25 L14.53125,13.59375 C14.53125,14.111517 14.111517,14.53125 13.59375,14.53125 L11.25,14.53125" id="Path"></path>
+            <path d="M3.75,14.53125 L1.40625,14.53125 C0.888483047,14.53125 0.46875,14.111517 0.46875,13.59375 L0.46875,11.25" id="Path"></path>
+        </g>
+    </g>
+</svg>
