@@ -68,6 +68,11 @@ export const StatusTd = styled.td`
   color: ${({ funded = false }) => (funded === true ? '#0fcb97;' : '#000')};
   font-weight: ${({ funded = false }) => (funded === true ? 'bold;' : 'none')};
 `;
+export const StatusTdOldschool = styled.td`
+  text-align: left;
+  color: ${({ funded = false }) => (funded === true ? '#F59332 ;' : '#000')};
+  font-weight: ${({ funded = false }) => (funded === true ? 'bold;' : 'none')};
+`;
 export const ShareIcon = styled.img`
   padding: 3px 3px 0px 5px;
 `;
@@ -88,8 +93,9 @@ export const TipAmount = styled.div`
   margin-top: 0px;
   padding: 6px 0px 4px;
   text-align: center;
-  background-color: #0fcb97;
   color: #fff;
+  background-color: ${({ oldSchool = false }) =>
+    oldSchool === true ? '#F59332;' : '#0fcb97;'};
 `;
 export const TipHeader = styled.div`
   margin: 0;
@@ -123,7 +129,8 @@ export const Content = styled.div`
 export const TipExchangeRate = styled.div`
   padding: 3px 0px;
   text-align: center;
-  background-color: #006531;
+  background-color: ${({ oldSchool = false }) =>
+    oldSchool === true ? '#4d4d4d;' : '#006531;'};
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -136,6 +143,7 @@ export const HowToClaimLabel = styled.div`
 `;
 export const HowToClaim = styled.div`
   font-size: 13px;
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
 `;
 export const HowToList = styled.ul`
   text-align: left;

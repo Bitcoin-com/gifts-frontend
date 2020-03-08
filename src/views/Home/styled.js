@@ -60,6 +60,15 @@ export const SweepAllCard = styled(Card)`
   margin-top: 24px;
 `;
 
+export const GiftsControlPanel = styled(Card)`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  margin-top: 24px;
+`;
+export const ControlPanelForm = styled.div`
+  text-align: left;
+  margin: 24px auto;
+`;
+
 export const ApiErrorCard = styled(Card)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   margin-top: ${theme.spacing.unit * 3}px;
@@ -295,7 +304,7 @@ export const TipsWrapper = styled.div`
 `;
 export const TipContainerWrapper = styled.div`
   margin: auto;
-  margin-top: ${theme.spacing.unit * 6}px;
+
   width: ${props => props.maxWidth || '100%'};
   @media only screen and (max-width: 424px) {
   max-width: 2.5in;

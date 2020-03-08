@@ -22,13 +22,16 @@ import {
   StatusTable,
   LabelTd,
   StatusTd,
+  StatusTdOldschool,
   ShareIcon,
   SnapshotHolder,
   ShareButton,
 } from './styled';
 // import bchLogo from '../../../../static/images/uploads/bch-logo.png';
 import bchLogo from '../../../../static/images/uploads/bch-logo-2.png';
+import bchLogoOldSchool from '../../../../static/images/uploads/bch-logo-oldschool.png';
 import tipsLogo from '../../../../static/images/uploads/logo-min.png';
+import oldSchoolGiftsLogo from '../../../../static/images/uploads/bitcoin-cash-logo-horizontal-small.png';
 import dotComLogo from '../../../../static/images/uploads/logo_black.png';
 import shareIcon from '../../../../static/images/uploads/share-24px.svg';
 
@@ -39,69 +42,97 @@ const Tip = ({
   dateStr,
   expirationDate,
   share,
+  showGiftNames,
+  oldSchool,
 }) => (
   <TipWrapper className={tipWallet.status === 'funded' ? 'print' : 'printHide'}>
     <SnapshotHolder id={tipWallet.addr.substr(12)}>
       <TipHeader>
-        <img src={tipsLogo} alt="Bitcoin Cash Tips" />
+        {oldSchool ? (
+          <img src={oldSchoolGiftsLogo} alt="Bitcoin Cash Tips" />
+        ) : (
+          <img src={tipsLogo} alt="Bitcoin Cash Tips" />
+        )}
       </TipHeader>
 
-      <TipAmount>
+      <TipAmount oldSchool={oldSchool}>
         <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
         <FiatAmount>
-          ~ {fiatAmount} {fiatCurrency}
+          {tipWallet.sats !== 0 ? (
+            <React.Fragment>
+              ~ {fiatAmount} {fiatCurrency}
+            </React.Fragment>
+          ) : (
+            <React.Fragment>0 {fiatCurrency}</React.Fragment>
+          )}
         </FiatAmount>
       </TipAmount>
       {dateStr !== null && (
-        <TipExchangeRate>
-          1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-          {fiatCurrency} on {dateStr}
+        <TipExchangeRate oldSchool={oldSchool}>
+          {tipWallet.sats !== 0 ? (
+            <React.Fragment>
+              1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+              {fiatCurrency} on {dateStr}
+            </React.Fragment>
+          ) : (
+            <React.Fragment>&nbsp;</React.Fragment>
+          )}
         </TipExchangeRate>
       )}
       {tipWallet.status === 'funded' ? (
         <React.Fragment>
           {/* <ScanLabel>Download the Bitcoin.com wallet and scan to claim</ScanLabel> */}
-          <QRCode
-            id="borderedQRCode"
-            value={tipWallet.wif}
-            size={125}
-            logoImage={bchLogo}
-            logoWidth={32}
-            qrStyle="squares"
-            ecLevel="M"
-            quietZone={10}
-            bgColor="#fff"
-          />
-          {expirationDate !== '' && (
-            <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
+          {oldSchool ? (
+            <QRCode
+              id="borderedQRCode"
+              value={tipWallet.wif}
+              size={125}
+              logoImage={bchLogoOldSchool}
+              logoOpacity={0.5}
+              logoWidth={64}
+              qrStyle="dots"
+              ecLevel="H"
+              quietZone={10}
+              bgColor="#fff"
+              fgColor="#4d4d4d"
+            />
+          ) : (
+            <QRCode
+              id="borderedQRCode"
+              value={tipWallet.wif}
+              size={125}
+              logoImage={bchLogo}
+              logoWidth={32}
+              qrStyle="squares"
+              ecLevel="M"
+              quietZone={10}
+              bgColor="#fff"
+            />
           )}
-
-          <HowToClaim>
-            <HowToList>
-              <StepOne>
-                Download the <DotComImg src={dotComLogo} /> wallet
-              </StepOne>
-              <StepTwo>Select &quot;Settings&quot;</StepTwo>
-              <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
-            </HowToList>
-          </HowToClaim>
         </React.Fragment>
       ) : (
         <React.Fragment>
           <ClaimedBlock>[Claimed]</ClaimedBlock>
-          {expirationDate !== '' && (
-            <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
-          )}
-          <HowToClaim>
-            <HowToList>
-              <StepOne>
-                Download the <DotComImg src={dotComLogo} /> wallet
-              </StepOne>
-              <StepTwo>Select &quot;Settings&quot;</StepTwo>
-              <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
-            </HowToList>
-          </HowToClaim>
         </React.Fragment>
+      )}
+      {expirationDate !== '' && (
+        <TipExchangeRate oldSchool={oldSchool}>
+          Claim by {expirationDate}
+        </TipExchangeRate>
+      )}
+      <HowToClaim show={!oldSchool}>
+        <HowToList>
+          <StepOne>
+            Download the <DotComImg src={dotComLogo} /> wallet
+          </StepOne>
+          <StepTwo>Select &quot;Settings&quot;</StepTwo>
+          <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
+        </HowToList>
+      </HowToClaim>
+      {showGiftNames && (
+        <TipExchangeRate oldSchool={oldSchool}>
+          Gift Name: {tipWallet.callsign}
+        </TipExchangeRate>
       )}
     </SnapshotHolder>
     <StatusWrap className="printHide">
@@ -109,26 +140,49 @@ const Tip = ({
         <tbody>
           <tr>
             <LabelTd>Status:</LabelTd>
-            <StatusTd funded={tipWallet.status === 'funded'}>
-              {tipWallet.status === 'funded' ? (
-                'Unclaimed'
-              ) : (
-                <React.Fragment>
-                  {tipWallet.claimedTxid !== undefined &&
-                  tipWallet.claimedTxid !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
-                    >
-                      Claimed
-                    </a>
-                  ) : (
-                    `Claimed`
-                  )}
-                </React.Fragment>
-              )}
-            </StatusTd>
+            {oldSchool ? (
+              <StatusTdOldschool funded={tipWallet.status === 'funded'}>
+                {tipWallet.status === 'funded' ? (
+                  'Unclaimed'
+                ) : (
+                  <React.Fragment>
+                    {tipWallet.claimedTxid !== undefined &&
+                    tipWallet.claimedTxid !== '' ? (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
+                      >
+                        Claimed
+                      </a>
+                    ) : (
+                      `Claimed`
+                    )}
+                  </React.Fragment>
+                )}
+              </StatusTdOldschool>
+            ) : (
+              <StatusTd funded={tipWallet.status === 'funded'}>
+                {tipWallet.status === 'funded' ? (
+                  'Unclaimed'
+                ) : (
+                  <React.Fragment>
+                    {tipWallet.claimedTxid !== undefined &&
+                    tipWallet.claimedTxid !== '' ? (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
+                      >
+                        Claimed
+                      </a>
+                    ) : (
+                      `Claimed`
+                    )}
+                  </React.Fragment>
+                )}
+              </StatusTd>
+            )}
           </tr>
           <tr>
             <LabelTd>Label:</LabelTd>
@@ -157,6 +211,8 @@ Tip.propTypes = {
     claimedTxid: PropTypes.string,
   }).isRequired,
   share: PropTypes.func.isRequired,
+  showGiftNames: PropTypes.bool.isRequired,
+  oldSchool: PropTypes.bool.isRequired,
 };
 
 Tip.defaultProps = {
