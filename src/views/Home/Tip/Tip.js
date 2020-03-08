@@ -29,6 +29,11 @@ import {
   ShareIcon,
   SnapshotHolder,
   ShareButton,
+  ShareMenu,
+  ShareMenuList,
+  ShareMenuButton,
+  ShareMenuButtonSpan,
+  ShareMenuListItem,
 } from './styled';
 // import bchLogo from '../../../../static/images/uploads/bch-logo.png';
 import bchLogo from '../../../../static/images/uploads/bch-logo-2.png';
@@ -203,9 +208,32 @@ const Tip = ({
           </tr>
         </tbody>
       </StatusTable>
-      <ShareButton type="button" data-save="test" onClick={share}>
-        <ShareIcon data-id={tipWallet.addr.substr(12)} src={shareIcon} />
-      </ShareButton>
+      <ShareMenu
+        trigger={
+          <ShareButton type="button">
+            <ShareIcon data-id={tipWallet.addr.substr(12)} src={shareIcon} />
+          </ShareButton>
+        }
+        position="bottom right"
+        on="hover"
+        closeOnDocumentClick
+        mouseLeaveDelay={300}
+        mouseEnterDelay={0}
+        contentStyle={{ padding: '0px', border: 'none', width: '130px' }}
+        arrow={false}
+      >
+        <ShareMenuList>
+          <ShareMenuButton
+            type="button"
+            data-id={tipWallet.addr.substr(12)}
+            onClick={share}
+          >
+            PNG
+          </ShareMenuButton>
+
+          {/* <ShareMenuListItem>pdf</ShareMenuListItem> */}
+        </ShareMenuList>
+      </ShareMenu>
     </StatusWrap>
   </TipWrapper>
 );

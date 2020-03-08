@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import Popup from 'reactjs-popup';
 import { theme, media, Paragraph } from 'bitcoincom-storybook';
 import appIcon from '../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../static/images/uploads/gear3x.png';
@@ -6,12 +7,52 @@ import sweepIcon from '../../../../static/images/uploads/sweep3x.png';
 import appIconOG from '../../../../static/images/uploads/applogogrey.png';
 import gearIconOG from '../../../../static/images/uploads/ic_settings_active_orange.svg';
 import sweepIconOG from '../../../../static/images/uploads/ic_receive_orange.svg';
+import downloadIcon from '../../../../static/images/uploads/download.png';
 
+export const ShareMenu = styled(Popup)`
+  width: 130px;
+`;
+export const ShareMenuButton = styled.button`
+  width: 100%;
+  padding: 12px;
+  color: #4d4d4d;
+
+  cursor: pointer;
+  background-color: transparent;
+  background: url(${downloadIcon}) no-repeat left center;
+  border: none;
+  height: 100%;
+  & :hover {
+    background-color: #fff;
+    color: #000;
+  }
+`;
+export const ShareMenuList = styled.div`
+  width: 130px;
+
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  & :hover {
+    background-color: #fff;
+    color: #000;
+  }
+`;
+export const ShareMenuListItem = styled.div`
+  background: url(${downloadIcon}) no-repeat left center;
+  cursor: pointer;
+
+  & :hover {
+    background-color: #4d4d4d;
+    color: #fff;
+  }
+`;
 export const SnapshotHolder = styled.div`
   background-color: #fff;
 `;
 
-export const ShareButton = styled.button`
+export const ShareButton = styled.div`
   & :hover {
     background-color: white;
   }
