@@ -14,6 +14,7 @@ import {
   Input,
   InputSelect,
   Select,
+  Checkbox,
 } from 'bitcoincom-storybook';
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
@@ -65,6 +66,8 @@ import {
   ApiErrorPopupMsg,
   CustomSelect,
   SweepAllCard,
+  GiftsControlPanel,
+  ControlPanelForm,
   SweepInstructions,
 } from './styled';
 import Tip from './Tip';
@@ -214,6 +217,8 @@ class TipsPortal extends React.Component {
       this,
     );
     this.retryInvoiceSuccess = this.retryInvoiceSuccess.bind(this);
+    this.toggleGiftNames = this.toggleGiftNames.bind(this);
+    this.toggleOldSchool = this.toggleOldSchool.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -252,6 +257,8 @@ class TipsPortal extends React.Component {
       apiPostFailed: false,
       createExpirationTxsFailed: false,
       customExpirationDate: false,
+      showGiftNames: false,
+      oldSchool: false,
     };
   }
 
@@ -518,6 +525,16 @@ class TipsPortal extends React.Component {
     }
     return field;
   };
+
+  toggleGiftNames() {
+    const { showGiftNames } = this.state;
+    this.setState({ showGiftNames: !showGiftNames });
+  }
+
+  toggleOldSchool() {
+    const { oldSchool } = this.state;
+    this.setState({ oldSchool: !oldSchool });
+  }
 
   handleSelectedExpirationDateChange(e) {
     const { formData, customExpirationDate } = this.state;
@@ -1165,6 +1182,8 @@ class TipsPortal extends React.Component {
       returnTxInfos: [],
       importedGiftInfo: [],
       createExpirationTxsFailed: false,
+      showGiftNames: false,
+      oldSchool: false,
     });
   }
 
@@ -1822,6 +1841,8 @@ class TipsPortal extends React.Component {
       apiPostFailed,
       createExpirationTxsFailed,
       customExpirationDate,
+      showGiftNames,
+      oldSchool,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1880,12 +1901,14 @@ class TipsPortal extends React.Component {
     let giftInfoSuccess = false;
     let giftInfoFiatCurrency = selectedCurrency;
     let giftInfoFiatAmount = calculatedFiatAmount;
+    let giftInfoGiftQty;
 
     if (importedMnemonic) {
       try {
         expirationDate = importedGiftInfo[0].expirationStamp * 1000;
         giftInfoFiatCurrency = importedGiftInfo[0].fiatCode;
         giftInfoFiatAmount = importedGiftInfo[0].fiatAmount;
+        giftInfoGiftQty = importedGiftInfo.length;
         giftInfoSuccess = true;
       } catch (err) {
         expirationDate = formData.expirationDate.value;
@@ -1928,6 +1951,8 @@ class TipsPortal extends React.Component {
             expirationDate={expirationDate}
             status={tipWallet.status}
             share={this.shareTip}
+            showGiftNames={showGiftNames}
+            oldSchool={oldSchool}
           ></Tip>,
         );
       });
@@ -2005,7 +2030,7 @@ class TipsPortal extends React.Component {
             show={fundingAddress === '' || importedMnemonic}
             columns={!importedMnemonic ? 2 : 1}
           >
-            <WalletCard show={!importedMnemonic} title="Make New Tips">
+            <WalletCard show={!importedMnemonic} title="Make New Gifts">
               <CardButton
                 primary
                 style={{ margin: 'auto' }}
@@ -2014,7 +2039,7 @@ class TipsPortal extends React.Component {
                 <FormattedMessage id="home.buttons.createTips" />
               </CardButton>
             </WalletCard>
-            <Card title="Manage Created Tips">
+            <Card title="Manage Gifts">
               <InputWrapper show>
                 <Input
                   name="importedMnemonic"
@@ -2184,7 +2209,7 @@ class TipsPortal extends React.Component {
             show={appState === appStates.seedConfirmed}
             columns={2}
           >
-            <MakeAndPayTipsCard title={tipsFunded ? '' : 'Create your tips'}>
+            <MakeAndPayTipsCard title={tipsFunded ? '' : 'Build Your Gifts'}>
               {invoiceUrl === '' ? (
                 <React.Fragment>
                   <Form id="createTip" onSubmit={this.handleCreateTipSubmit}>
@@ -2324,7 +2349,7 @@ class TipsPortal extends React.Component {
                     <thead>
                       <tr>
                         <TipTh>Quantity</TipTh>
-                        <TipTh>Value per tip</TipTh>
+                        <TipTh>Value per gift</TipTh>
                         <TipTh>Currency</TipTh>
                         <TipTh>Expiration</TipTh>
                       </tr>
@@ -2347,7 +2372,7 @@ class TipsPortal extends React.Component {
                         <TipTd>{formData.tipCount.value}</TipTd>
                       </tr>
                       <tr>
-                        <MobileTipTh>Value per tip</MobileTipTh>
+                        <MobileTipTh>Value per gift</MobileTipTh>
                         <TipTd>{formData.tipAmountFiat.value.toFixed(2)}</TipTd>
                       </tr>
                       <tr>
@@ -2397,7 +2422,7 @@ class TipsPortal extends React.Component {
                         </CardButton>
                       </CopyToClipboard>
                       <SeedReminder>
-                        Save this seed to access your tips in the future.
+                        Save this seed to access your gifts in the future.
                       </SeedReminder>
                     </React.Fragment>
                   ) : (
@@ -2507,6 +2532,75 @@ class TipsPortal extends React.Component {
               </CardButton>
             </ApiErrorCard>
           </CustomFlexCardContainer>
+          <GiftsControlPanel
+            title="Customize"
+            className="noPrint"
+            show={tipWallets.length > 0 && tipsFunded}
+          >
+            {/* expirationDate = importedGiftInfo[0].expirationStamp * 1000;
+        giftInfoFiatCurrency = importedGiftInfo[0].fiatCode;
+        giftInfoFiatAmount = importedGiftInfo[0].fiatAmount;
+        giftInfoGiftQty = importedGiftInfo.length;
+        giftInfoSuccess = true; */}
+
+            {importedMnemonic && giftInfoSuccess && (
+              <React.Fragment>
+                <TipTable>
+                  <thead>
+                    <tr>
+                      <TipTh>Quantity</TipTh>
+                      <TipTh>Value per gift</TipTh>
+                      <TipTh>Currency</TipTh>
+                      <TipTh>Expiration</TipTh>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <TipTd>{giftInfoGiftQty}</TipTd>
+                      <TipTd>{giftInfoFiatAmount}</TipTd>
+                      <TipTd>{giftInfoFiatCurrency}</TipTd>
+                      <TipTd>{expirationDate}</TipTd>
+                    </tr>
+                  </tbody>
+                </TipTable>
+                <MobileTipTable>
+                  <tbody>
+                    <tr>
+                      <MobileTipTh>Quantity</MobileTipTh>
+                      <TipTd>{giftInfoGiftQty}</TipTd>
+                    </tr>
+                    <tr>
+                      <MobileTipTh>Value per gift</MobileTipTh>
+                      <TipTd>{giftInfoFiatAmount}</TipTd>
+                    </tr>
+                    <tr>
+                      <MobileTipTh>Currency</MobileTipTh>
+                      <TipTd>{giftInfoFiatCurrency}</TipTd>
+                    </tr>
+                    <tr>
+                      <MobileTipTh>Expiration</MobileTipTh>
+                      <TipTd>{expirationDate}</TipTd>
+                    </tr>
+                  </tbody>
+                </MobileTipTable>
+              </React.Fragment>
+            )}
+
+            <ControlPanelForm style={{ margin: 'auto' }}>
+              <InputWrapper show>
+                <Checkbox
+                  text="Show gift names?"
+                  onChange={this.toggleGiftNames}
+                ></Checkbox>
+              </InputWrapper>
+              <InputWrapper show>
+                <Checkbox
+                  text="Start an argument?"
+                  onChange={this.toggleOldSchool}
+                ></Checkbox>
+              </InputWrapper>
+            </ControlPanelForm>
+          </GiftsControlPanel>
           <TipContainerWrapper maxWidth={displayWidth}>
             <TipContainer
               show={tipWallets.length > 0 && tipsFunded}
