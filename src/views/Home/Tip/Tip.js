@@ -18,6 +18,9 @@ import {
   StepOne,
   StepTwo,
   StepThree,
+  StepOneOG,
+  StepTwoOG,
+  StepThreeOG,
   DotComImg,
   StatusTable,
   LabelTd,
@@ -88,8 +91,8 @@ const Tip = ({
               value={tipWallet.wif}
               size={125}
               logoImage={bchLogoOldSchool}
-              logoOpacity={0.5}
-              logoWidth={64}
+              logoOpacity={0.25}
+              logoWidth={125}
               qrStyle="dots"
               ecLevel="H"
               quietZone={10}
@@ -120,13 +123,23 @@ const Tip = ({
           Claim by {expirationDate}
         </TipExchangeRate>
       )}
-      <HowToClaim show={!oldSchool}>
+      <HowToClaim show>
         <HowToList>
-          <StepOne>
-            Download the <DotComImg src={dotComLogo} /> wallet
-          </StepOne>
-          <StepTwo>Select &quot;Settings&quot;</StepTwo>
-          <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
+          {oldSchool ? (
+            <React.Fragment>
+              <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
+              <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
+              <StepThreeOG>Select &quot;Sweep Paper Wallet&quot;</StepThreeOG>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <StepOne>
+                Download the <DotComImg src={dotComLogo} /> wallet
+              </StepOne>
+              <StepTwo>Select &quot;Settings&quot;</StepTwo>
+              <StepThree>Select &quot;Sweep Paper Wallet&quot;</StepThree>
+            </React.Fragment>
+          )}
         </HowToList>
       </HowToClaim>
       {showGiftNames && (
