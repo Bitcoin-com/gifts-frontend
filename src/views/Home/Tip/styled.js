@@ -8,6 +8,7 @@ import appIconOG from '../../../../static/images/uploads/applogogrey.png';
 import gearIconOG from '../../../../static/images/uploads/ic_settings_active_orange.svg';
 import sweepIconOG from '../../../../static/images/uploads/ic_receive_orange.svg';
 import downloadIcon from '../../../../static/images/uploads/download.png';
+import pdfIcon from '../../../../static/images/uploads/pdf.png';
 
 export const ShareMenu = styled(Popup)`
   width: 130px;
@@ -17,10 +18,25 @@ export const ShareMenuButton = styled.button`
   outline: none;
   padding: 12px;
   color: #4d4d4d;
-
   cursor: pointer;
   background-color: transparent;
-  background: url(${downloadIcon}) no-repeat left center;
+  background: url(${downloadIcon}) no-repeat 12px center;
+  border: none;
+  height: 100%;
+
+  & :hover {
+    background-color: #fff;
+    color: #000;
+  }
+`;
+export const ShareMenuButtonPDF = styled.button`
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  color: #4d4d4d;
+  cursor: pointer;
+  background-color: transparent;
+  background: url(${pdfIcon}) no-repeat 12px center;
   border: none;
   height: 100%;
   & :hover {
@@ -31,14 +47,9 @@ export const ShareMenuButton = styled.button`
 export const ShareMenuList = styled.div`
   width: 130px;
 
-  padding-left: 12px;
   display: flex;
   flex-direction: column;
   background: #f5f5f5;
-  & :hover {
-    background-color: #fff;
-    color: #000;
-  }
 `;
 export const ShareMenuListItem = styled.div`
   background: url(${downloadIcon}) no-repeat left center;
@@ -142,6 +153,21 @@ export const TipAmount = styled.div`
   background-color: ${({ oldSchool = false }) =>
     oldSchool === true ? '#F59332;' : '#0fcb97;'};
 `;
+export const TipAmountThrowback = styled.div`
+  margin-top: 0px;
+  padding: 6px 0px 4px;
+  text-align: center;
+  color: #fff;
+  background-color: #f59332;
+`;
+export const TipAmountEZ = styled.div`
+  margin-top: 0px;
+
+  padding: 6px 0px 4px;
+  text-align: center;
+  color: #000;
+  background-color: #fff;
+`;
 export const TipHeader = styled.div`
   margin: 0;
   padding: 10px 10px 0;
@@ -180,6 +206,23 @@ export const TipExchangeRate = styled.div`
   font-size: 10px;
   font-weight: 600;
 `;
+export const TipExchangeRateThrowback = styled.div`
+  padding: 3px 0px;
+  text-align: center;
+  background-color: #4d4d4d;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+`;
+export const TipExchangeRateEZ = styled.div`
+  padding: 3px 0px;
+
+  text-align: center;
+  background-color: #fff;
+  color: #000;
+  font-size: 10px;
+  font-weight: 600;
+`;
 export const HowToClaimLabel = styled.div`
   font-style: bold;
   font-style: italic;
@@ -196,6 +239,7 @@ export const HowToList = styled.ul`
   padding-left: 4px;
   padding-bottom: 12px;
   margin-bottom: 0px;
+  margin-top: 0px;
 `;
 export const StepOne = styled.li`
   background: url(${appIcon}) no-repeat left center;
