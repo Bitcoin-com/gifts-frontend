@@ -204,6 +204,7 @@ class TipsPortal extends React.Component {
     this.handleExpirationDateChange = this.handleExpirationDateChange.bind(
       this,
     );
+    this.handleGiftDesignChange = this.handleGiftDesignChange.bind(this);
     this.handleEmailAddressChange = this.handleEmailAddressChange.bind(this);
     this.createExpirationTxs = this.createExpirationTxs.bind(this);
     this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
@@ -218,7 +219,8 @@ class TipsPortal extends React.Component {
     );
     this.retryInvoiceSuccess = this.retryInvoiceSuccess.bind(this);
     this.toggleGiftNames = this.toggleGiftNames.bind(this);
-    this.toggleOldSchool = this.toggleOldSchool.bind(this);
+    this.toggleQrDots = this.toggleQrDots.bind(this);
+    this.toggleQrLogo = this.toggleQrLogo.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -258,7 +260,9 @@ class TipsPortal extends React.Component {
       createExpirationTxsFailed: false,
       customExpirationDate: false,
       showGiftNames: false,
-      oldSchool: false,
+      qrDots: true,
+      qrLogo: true,
+      selectedGiftDesign: 'default',
     };
   }
 
@@ -532,10 +536,16 @@ class TipsPortal extends React.Component {
     this.setState({ showGiftNames: value });
   }
 
-  toggleOldSchool(e) {
+  toggleQrDots(e) {
     const { target } = e;
     const value = target.type === 'checkbox' ? target.checked : target.value;
-    this.setState({ oldSchool: value });
+    this.setState({ qrDots: value });
+  }
+
+  toggleQrLogo(e) {
+    const { target } = e;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    this.setState({ qrLogo: value });
   }
 
   handleSelectedExpirationDateChange(e) {
@@ -1186,7 +1196,9 @@ class TipsPortal extends React.Component {
       importedGiftInfo: [],
       createExpirationTxsFailed: false,
       showGiftNames: false,
-      oldSchool: false,
+      qrDots: true,
+      qrLogo: true,
+      selectedGiftDesign: 'default',
     });
   }
 
@@ -1236,6 +1248,11 @@ class TipsPortal extends React.Component {
         [`expirationDate`]: this.validateExpirationDateChange({ date }),
       },
     });
+  }
+
+  handleGiftDesignChange(selectedGiftDesignOption) {
+    const { value } = selectedGiftDesignOption;
+    this.setState({ selectedGiftDesign: value });
   }
 
   handleSelectedCurrencyChange(selectedCurrency) {
@@ -1845,7 +1862,9 @@ class TipsPortal extends React.Component {
       createExpirationTxsFailed,
       customExpirationDate,
       showGiftNames,
-      oldSchool,
+      qrDots,
+      qrLogo,
+      selectedGiftDesign,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1875,6 +1894,12 @@ class TipsPortal extends React.Component {
       { value: oneMonth, label: '1 month' },
       { value: threeMonths, label: '3 months' },
       { value: custom, label: 'Custom' },
+    ];
+
+    const giftDesignOptions = [
+      { value: 'default', label: 'Bitcoin.com' },
+      { value: 'throwback', label: 'Throwback' },
+      { value: 'ezprint', label: 'Easy Print' },
     ];
 
     const printingTips = [];
@@ -1955,7 +1980,9 @@ class TipsPortal extends React.Component {
             status={tipWallet.status}
             share={this.shareTip}
             showGiftNames={showGiftNames}
-            oldSchool={oldSchool}
+            qrDots={qrDots}
+            qrLogo={qrLogo}
+            design={selectedGiftDesign}
           ></Tip>,
         );
       });
@@ -2600,9 +2627,28 @@ class TipsPortal extends React.Component {
               </InputWrapper>
               <InputWrapper show>
                 <Checkbox
-                  text="Start an argument?"
-                  onChange={this.toggleOldSchool}
+                  name="qrDots"
+                  text="QR Code Dots?"
+                  onChange={this.toggleQrDots}
                 ></Checkbox>
+              </InputWrapper>
+              <InputWrapper show>
+                <Checkbox
+                  name="qrLogo"
+                  text="QR Code Logo?"
+                  onChange={this.toggleQrLogo}
+                ></Checkbox>
+              </InputWrapper>
+              <InputWrapper show>
+                <InputLabel>
+                  <FormattedMessage id="home.labels.giftDesignSelect" />{' '}
+                  <Red>*</Red>
+                </InputLabel>
+                <CustomSelect
+                  onChange={this.handleGiftDesignChange}
+                  options={giftDesignOptions}
+                  defaultValue={giftDesignOptions[0]}
+                />
               </InputWrapper>
             </ControlPanelForm>
           </GiftsControlPanel>

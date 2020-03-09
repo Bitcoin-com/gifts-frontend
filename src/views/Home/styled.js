@@ -63,6 +63,7 @@ export const SweepAllCard = styled(Card)`
 export const GiftsControlPanel = styled(Card)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   margin-top: 24px;
+  overflow: visible;
 `;
 export const ControlPanelForm = styled.div`
   text-align: left;
