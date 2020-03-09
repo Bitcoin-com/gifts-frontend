@@ -14,6 +14,7 @@ export const ShareMenu = styled(Popup)`
 `;
 export const ShareMenuButton = styled.button`
   width: 100%;
+  outline: none;
   padding: 12px;
   color: #4d4d4d;
 

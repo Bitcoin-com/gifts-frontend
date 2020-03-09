@@ -47,7 +47,7 @@
   "buttons": {
     "createTips": "Go",
     "goBack": "Back",
-    "copyUri": "Copy Invoice",
+    "copyUri": "Copy Invoice URL",
     "copySeed": "Copy",
     "sweepAll": "Sweep All",
     "newTips": "New Gifts",

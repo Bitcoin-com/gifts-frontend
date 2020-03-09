@@ -587,7 +587,7 @@ class TipsPortal extends React.Component {
   // eslint-disable-next-line class-methods-use-this
   shareTip(e) {
     const elementId = e.target.dataset.id;
-    console.log(`elementId: ${elementId}`);
+    // console.log(`elementId: ${elementId}`);
     const node = document.getElementById(elementId);
     htmlToImage.toPng(node).then(
       dataUrl => {
