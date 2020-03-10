@@ -442,6 +442,11 @@ export const InputError = styled.div`
   color: #f44336;
   font-size: 0.8rem;
 `;
+export const InputExtra = styled.div`
+  font-size: 15px;
+  padding: 0px 4px;
+  text-align: justify;
+`;
 
 export const TipInput = styled(Input)`
   padding-bottom: 0px;
