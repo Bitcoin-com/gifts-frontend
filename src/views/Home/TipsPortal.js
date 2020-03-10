@@ -612,7 +612,9 @@ class TipsPortal extends React.Component {
         this.setState({ pngLoading: false });
       },
       err => {
+        console.log(`Error in this.shareTip(e) PNG download:`);
         console.log(err);
+        this.setState({ pngLoading: false });
       },
     );
   }
