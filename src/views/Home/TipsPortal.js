@@ -263,6 +263,7 @@ class TipsPortal extends React.Component {
       qrDots: true,
       qrLogo: true,
       selectedGiftDesign: 'default',
+      pngLoading: false,
     };
   }
 
@@ -596,6 +597,7 @@ class TipsPortal extends React.Component {
 
   // eslint-disable-next-line class-methods-use-this
   shareTip(e) {
+    this.setState({ pngLoading: true });
     const elementId = e.target.dataset.id;
     // console.log(`elementId: ${elementId}`);
     const node = document.getElementById(elementId);
@@ -607,9 +609,12 @@ class TipsPortal extends React.Component {
           imageType,
           'image/octet-stream',
         );
+        this.setState({ pngLoading: false });
       },
       err => {
+        console.log(`Error in this.shareTip(e) PNG download:`);
         console.log(err);
+        this.setState({ pngLoading: false });
       },
     );
   }
@@ -1199,6 +1204,7 @@ class TipsPortal extends React.Component {
       qrDots: true,
       qrLogo: true,
       selectedGiftDesign: 'default',
+      pngLoading: false,
     });
   }
 
@@ -1736,7 +1742,7 @@ class TipsPortal extends React.Component {
       });
     }
 
-    const invoiceMemo = `Funding transaction for ${tipCount} BCH tips of ${tipAmountFiat} dollars each`;
+    const invoiceMemo = `Funding transaction for ${tipCount} BCH gifts of ${tipAmountFiat} dollars each`;
     const tipWallets = [];
     const fundingOutputs = [];
 
@@ -1865,6 +1871,7 @@ class TipsPortal extends React.Component {
       qrDots,
       qrLogo,
       selectedGiftDesign,
+      pngLoading,
     } = this.state;
 
     const currencies = this.getCurrenciesOptions(messages);
@@ -1983,6 +1990,7 @@ class TipsPortal extends React.Component {
             qrDots={qrDots}
             qrLogo={qrLogo}
             design={selectedGiftDesign}
+            pngLoading={pngLoading}
           ></Tip>,
         );
       });
@@ -1990,7 +1998,7 @@ class TipsPortal extends React.Component {
     const sweepNotice = (
       <React.Fragment>
         <SweepNotice>
-          {tipsSweptCount} of original {tipWallets.length} tips have been{' '}
+          {tipsSweptCount} of original {tipWallets.length} gifts have been{' '}
           <a
             href={`https://explorer.bitcoin.com/bch/tx/${sweptTxid}`}
             target="_blank"
@@ -2020,7 +2028,7 @@ class TipsPortal extends React.Component {
     const tipsAlreadySweptNotice = (
       <React.Fragment>
         <ErrorNotice>
-          Error: Cannot sweep tips, all tips have already been claimed!
+          Error: Cannot sweep tips, all gifts have already been claimed!
           <br />
           <CardButton
             primary
@@ -2041,8 +2049,8 @@ class TipsPortal extends React.Component {
             <ApiErrorPopupMsg>
               <ApiErrorWarning>Warning!</ApiErrorWarning>
               <ApiErrorWarning>
-                Tip information failed to post to backend. Your tips will not be
-                automatically returned to you on expiration.
+                Tip information failed to post to backend. Your gifts will not
+                be automatically returned to you on expiration.
               </ApiErrorWarning>
             </ApiErrorPopupMsg>
           </ApiErrorPopup>
@@ -2051,7 +2059,7 @@ class TipsPortal extends React.Component {
             <ApiErrorPopupMsg>
               <ApiErrorWarning>Warning!</ApiErrorWarning>
               <ApiErrorWarning>
-                Error creating your reclaim transactions. Your tips will not be
+                Error creating your reclaim transactions. Your gifts will not be
                 automatically returned to you on expiration.
               </ApiErrorWarning>
             </ApiErrorPopupMsg>
@@ -2158,7 +2166,7 @@ class TipsPortal extends React.Component {
               {importedMnemonic && (
                 <React.Fragment>
                   <p>
-                    {tipsClaimedCount} of {tipWallets.length} tips have been
+                    {tipsClaimedCount} of {tipWallets.length} gifts have been
                     claimed
                   </p>
                 </React.Fragment>
@@ -2425,7 +2433,7 @@ class TipsPortal extends React.Component {
                     </MobileBadgerCover>
                     <DesktopBadgerCover></DesktopBadgerCover>
                     <BadgerButton
-                      text={tipsFunded ? 'Tips Funded' : 'Fund Your Tips'}
+                      text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}
                       currency={selectedCurrency}
                       paymentRequestUrl={invoiceUrl}
                       isRepeatable={false}
@@ -2509,12 +2517,12 @@ class TipsPortal extends React.Component {
                 server.
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Your tips will not automatically be returned to your refund
+                Your gifts will not automatically be returned to your refund
                 address after their expiration date!
               </ApiErrorWarning>
               <ApiErrorWarning>
                 Make sure to save your 12-word backup seed above. You can still
-                access your tips with this phrase.
+                access your gifts with this phrase.
               </ApiErrorWarning>
               <ApiErrorWarning>
                 Please try to repost your tip information. If the issue
@@ -2539,8 +2547,8 @@ class TipsPortal extends React.Component {
                 API error while creating your auto-reclaim transactions.
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Your tips will not be automatically returned on their expiration
-                date!
+                Your gifts will not be automatically returned on their
+                expiration date!
               </ApiErrorWarning>
               <ApiErrorWarning>
                 Make sure you have written down your 12-word backup seed.
@@ -2629,6 +2637,7 @@ class TipsPortal extends React.Component {
                 <Checkbox
                   name="qrDots"
                   text="QR Code Dots?"
+                  checked={qrDots}
                   onChange={this.toggleQrDots}
                 ></Checkbox>
               </InputWrapper>
@@ -2636,6 +2645,7 @@ class TipsPortal extends React.Component {
                 <Checkbox
                   name="qrLogo"
                   text="QR Code Logo?"
+                  checked={qrLogo}
                   onChange={this.toggleQrLogo}
                 ></Checkbox>
               </InputWrapper>
@@ -2689,7 +2699,7 @@ class TipsPortal extends React.Component {
             show={tipWallets.length > 0 && tipsFunded}
           >
             <SweepInstructions>
-              You can send all the BCH from your unclaimed tips to a single
+              You can send all the BCH from your unclaimed gifts to a single
               address in one transaction.
             </SweepInstructions>
             <ButtonHider show={!showSweepForm}>
