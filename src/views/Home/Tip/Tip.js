@@ -61,7 +61,9 @@ const Tip = ({
   qrLogo,
   pngLoading,
 }) => (
-  <TipWrapper className={tipWallet.status === 'funded' ? 'print' : 'printHide'}>
+  <TipWrapper
+    className={tipWallet.status === 'unclaimed' ? 'print' : 'printHide'}
+  >
     {design === 'default' && (
       <React.Fragment>
         <SnapshotHolder id={tipWallet.addr.substr(12)}>
@@ -92,7 +94,7 @@ const Tip = ({
               )}
             </TipExchangeRate>
           )}
-          {tipWallet.status === 'funded' ? (
+          {tipWallet.status === 'unclaimed' ? (
             <QRCode
               id="borderedQRCode"
               value={tipWallet.wif}
@@ -106,7 +108,9 @@ const Tip = ({
               bgColor="#fff"
             />
           ) : (
-            <ClaimedBlock>[Claimed]</ClaimedBlock>
+            <ClaimedBlock status={tipWallet.status}>
+              [{tipWallet.status}]
+            </ClaimedBlock>
           )}
           {expirationDate !== '' && (
             <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
@@ -156,7 +160,7 @@ const Tip = ({
               )}
             </TipExchangeRateThrowback>
           )}
-          {tipWallet.status === 'funded' ? (
+          {tipWallet.status === 'unclaimed' ? (
             <QRCode
               id="borderedQRCode"
               value={tipWallet.wif}
@@ -171,7 +175,9 @@ const Tip = ({
               fgColor="#000"
             />
           ) : (
-            <ClaimedBlock>[Claimed]</ClaimedBlock>
+            <ClaimedBlock status={tipWallet.status}>
+              [{tipWallet.status}]
+            </ClaimedBlock>
           )}
           {expirationDate !== '' && (
             <TipExchangeRateThrowback>
@@ -224,7 +230,7 @@ const Tip = ({
               )}
             </TipExchangeRateEZ>
           )}
-          {tipWallet.status === 'funded' ? (
+          {tipWallet.status === 'unclaimed' ? (
             <QRCode
               id="borderedQRCode"
               value={tipWallet.wif}
@@ -239,7 +245,9 @@ const Tip = ({
               fgColor="#000"
             />
           ) : (
-            <ClaimedBlock>[Claimed]</ClaimedBlock>
+            <ClaimedBlock status={tipWallet.status}>
+              [{tipWallet.status}]
+            </ClaimedBlock>
           )}
           {expirationDate !== '' && (
             <TipExchangeRateEZ>Claim by {expirationDate}</TipExchangeRateEZ>
@@ -266,8 +274,8 @@ const Tip = ({
           <tr>
             <LabelTd>Status:</LabelTd>
             {design === 'throwback' ? (
-              <StatusTdOldschool funded={tipWallet.status === 'funded'}>
-                {tipWallet.status === 'funded' ? (
+              <StatusTdOldschool funded={tipWallet.status === 'unclaimed'}>
+                {tipWallet.status === 'unclaimed' ? (
                   'Unclaimed'
                 ) : (
                   <React.Fragment>
@@ -278,17 +286,17 @@ const Tip = ({
                         rel="noopener noreferrer"
                         href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
                       >
-                        Claimed
+                        {tipWallet.status}
                       </a>
                     ) : (
-                      `Claimed`
+                      `[${tipWallet.status}]`
                     )}
                   </React.Fragment>
                 )}
               </StatusTdOldschool>
             ) : (
-              <StatusTd funded={tipWallet.status === 'funded'}>
-                {tipWallet.status === 'funded' ? (
+              <StatusTd funded={tipWallet.status === 'unclaimed'}>
+                {tipWallet.status === 'unclaimed' ? (
                   'Unclaimed'
                 ) : (
                   <React.Fragment>
@@ -299,10 +307,10 @@ const Tip = ({
                         rel="noopener noreferrer"
                         href={`https://explorer.bitcoin.com/bch/tx/${tipWallet.claimedTxid}`}
                       >
-                        Claimed
+                        {tipWallet.status}
                       </a>
                     ) : (
-                      `Claimed`
+                      `${tipWallet.status}`
                     )}
                   </React.Fragment>
                 )}

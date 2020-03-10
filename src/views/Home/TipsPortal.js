@@ -1,7 +1,6 @@
 import React from 'react';
 import throttle from 'lodash.throttle';
 import { injectIntl, FormattedMessage } from 'react-intl';
-import memoize from 'memoize-one';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BITBOX } from 'bitbox-sdk';
 import { BadgerButton } from 'badger-components-react';
@@ -12,7 +11,6 @@ import {
   Card,
   InputLabel,
   Input,
-  InputSelect,
   Select,
   Checkbox,
 } from 'bitcoincom-storybook';
@@ -32,6 +30,7 @@ import {
   AddressInputWrapper,
   Form,
   InputError,
+  InputExtra,
   Red,
   TipContainer,
   WalletCard,
@@ -82,6 +81,9 @@ const bitbox = new BITBOX({
 });
 
 const inputState = { untouched: 0, valid: 1, invalid: 2 };
+
+const defaultRefundAddress =
+  'bitcoincash:qq9qmugsdua78g7jjjykh9r4zku3wmyhnvdl8ucu0e';
 
 // set api here
 // Prod
@@ -152,8 +154,6 @@ class TipsPortal extends React.Component {
         error: null,
       },
     };
-
-    this.getCurrenciesOptions = this.getCurrenciesOptions.bind(this);
     this.handleSelectedCurrencyChange = this.handleSelectedCurrencyChange.bind(
       this,
     );
@@ -259,30 +259,13 @@ class TipsPortal extends React.Component {
       apiPostFailed: false,
       createExpirationTxsFailed: false,
       customExpirationDate: false,
-      showGiftNames: false,
+      showGiftNames: true,
       qrDots: true,
       qrLogo: true,
       selectedGiftDesign: 'default',
       pngLoading: false,
     };
   }
-
-  getCurrenciesOptions = memoize(messages => {
-    const currenciesOptions = {};
-    Object.keys(messages).forEach(m => {
-      if (m.startsWith('home.currenciesOptions')) {
-        const split = m.split('.');
-        const fiat = split[2];
-        const field = split[3];
-        const value = messages[m];
-        if (typeof currenciesOptions[fiat] === 'undefined') {
-          currenciesOptions[fiat] = {};
-        }
-        currenciesOptions[fiat][field] = value;
-      }
-    });
-    return currenciesOptions;
-  });
 
   componentDidMount() {
     // this.setDefaultExpirationDate();
@@ -495,8 +478,7 @@ class TipsPortal extends React.Component {
   };
 
   handleTipAmountFiatChange(e) {
-    const value = e;
-    const name = 'tipAmountFiat';
+    const { value, name } = e.target;
     const { formData } = this.state;
     this.setState({
       formData: {
@@ -514,15 +496,17 @@ class TipsPortal extends React.Component {
 
     const field = formData[name];
 
-    field.value = value;
+    const valueAsNum = parseFloat(value);
+
+    field.value = valueAsNum;
     field.state = inputState.valid;
     field.error = null;
-    if (!value) {
+    if (!valueAsNum) {
       field.state = inputState.invalid;
       field.error = formatMessage({
-        id: 'home.errors.fiatTipAmountNum',
+        id: 'home.errors.fiatTipAmountRequired',
       });
-    } else if (value <= 0) {
+    } else if (valueAsNum <= 0) {
       field.state = inputState.invalid;
       field.error = formatMessage({
         id: 'home.errors.fiatTipAmountRequired',
@@ -802,7 +786,11 @@ class TipsPortal extends React.Component {
       selectedCurrency,
       invoiceUrl,
     } = this.state;
-    const refundAddress = formData.userRefundAddressOnCreate.value;
+    let refundAddress = formData.userRefundAddressOnCreate.value;
+    // If no refund address is specified, set to Bitcoin.com donation
+    if (refundAddress === '') {
+      refundAddress = defaultRefundAddress;
+    }
     // Scan through tip wallets by wif, see if there is money to sweep, and output a new object
     // of what you need to build your sweeping tx
     const sweepBuilder = [];
@@ -1200,7 +1188,7 @@ class TipsPortal extends React.Component {
       returnTxInfos: [],
       importedGiftInfo: [],
       createExpirationTxsFailed: false,
-      showGiftNames: false,
+      showGiftNames: true,
       qrDots: true,
       qrLogo: true,
       selectedGiftDesign: 'default',
@@ -1261,9 +1249,10 @@ class TipsPortal extends React.Component {
     this.setState({ selectedGiftDesign: value });
   }
 
-  handleSelectedCurrencyChange(selectedCurrency) {
+  handleSelectedCurrencyChange(e) {
+    const currency = e.value;
     this.setState({
-      selectedCurrency,
+      selectedCurrency: currency,
     });
   }
 
@@ -1405,7 +1394,7 @@ class TipsPortal extends React.Component {
           txHistory.length === 1 &&
           (addrDetails.balance > 0 || addrDetails.unconfirmedBalanceSat > 0)
         ) {
-          firstTipWallet.status = 'funded';
+          firstTipWallet.status = 'unclaimed';
           // get creation txid
           // eslint-disable-next-line prefer-destructuring
           creationTxid = txHistory[0];
@@ -1418,6 +1407,7 @@ class TipsPortal extends React.Component {
         const queryApi = `${giftsQuery}/${creationTxid}`;
         let importedGiftInfo;
         let importedGiftInfoJson;
+        let importedGifts;
 
         try {
           importedGiftInfo = await fetch(queryApi);
@@ -1428,7 +1418,7 @@ class TipsPortal extends React.Component {
             // console.log(`Fetched importedGiftInfo:`);
             // console.log(importedGiftInfoJson);
             // console.log(`Server Data for Gifts at Imported Seed:`);
-            const importedGifts = importedGiftInfoJson.result;
+            importedGifts = importedGiftInfoJson.result;
             // console.log(importedGifts);
 
             this.setState({ importedGiftInfo: importedGifts });
@@ -1513,7 +1503,7 @@ class TipsPortal extends React.Component {
                 (potentialTipDetails[i].balance > 0 ||
                   potentialTipDetails[i].unconfirmedBalanceSat > 0)
               ) {
-                tipWallet.status = 'funded';
+                tipWallet.status = 'unclaimed';
               } else if (
                 potentialTipDetails[i].transactions.length > 1 &&
                 (potentialTipDetails[i].balance === 0 ||
@@ -1524,6 +1514,15 @@ class TipsPortal extends React.Component {
                 // eslint-disable-next-line prefer-destructuring
                 tipWallet.claimedTxid = potentialTipDetails[i].transactions[0];
               }
+              if (typeof importedGifts !== 'undefined') {
+                try {
+                  tipWallet.status = importedGifts[i].status;
+                } catch (err) {
+                  console.log(`Error in applying server tip status`);
+                  console.log(err);
+                }
+              }
+
               tipWallets.push(tipWallet);
             } else {
               // console.log(`You have ${i} tips in this wallet`);
@@ -1747,7 +1746,7 @@ class TipsPortal extends React.Component {
     const fundingOutputs = [];
 
     for (let i = 0; i < tipCount; i += 1) {
-      const tipWallet = { addr: '', wif: '', sats: '', status: 'funded' };
+      const tipWallet = { addr: '', wif: '', sats: '', status: 'unclaimed' };
       const fundingOutput = { address: '', amount: '' };
       // derive the ith external change address from the BIP44 account HDNode
       // get a child node
@@ -1840,7 +1839,7 @@ class TipsPortal extends React.Component {
 
   render() {
     const {
-      intl: { formatMessage, messages },
+      intl: { formatMessage },
     } = this.props;
     const {
       formData,
@@ -1874,8 +1873,6 @@ class TipsPortal extends React.Component {
       pngLoading,
     } = this.state;
 
-    const currencies = this.getCurrenciesOptions(messages);
-
     const selectCurrencies = [
       { value: 'USD', label: 'USD' },
       { value: 'EUR', label: 'EUR' },
@@ -1885,6 +1882,170 @@ class TipsPortal extends React.Component {
       { value: 'AUD', label: 'AUD' },
       { value: 'HKD', label: 'HKD' },
       { value: 'CAD', label: 'CAD' },
+    ];
+
+    const selectedCurrenciesFull = [
+      { value: 'FJD', label: 'FJD - Fijian Dollar' },
+      { value: 'DJF', label: 'DJF - Djiboutian Franc' },
+      { value: 'AED', label: 'AED - UAE Dirham' },
+      { value: 'SVC', label: 'SVC - Salvadoran Colón' },
+      { value: 'MZN', label: 'MZN - Mozambican Metical' },
+      { value: 'ISK', label: 'ISK - Icelandic Króna' },
+      { value: 'CHF', label: 'CHF - Swiss Franc' },
+      { value: 'HRK', label: 'HRK - Croatian Kuna' },
+      { value: 'ALL', label: 'ALL - Albanian Lek' },
+      { value: 'TWD', label: 'TWD - New Taiwan Dollar' },
+      { value: 'RWF', label: 'RWF - Rwandan Franc' },
+      { value: 'JMD', label: 'JMD - Jamaican Dollar' },
+      { value: 'HKD', label: 'HKD - Hong Kong Dollar' },
+      { value: 'MWK', label: 'MWK - Malawian Kwacha' },
+      { value: 'LVL', label: 'LVL - Latvian Lats' },
+      { value: 'SCR', label: 'SCR - Seychellois Rupee' },
+      { value: 'QAR', label: 'QAR - Qatari Rial' },
+      { value: 'EUR', label: 'EUR - Eurozone Euro' },
+      { value: 'ARS', label: 'ARS - Argentine Peso' },
+      { value: 'MXN', label: 'MXN - Mexican Peso' },
+      { value: 'STD', label: 'STD - São Tomé and Príncipe Dobra' },
+      { value: 'RSD', label: 'RSD - Serbian Dinar' },
+      { value: 'BBD', label: 'BBD - Barbadian Dollar' },
+      { value: 'DKK', label: 'DKK - Danish Krone' },
+      { value: 'GTQ', label: 'GTQ - Guatemalan Quetzal' },
+      { value: 'COP', label: 'COP - Colombian Peso' },
+      { value: 'TTD', label: 'TTD - Trinidad and Tobago Dollar' },
+      { value: 'KMF', label: 'KMF - Comorian Franc' },
+      { value: 'ZMW', label: 'ZMW - Zambian Kwacha' },
+      { value: 'LTL', label: 'LTL - Lithuanian Litas' },
+      { value: 'SAR', label: 'SAR - Saudi Riyal' },
+      { value: 'CDF', label: 'CDF - Congolese Franc' },
+      { value: 'KZT', label: 'KZT - Kazakhstani Tenge' },
+      { value: 'DOP', label: 'DOP - Dominican Peso' },
+      { value: 'SRD', label: 'SRD - Surinamese Dollar' },
+      { value: 'SZL', label: 'SZL - Swazi Lilangeni' },
+      { value: 'LSL', label: 'LSL - Lesotho Loti' },
+      { value: 'HNL', label: 'HNL - Honduran Lempira' },
+      { value: 'UGX', label: 'UGX - Ugandan Shilling' },
+      { value: 'MYR', label: 'MYR - Malaysian Ringgit' },
+      { value: 'USD', label: 'USD - US Dollar' },
+      { value: 'MKD', label: 'MKD - Macedonian Denar' },
+      { value: 'YER', label: 'YER - Yemeni Rial' },
+      { value: 'CAD', label: 'CAD - Canadian Dollar' },
+      { value: 'CLP', label: 'CLP - Chilean Peso' },
+      { value: 'MGA', label: 'MGA - Malagasy Ariary' },
+      { value: 'IRR', label: 'IRR - Iranian Rial' },
+      { value: 'BGN', label: 'BGN - Bulgarian Lev' },
+      { value: 'AFN', label: 'AFN - Afghan Afghani' },
+      { value: 'MVR', label: 'MVR - Maldivian Rufiyaa' },
+      { value: 'TND', label: 'TND - Tunisian Dinar' },
+      { value: 'NOK', label: 'NOK - Norwegian Krone' },
+      { value: 'SYP', label: 'SYP - Syrian Pound' },
+      { value: 'MRO', label: 'MRO - Mauritanian Ouguiya' },
+      { value: 'MUR', label: 'MUR - Mauritian Rupee' },
+      { value: 'FKP', label: 'FKP - Falkland Islands Pound' },
+      { value: 'ZAR', label: 'ZAR - South African Rand' },
+      { value: 'MMK', label: 'MMK - Myanma Kyat' },
+      { value: 'EEK', label: 'EEK - Estonian Kroon' },
+      { value: 'VND', label: 'VND - Vietnamese Dong' },
+      { value: 'XAU', label: 'XAU - Gold (troy ounce)' },
+      { value: 'BZD', label: 'BZD - Belize Dollar' },
+      { value: 'TZS', label: 'TZS - Tanzanian Shilling' },
+      { value: 'INR', label: 'INR - Indian Rupee' },
+      { value: 'THB', label: 'THB - Thai Baht' },
+      { value: 'XPF', label: 'XPF - CFP Franc' },
+      { value: 'CNY', label: 'CNY - Chinese Yuan' },
+      { value: 'UZS', label: 'UZS - Uzbekistan Som' },
+      { value: 'DZD', label: 'DZD - Algerian Dinar' },
+      { value: 'MOP', label: 'MOP - Macanese Pataca' },
+      { value: 'GEL', label: 'GEL - Georgian Lari' },
+      { value: 'GIP', label: 'GIP - Gibraltar Pound' },
+      { value: 'EGP', label: 'EGP - Egyptian Pound' },
+      { value: 'BAM', label: 'BAM - Bosnia-Herzegovina Convertible Mark' },
+      { value: 'XOF', label: 'XOF - CFA Franc BCEAO' },
+      { value: 'ZWL', label: 'ZWL - Zimbabwean Dollar' },
+      { value: 'SGD', label: 'SGD - Singapore Dollar' },
+      { value: 'MAD', label: 'MAD - Moroccan Dirham' },
+      { value: 'AUD', label: 'AUD - Australian Dollar' },
+      { value: 'NPR', label: 'NPR - Nepalese Rupee' },
+      { value: 'ILS', label: 'ILS - Israeli Shekel' },
+      { value: 'KRW', label: 'KRW - South Korean Won' },
+      { value: 'PAB', label: 'PAB - Panamanian Balboa' },
+      { value: 'NAD', label: 'NAD - Namibian Dollar' },
+      { value: 'RON', label: 'RON - Romanian Leu' },
+      { value: 'UYU', label: 'UYU - Uruguayan Peso' },
+      { value: 'AWG', label: 'AWG - Aruban Florin' },
+      { value: 'BDT', label: 'BDT - Bangladeshi Taka' },
+      { value: 'GYD', label: 'GYD - Guyanaese Dollar' },
+      { value: 'PLN', label: 'PLN - Polish Zloty' },
+      { value: 'CVE', label: 'CVE - Cape Verdean Escudo' },
+      { value: 'GHS', label: 'GHS - Ghanaian Cedi' },
+      { value: 'KPW', label: 'KPW - North Korean Won' },
+      { value: 'SLL', label: 'SLL - Sierra Leonean Leone' },
+      { value: 'ETB', label: 'ETB - Ethiopian Birr' },
+      { value: 'AOA', label: 'AOA - Angolan Kwanza' },
+      { value: 'BSD', label: 'BSD - Bahamian Dollar' },
+      { value: 'LKR', label: 'LKR - Sri Lankan Rupee' },
+      { value: 'MNT', label: 'MNT - Mongolian Tugrik' },
+      { value: 'JPY', label: 'JPY - Japanese Yen' },
+      { value: 'PGK', label: 'PGK - Papua New Guinean Kina' },
+      { value: 'CRC', label: 'CRC - Costa Rican Colón' },
+      { value: 'NIO', label: 'NIO - Nicaraguan Córdoba' },
+      { value: 'OMR', label: 'OMR - Omani Rial' },
+      { value: 'CZK', label: 'CZK - Czech Koruna' },
+      { value: 'TOP', label: 'TOP - Tongan Paʻanga' },
+      { value: 'BOB', label: 'BOB - Bolivian Boliviano' },
+      { value: 'MDL', label: 'MDL - Moldovan Leu' },
+      { value: 'NGN', label: 'NGN - Nigerian Naira' },
+      { value: 'JEP', label: 'JEP - Jersey Pound' },
+      { value: 'KHR', label: 'KHR - Cambodian Riel' },
+      { value: 'GBP', label: 'GBP - Pound Sterling' },
+      { value: 'AZN', label: 'AZN - Azerbaijani Manat' },
+      { value: 'SBD', label: 'SBD - Solomon Islands Dollar' },
+      { value: 'SDG', label: 'SDG - Sudanese Pound' },
+      { value: 'KYD', label: 'KYD - Cayman Islands Dollar' },
+      { value: 'LAK', label: 'LAK - Laotian Kip' },
+      { value: 'LYD', label: 'LYD - Libyan Dinar' },
+      { value: 'SOS', label: 'SOS - Somali Shilling' },
+      { value: 'VUV', label: 'VUV - Vanuatu Vatu' },
+      { value: 'PKR', label: 'PKR - Pakistani Rupee' },
+      { value: 'KGS', label: 'KGS - Kyrgystani Som' },
+      { value: 'IDR', label: 'IDR - Indonesian Rupiah' },
+      { value: 'VEF', label: 'VEF - Venezuelan Bolívar Fuerte' },
+      { value: 'KWD', label: 'KWD - Kuwaiti Dinar' },
+      { value: 'WST', label: 'WST - Samoan Tala' },
+      { value: 'PHP', label: 'PHP - Philippine Peso' },
+      { value: 'BND', label: 'BND - Brunei Dollar' },
+      { value: 'AMD', label: 'AMD - Armenian Dram' },
+      { value: 'NZD', label: 'NZD - New Zealand Dollar' },
+      { value: 'SEK', label: 'SEK - Swedish Krona' },
+      { value: 'HUF', label: 'HUF - Hungarian Forint' },
+      { value: 'PEN', label: 'PEN - Peruvian Nuevo Sol' },
+      { value: 'BMD', label: 'BMD - Bermudan Dollar' },
+      { value: 'KES', label: 'KES - Kenyan Shilling' },
+      { value: 'XCD', label: 'XCD - East Caribbean Dollar' },
+      { value: 'LBP', label: 'LBP - Lebanese Pound' },
+      { value: 'ANG', label: 'ANG - Netherlands Antillean Guilder' },
+      { value: 'SHP', label: 'SHP - Saint Helena Pound' },
+      { value: 'HTG', label: 'HTG - Haitian Gourde' },
+      { value: 'TMT', label: 'TMT - Turkmenistani Manat' },
+      { value: 'TRY', label: 'TRY - Turkish Lira' },
+      { value: 'BWP', label: 'BWP - Botswanan Pula' },
+      { value: 'BYR', label: 'BYR - Belarusian Ruble' },
+      { value: 'IQD', label: 'IQD - Iraqi Dinar' },
+      { value: 'BRL', label: 'BRL - Brazilian Real' },
+      { value: 'BTN', label: 'BTN - Bhutanese Ngultrum' },
+      { value: 'UAH', label: 'UAH - Ukrainian Hryvnia' },
+      { value: 'TJS', label: 'TJS - Tajikistani Somoni' },
+      { value: 'CLF', label: 'CLF - Chilean Unit of Account (UF)' },
+      { value: 'XAF', label: 'XAF - CFA Franc BEAC' },
+      { value: 'GMD', label: 'GMD - Gambian Dalasi' },
+      { value: 'BHD', label: 'BHD - Bahraini Dinar' },
+      { value: 'CUP', label: 'CUP - Cuban Peso' },
+      { value: 'XAG', label: 'XAG - Silver (troy ounce)' },
+      { value: 'PYG', label: 'PYG - Paraguayan Guarani' },
+      { value: 'LRD', label: 'LRD - Liberian Dollar' },
+      { value: 'GNF', label: 'GNF - Guinean Franc' },
+      { value: 'BIF', label: 'BIF - Burundian Franc' },
+      { value: 'RUB', label: 'RUB - Russian Ruble' },
+      { value: 'JOD', label: 'JOD - Jordanian Dinar' },
     ];
 
     const twoMinutes = 'twoMinutes';
@@ -1905,7 +2066,7 @@ class TipsPortal extends React.Component {
 
     const giftDesignOptions = [
       { value: 'default', label: 'Bitcoin.com' },
-      { value: 'throwback', label: 'Throwback' },
+      { value: 'throwback', label: 'Classic' },
       { value: 'ezprint', label: 'Easy Print' },
     ];
 
@@ -2136,6 +2297,7 @@ class TipsPortal extends React.Component {
                         })}
                         required
                       />
+
                       <InputError>
                         {formData.userRefundAddress.error}
                       </InputError>
@@ -2278,6 +2440,27 @@ class TipsPortal extends React.Component {
                         <FormattedMessage id="home.labels.tipAmountFiat" />{' '}
                         <Red>*</Red>
                       </InputLabel>
+                      <Input
+                        id="tipAmountFiat"
+                        name="tipAmountFiat"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.tipAmountFiat.value}
+                        onChange={this.handleTipAmountFiatChange}
+                        placeholder={formatMessage({
+                          id: 'home.placeholders.tipAmountFiat',
+                        })}
+                        required
+                      />
+                      <InputError>{formData.tipAmountFiat.error}</InputError>
+                    </InputWrapper>
+
+                    {/* <InputWrapper show>
+                      <InputLabel>
+                        <FormattedMessage id="home.labels.tipAmountFiat" />{' '}
+                        <Red>*</Red>
+                      </InputLabel>
                       <InputSelect
                         name="tipAmountFiat"
                         min="0"
@@ -2297,6 +2480,19 @@ class TipsPortal extends React.Component {
                         required
                       />
                       <InputError>{formData.tipAmountFiat.error}</InputError>
+                      </InputWrapper> */}
+
+                    <InputWrapper show>
+                      <InputLabel>
+                        <FormattedMessage id="home.labels.selectCurrency" />
+                        <Red>*</Red>
+                      </InputLabel>
+                      <CustomSelect
+                        onChange={this.handleSelectedCurrencyChange}
+                        options={selectedCurrenciesFull}
+                        defaultValue={selectedCurrenciesFull[40]}
+                        isSearchable
+                      />
                     </InputWrapper>
 
                     <InputWrapper show>
@@ -2319,7 +2515,6 @@ class TipsPortal extends React.Component {
                     <InputWrapper show>
                       <InputLabel>
                         <FormattedMessage id="home.labels.refundAddress" />{' '}
-                        <Red>*</Red>
                       </InputLabel>
                       <Input
                         name="userRefundAddressOnCreate"
@@ -2329,8 +2524,12 @@ class TipsPortal extends React.Component {
                         placeholder={formatMessage({
                           id: 'home.placeholders.userRefundAddressOnCreate',
                         })}
-                        required
                       />
+                      <InputExtra>
+                        If no refund address is provided, unclaimed tips will be
+                        donated to Bitcoin.com to help promote peer to peer
+                        electronic cash.
+                      </InputExtra>
                       <InputError>
                         {formData.userRefundAddressOnCreate.error}
                       </InputError>

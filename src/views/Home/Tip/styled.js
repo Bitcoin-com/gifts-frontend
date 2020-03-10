@@ -123,7 +123,11 @@ export const StatusLabel = styled.div`
 `;
 export const TipStatus = styled.div``;
 export const ClaimedBlock = styled.div`
-  padding: 63px 0px;
+  background-color: ${({ status = 'claimed' }) =>
+    status === 'expired' ? '#ffbaba;' : '#0fcb97;'};
+  border-radius: 5px;
+  margin: 24px;
+  padding: 39px 0px;
 `;
 export const StatusTable = styled.table`
   max-width: 2.5in;
@@ -219,7 +223,7 @@ export const TipExchangeRate = styled.div`
   background-color: ${({ oldSchool = false }) =>
     oldSchool === true ? '#4d4d4d;' : '#006531;'};
   color: #fff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 `;
 export const TipExchangeRateThrowback = styled.div`
@@ -227,7 +231,7 @@ export const TipExchangeRateThrowback = styled.div`
   text-align: center;
   background-color: #4d4d4d;
   color: #fff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 `;
 export const TipExchangeRateEZ = styled.div`
@@ -236,7 +240,7 @@ export const TipExchangeRateEZ = styled.div`
   text-align: center;
   background-color: #fff;
   color: #000;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 `;
 export const HowToClaimLabel = styled.div`
