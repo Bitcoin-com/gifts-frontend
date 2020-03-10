@@ -42,7 +42,8 @@
     "changeCurrency": "Change currency",
     "expirationDate": "Choose custom expiration date",
     "expirationDateSelect": "Expiration date",
-    "emailAddress": "Email address (optional)"
+    "emailAddress": "Email address (optional)",
+    "giftDesignSelect": "Select design"
   },
   "buttons": {
     "createTips": "Go",

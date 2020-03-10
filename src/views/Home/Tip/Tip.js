@@ -35,6 +35,7 @@ import {
   ShareButton,
   ShareMenu,
   ShareMenuList,
+  LoadingButton,
   ShareMenuButton,
 } from './styled';
 // import bchLogo from '../../../../static/images/uploads/bch-logo.png';
@@ -58,6 +59,7 @@ const Tip = ({
   design,
   qrDots,
   qrLogo,
+  pngLoading,
 }) => (
   <TipWrapper className={tipWallet.status === 'funded' ? 'print' : 'printHide'}>
     {design === 'default' && (
@@ -328,13 +330,17 @@ const Tip = ({
         arrow={false}
       >
         <ShareMenuList>
-          <ShareMenuButton
-            type="button"
-            data-id={tipWallet.addr.substr(12)}
-            onClick={share}
-          >
-            PNG
-          </ShareMenuButton>
+          {pngLoading ? (
+            <LoadingButton>Downloading...</LoadingButton>
+          ) : (
+            <ShareMenuButton
+              type="button"
+              data-id={tipWallet.addr.substr(12)}
+              onClick={share}
+            >
+              PNG
+            </ShareMenuButton>
+          )}
           {/* <ShareMenuButtonPDF
             type="button"
             data-id={tipWallet.addr.substr(12)}
@@ -367,6 +373,7 @@ Tip.propTypes = {
   showGiftNames: PropTypes.bool.isRequired,
   qrDots: PropTypes.bool.isRequired,
   qrLogo: PropTypes.bool.isRequired,
+  pngLoading: PropTypes.bool.isRequired,
   design: PropTypes.string.isRequired,
 };
 
