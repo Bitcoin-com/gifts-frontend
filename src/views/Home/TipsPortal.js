@@ -583,16 +583,26 @@ class TipsPortal extends React.Component {
   shareTip(e) {
     this.setState({ pngLoading: true });
     const elementId = e.target.dataset.id;
+    const giftName = e.target.dataset.name;
+    const fiatAmount = e.target.dataset.amount;
+    const { currency } = e.target.dataset;
     // console.log(`elementId: ${elementId}`);
     const node = document.getElementById(elementId);
     htmlToImage.toPng(node).then(
       dataUrl => {
         const imageType = 'image/png';
         // Download the image
+        const fileName = `BCH_Gift_${fiatAmount}${currency}_${giftName}`;
+        const link = document.createElement('a');
+        link.download = `${fileName}.png`;
+        link.href = dataUrl.replace(imageType, 'image/octet-stream');
+        link.click();
+        /*
         document.location.href = dataUrl.replace(
           imageType,
           'image/octet-stream',
         );
+        */
         this.setState({ pngLoading: false });
       },
       err => {
@@ -739,10 +749,6 @@ class TipsPortal extends React.Component {
   }
 
   processRetryPostReturnTxInfos() {
-    // Dev
-    // const api = 'http://localhost:3001/setClaimChecks';
-    // Prod
-    // const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     const { returnTxInfos } = this.state;
     fetch(giftsBackend, {
       method: 'POST',
@@ -2122,12 +2128,14 @@ class TipsPortal extends React.Component {
       } ${expirationDay}, ${expirationYear}`;
     }
 
-    const tipWidth = 2.5;
+    const tipWidth = 2.5; // in
+    const tipSpaceBetweenCols = 0.2; // in
     let displayWidth = '500px';
-    if (tipWallets.length >= 6) {
-      displayWidth = `${6 * tipWidth}in`;
+    if (tipWallets.length >= 5) {
+      displayWidth = `${5 * tipWidth + 4 * tipSpaceBetweenCols}in`;
     } else {
-      displayWidth = `${tipWallets.length * tipWidth}in`;
+      displayWidth = `${tipWallets.length * tipWidth +
+        (tipWallets.length - 1) * tipSpaceBetweenCols}in`;
     }
     // console.log(`displayWidth: ${displayWidth}`);
 
@@ -2826,14 +2834,6 @@ class TipsPortal extends React.Component {
             <ControlPanelForm style={{ margin: 'auto' }}>
               <InputWrapper show>
                 <Checkbox
-                  name="showGiftNames"
-                  text="Show gift names?"
-                  checked={showGiftNames}
-                  onChange={this.toggleGiftNames}
-                ></Checkbox>
-              </InputWrapper>
-              <InputWrapper show>
-                <Checkbox
                   name="qrDots"
                   text="QR Code Dots?"
                   checked={qrDots}
@@ -2846,6 +2846,14 @@ class TipsPortal extends React.Component {
                   text="QR Code Logo?"
                   checked={qrLogo}
                   onChange={this.toggleQrLogo}
+                ></Checkbox>
+              </InputWrapper>
+              <InputWrapper show>
+                <Checkbox
+                  name="showGiftNames"
+                  text="Show gift names?"
+                  checked={showGiftNames}
+                  onChange={this.toggleGiftNames}
                 ></Checkbox>
               </InputWrapper>
               <InputWrapper show>

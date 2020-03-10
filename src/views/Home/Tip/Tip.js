@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { QRCode } from 'react-qrcode-logo';
 import {
   TipWrapper,
+  TipBorder,
   TipHeader,
   TipAmount,
   TipAmountThrowback,
@@ -64,210 +65,211 @@ const Tip = ({
   <TipWrapper
     className={tipWallet.status === 'unclaimed' ? 'print' : 'printHide'}
   >
-    {design === 'default' && (
-      <React.Fragment>
-        <SnapshotHolder id={tipWallet.addr.substr(12)}>
-          <TipHeader>
-            <img src={tipsLogo} alt="Bitcoin Cash Tips" />
-          </TipHeader>
-          <TipAmount>
-            <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
-            <FiatAmount>
-              {tipWallet.sats !== 0 ? (
-                <React.Fragment>
-                  ~ {fiatAmount} {fiatCurrency}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>0 {fiatCurrency}</React.Fragment>
-              )}
-            </FiatAmount>
-          </TipAmount>
-          {dateStr !== null && (
-            <TipExchangeRate>
-              {tipWallet.sats !== 0 ? (
-                <React.Fragment>
-                  1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-                  {fiatCurrency} on {dateStr}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>&nbsp;</React.Fragment>
-              )}
-            </TipExchangeRate>
-          )}
-          {tipWallet.status === 'unclaimed' ? (
-            <QRCode
-              id="borderedQRCode"
-              value={tipWallet.wif}
-              size={125}
-              logoImage={qrLogo ? bchLogo : false}
-              logoOpacity={0.25}
-              logoWidth={125}
-              qrStyle={qrDots ? 'dots' : 'squares'}
-              ecLevel="M"
-              quietZone={10}
-              bgColor="#fff"
-            />
-          ) : (
-            <ClaimedBlock status={tipWallet.status}>
-              [{tipWallet.status}]
-            </ClaimedBlock>
-          )}
-          {expirationDate !== '' && (
-            <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
-          )}
-          <HowToClaim show>
-            <HowToList>
-              <StepOne>
-                Download the <DotComImg src={dotComLogo} /> wallet
-              </StepOne>
-              <StepTwo>Select &quot;Settings&quot;</StepTwo>
-              <StepThree>Select &quot;Paper Wallet Sweep&quot;</StepThree>
-            </HowToList>
-          </HowToClaim>
-          {showGiftNames && (
-            <TipExchangeRate>Gift Name: {tipWallet.callsign}</TipExchangeRate>
-          )}
-        </SnapshotHolder>
-      </React.Fragment>
-    )}
-    {design === 'throwback' && (
-      <React.Fragment>
-        <SnapshotHolder id={tipWallet.addr.substr(12)}>
-          <TipHeader>
-            <img src={oldSchoolGiftsLogo} alt="Bitcoin Cash Tips" />
-          </TipHeader>
-          <TipAmountThrowback>
-            <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
-            <FiatAmount>
-              {tipWallet.sats !== 0 ? (
-                <React.Fragment>
-                  ~ {fiatAmount} {fiatCurrency}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>0 {fiatCurrency}</React.Fragment>
-              )}
-            </FiatAmount>
-          </TipAmountThrowback>
-          {dateStr !== null && (
-            <TipExchangeRateThrowback>
-              {tipWallet.sats !== 0 ? (
-                <React.Fragment>
-                  1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-                  {fiatCurrency} on {dateStr}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>&nbsp;</React.Fragment>
-              )}
-            </TipExchangeRateThrowback>
-          )}
-          {tipWallet.status === 'unclaimed' ? (
-            <QRCode
-              id="borderedQRCode"
-              value={tipWallet.wif}
-              size={125}
-              logoImage={qrLogo ? bchLogoOldSchool : false}
-              logoOpacity={0.25}
-              logoWidth={125}
-              qrStyle={qrDots ? 'dots' : 'squares'}
-              ecLevel="M"
-              quietZone={10}
-              bgColor="#fff"
-              fgColor="#000"
-            />
-          ) : (
-            <ClaimedBlock status={tipWallet.status}>
-              [{tipWallet.status}]
-            </ClaimedBlock>
-          )}
-          {expirationDate !== '' && (
-            <TipExchangeRateThrowback>
-              Claim by {expirationDate}
-            </TipExchangeRateThrowback>
-          )}
-          <HowToClaim show>
-            <HowToList>
-              <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
-              <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
-              <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
-            </HowToList>
-          </HowToClaim>
-          {showGiftNames && (
-            <TipExchangeRateThrowback>
-              Gift Name: {tipWallet.callsign}
-            </TipExchangeRateThrowback>
-          )}
-        </SnapshotHolder>
-      </React.Fragment>
-    )}
+    <TipBorder>
+      {design === 'default' && (
+        <React.Fragment>
+          <SnapshotHolder id={tipWallet.addr.substr(12)}>
+            <TipHeader>
+              <img src={tipsLogo} alt="Bitcoin Cash Tips" />
+            </TipHeader>
+            <TipAmount>
+              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+              <FiatAmount>
+                {tipWallet.sats !== 0 ? (
+                  <React.Fragment>
+                    ~ {fiatAmount} {fiatCurrency}
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>0 {fiatCurrency}</React.Fragment>
+                )}
+              </FiatAmount>
+            </TipAmount>
+            {dateStr !== null && (
+              <TipExchangeRate>
+                {tipWallet.sats !== 0 ? (
+                  <React.Fragment>
+                    1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                    {fiatCurrency} on {dateStr}
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>&nbsp;</React.Fragment>
+                )}
+              </TipExchangeRate>
+            )}
+            {tipWallet.status === 'unclaimed' ? (
+              <QRCode
+                id="borderedQRCode"
+                value={tipWallet.wif}
+                size={125}
+                logoImage={qrLogo ? bchLogo : false}
+                logoOpacity={0.25}
+                logoWidth={125}
+                qrStyle={qrDots ? 'dots' : 'squares'}
+                ecLevel="M"
+                quietZone={10}
+                bgColor="#fff"
+              />
+            ) : (
+              <ClaimedBlock status={tipWallet.status}>
+                [{tipWallet.status}]
+              </ClaimedBlock>
+            )}
+            {expirationDate !== '' && (
+              <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
+            )}
+            <HowToClaim show>
+              <HowToList>
+                <StepOne>
+                  Download the <DotComImg src={dotComLogo} /> wallet
+                </StepOne>
+                <StepTwo>Select &quot;Settings&quot;</StepTwo>
+                <StepThree>Select &quot;Paper Wallet Sweep&quot;</StepThree>
+              </HowToList>
+            </HowToClaim>
+            {showGiftNames && (
+              <TipExchangeRate>Gift Name: {tipWallet.callsign}</TipExchangeRate>
+            )}
+          </SnapshotHolder>
+        </React.Fragment>
+      )}
+      {design === 'throwback' && (
+        <React.Fragment>
+          <SnapshotHolder id={tipWallet.addr.substr(12)}>
+            <TipHeader>
+              <img src={oldSchoolGiftsLogo} alt="Bitcoin Cash Tips" />
+            </TipHeader>
+            <TipAmountThrowback>
+              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+              <FiatAmount>
+                {tipWallet.sats !== 0 ? (
+                  <React.Fragment>
+                    ~ {fiatAmount} {fiatCurrency}
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>0 {fiatCurrency}</React.Fragment>
+                )}
+              </FiatAmount>
+            </TipAmountThrowback>
+            {dateStr !== null && (
+              <TipExchangeRateThrowback>
+                {tipWallet.sats !== 0 ? (
+                  <React.Fragment>
+                    1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                    {fiatCurrency} on {dateStr}
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>&nbsp;</React.Fragment>
+                )}
+              </TipExchangeRateThrowback>
+            )}
+            {tipWallet.status === 'unclaimed' ? (
+              <QRCode
+                id="borderedQRCode"
+                value={tipWallet.wif}
+                size={125}
+                logoImage={qrLogo ? bchLogoOldSchool : false}
+                logoOpacity={0.25}
+                logoWidth={125}
+                qrStyle={qrDots ? 'dots' : 'squares'}
+                ecLevel="M"
+                quietZone={10}
+                bgColor="#fff"
+                fgColor="#000"
+              />
+            ) : (
+              <ClaimedBlock status={tipWallet.status}>
+                [{tipWallet.status}]
+              </ClaimedBlock>
+            )}
+            {expirationDate !== '' && (
+              <TipExchangeRateThrowback>
+                Claim by {expirationDate}
+              </TipExchangeRateThrowback>
+            )}
+            <HowToClaim show>
+              <HowToList>
+                <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
+                <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
+                <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
+              </HowToList>
+            </HowToClaim>
+            {showGiftNames && (
+              <TipExchangeRateThrowback>
+                Gift Name: {tipWallet.callsign}
+              </TipExchangeRateThrowback>
+            )}
+          </SnapshotHolder>
+        </React.Fragment>
+      )}
 
-    {design === 'ezprint' && (
-      <React.Fragment>
-        <SnapshotHolder id={tipWallet.addr.substr(12)}>
-          <TipHeader>
-            <img src={ezPrintGiftsLogo} alt="Bitcoin Cash Tips" />
-          </TipHeader>
-          <TipAmountEZ>
-            <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
-            <FiatAmount>
-              {tipWallet.sats !== 0 ? (
-                <React.Fragment>
-                  ~ {fiatAmount} {fiatCurrency}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>0 {fiatCurrency}</React.Fragment>
-              )}
-            </FiatAmount>
-          </TipAmountEZ>
-          {dateStr !== null && (
-            <TipExchangeRateEZ>
-              {tipWallet.sats !== 0 ? (
-                <React.Fragment>
-                  1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-                  {fiatCurrency} on {dateStr}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>&nbsp;</React.Fragment>
-              )}
-            </TipExchangeRateEZ>
-          )}
-          {tipWallet.status === 'unclaimed' ? (
-            <QRCode
-              id="borderedQRCode"
-              value={tipWallet.wif}
-              size={125}
-              logoImage={qrLogo ? bchLogoEZ : false}
-              logoOpacity={0.25}
-              logoWidth={125}
-              qrStyle={qrDots ? 'dots' : 'squares'}
-              ecLevel="M"
-              quietZone={10}
-              bgColor="#fff"
-              fgColor="#000"
-            />
-          ) : (
-            <ClaimedBlock status={tipWallet.status}>
-              [{tipWallet.status}]
-            </ClaimedBlock>
-          )}
-          {expirationDate !== '' && (
-            <TipExchangeRateEZ>Claim by {expirationDate}</TipExchangeRateEZ>
-          )}
-          <HowToClaim show>
-            <HowToList>
-              <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
-              <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
-              <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
-            </HowToList>
-          </HowToClaim>
-          {showGiftNames && (
-            <TipExchangeRateEZ>
-              Gift Name: {tipWallet.callsign}
-            </TipExchangeRateEZ>
-          )}
-        </SnapshotHolder>
-      </React.Fragment>
-    )}
-
+      {design === 'ezprint' && (
+        <React.Fragment>
+          <SnapshotHolder id={tipWallet.addr.substr(12)}>
+            <TipHeader>
+              <img src={ezPrintGiftsLogo} alt="Bitcoin Cash Tips" />
+            </TipHeader>
+            <TipAmountEZ>
+              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+              <FiatAmount>
+                {tipWallet.sats !== 0 ? (
+                  <React.Fragment>
+                    ~ {fiatAmount} {fiatCurrency}
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>0 {fiatCurrency}</React.Fragment>
+                )}
+              </FiatAmount>
+            </TipAmountEZ>
+            {dateStr !== null && (
+              <TipExchangeRateEZ>
+                {tipWallet.sats !== 0 ? (
+                  <React.Fragment>
+                    1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                    {fiatCurrency} on {dateStr}
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>&nbsp;</React.Fragment>
+                )}
+              </TipExchangeRateEZ>
+            )}
+            {tipWallet.status === 'unclaimed' ? (
+              <QRCode
+                id="borderedQRCode"
+                value={tipWallet.wif}
+                size={125}
+                logoImage={qrLogo ? bchLogoEZ : false}
+                logoOpacity={0.25}
+                logoWidth={125}
+                qrStyle={qrDots ? 'dots' : 'squares'}
+                ecLevel="M"
+                quietZone={10}
+                bgColor="#fff"
+                fgColor="#000"
+              />
+            ) : (
+              <ClaimedBlock status={tipWallet.status}>
+                [{tipWallet.status}]
+              </ClaimedBlock>
+            )}
+            {expirationDate !== '' && (
+              <TipExchangeRateEZ>Claim by {expirationDate}</TipExchangeRateEZ>
+            )}
+            <HowToClaim show>
+              <HowToList>
+                <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
+                <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
+                <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
+              </HowToList>
+            </HowToClaim>
+            {showGiftNames && (
+              <TipExchangeRateEZ>
+                Gift Name: {tipWallet.callsign}
+              </TipExchangeRateEZ>
+            )}
+          </SnapshotHolder>
+        </React.Fragment>
+      )}
+    </TipBorder>
     <StatusWrap className="printHide">
       <StatusTable>
         <tbody>
@@ -326,7 +328,7 @@ const Tip = ({
       <ShareMenu
         trigger={
           <ShareButton type="button">
-            <ShareIcon data-id={tipWallet.addr.substr(12)} src={shareIcon} />
+            <ShareIcon src={shareIcon} />
           </ShareButton>
         }
         position="bottom right"
@@ -344,6 +346,9 @@ const Tip = ({
             <ShareMenuButton
               type="button"
               data-id={tipWallet.addr.substr(12)}
+              data-name={tipWallet.callsign}
+              data-amount={fiatAmount}
+              data-currency={fiatCurrency}
               onClick={share}
             >
               PNG

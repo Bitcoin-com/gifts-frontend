@@ -94,13 +94,13 @@ export const ShareButton = styled.div`
 
 export const TipWrapper = styled.div`
   position: relative;
-  border: 1px solid black;
+
   background-color: white;
   height: auto;
   width: 2.5in;
+
   align-self: center;
   justify-self: center;
-  margin-top: 24px;
 
   @media print {
     display: inline-block;
@@ -108,9 +108,18 @@ export const TipWrapper = styled.div`
     page-break-inside: avoid !important;
   }
 `;
+export const TipBorder = styled.div`
+  border: 1px solid black;
+  @media print {
+    border-right: 0;
+  }
+`;
 export const StatusWrap = styled.div`
   width: 100%;
-  border-top: 1px solid black;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  margin-top: 4px;
+  border: 1px solid black;
   padding: 0px;
   background-color: #f5f5f5;
   overflow: auto;
