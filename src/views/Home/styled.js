@@ -304,24 +304,22 @@ export const TipsWrapper = styled.div`
   margin: auto;
 `;
 export const TipContainerWrapper = styled.div`
-  margin: auto;
+  margin: 24px auto;
 
   width: ${props => props.maxWidth || '100%'};
-  @media only screen and (max-width: 424px) {
-  max-width: 2.5in;
-}
-  ${media.sm`
-    max-width: 5in;
-  `}
-  ${media.smmd`
-    max-width: 7.5in;
-  `}
-  ${media.md`
-  max-width: 7.5in;
-  `}
-  ${media.lg`
-  max-width: ${props => props.maxWidth || '100%'};
-  `}
+  @media only screen and (max-width: 657px) {
+    max-width: 2.7in;
+  }
+
+  @media only screen and (max-width: 912px) and (min-width: 658px) {
+    max-width: 5.4in;
+  }
+  @media screen and (max-width: 1424px) and (min-width: 913px) {
+    max-width: 8in;
+  }
+  @media screen and (min-width: 1425px) {
+    max-width: ${props => props.maxWidth || '100%'};
+  }
   @media print {
     margin: 0mm;
     padding: 0mm;
@@ -330,36 +328,33 @@ export const TipContainerWrapper = styled.div`
 `;
 export const TipContainer = styled.div`
   display: ${({ show = false }) => (show === true ? 'grid' : 'none')};
-  grid-row-gap: 0px;
-  grid-column-gap: 0px;
+  grid-template-columns: ${props =>
+    props.columns && `repeat(${props.columns}, 0fr)`};
+  grid-row-gap: 0.2in;
+  grid-column-gap: 0.2in;
   justify-items: center;
   @media print {
-   margin: 0mm;
-   padding: 0mm;
-   width: 10in;
-   grid-template-columns: repeat(5,0fr) !important;
+    margin: 0mm;
+    padding: 0mm;
+    width: 10in;
+    grid-template-columns: repeat(5, 0fr) !important;
+    grid-column-gap: 0in !important;
+    grid-row-gap: 0in !important;
   }
 
-    @media only screen and (max-width: 424px) {
-      grid-template-columns: 0fr;
-}
+  @media only screen and (max-width: 657px) {
+    grid-template-columns: 0fr;
+  }
 
+  @media only screen and (max-width: 912px) and (min-width: 658px) {
+    grid-template-columns: ${props => (props.columns >= 2 ? '0fr 0fr' : '0fr')};
+  }
 
-  ${media.sm`
-  grid-template-columns: ${props => (props.columns >= 2 ? '0fr 0fr' : '0fr')};
-  `}
-  ${media.smmd`
-  grid-template-columns: ${props => (props.columns >= 2 ? '0fr 0fr' : '0fr')};
-
-  `}
-  ${media.md`
-  grid-template-columns: ${props =>
-    props.columns >= 3 ? '0fr 0fr 0fr' : `repeat(${props.columns}, 0fr)`};
-  `}
-  ${media.lg`
+  @media screen and (max-width: 1424px) and (min-width: 913px) {
     grid-template-columns: ${props =>
-      props.columns && `repeat(${props.columns}, 0fr)`};
-  `}
+      props.columns >= 3 ? '0fr 0fr 0fr' : `repeat(${props.columns}, 0fr)`};
+  }
+
   & > div {
     max-width: unset;
   }
