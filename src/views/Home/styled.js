@@ -30,6 +30,7 @@ const reset = css`
 
 export const CustomSelect = styled(Select)`
   z-index: 2;
+  min-width: 185px;
 `;
 
 export const ApiErrorPopup = styled(Popup)``;
