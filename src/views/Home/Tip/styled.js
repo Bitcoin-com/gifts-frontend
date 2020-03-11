@@ -235,6 +235,14 @@ export const TipExchangeRate = styled.div`
   font-size: 12px;
   font-weight: 600;
 `;
+export const LogoFooter = styled.div`
+  padding: 3px 0px;
+  text-align: center;
+  background-color: #fff;
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+`;
 export const TipExchangeRateThrowback = styled.div`
   padding: 3px 0px;
   text-align: center;
@@ -307,7 +315,7 @@ export const StepThreeOG = styled.li`
   margin: 12px 6px 0px 6px;
 `;
 export const DotComImg = styled.img`
-  height: 10px;
+  height: 12px;
 `;
 
 export const Text = styled(Paragraph)`

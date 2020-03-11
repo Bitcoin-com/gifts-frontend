@@ -38,6 +38,7 @@ import {
   ShareMenuList,
   LoadingButton,
   ShareMenuButton,
+  LogoFooter,
 } from './styled';
 // import bchLogo from '../../../../static/images/uploads/bch-logo.png';
 import bchLogo from '../../../../static/images/uploads/bch-square-green.svg';
@@ -47,6 +48,7 @@ import tipsLogo from '../../../../static/images/uploads/logo-min.png';
 import oldSchoolGiftsLogo from '../../../../static/images/uploads/bitcoin-cash-logo-horizontal-small.png';
 import ezPrintGiftsLogo from '../../../../static/images/uploads/bitcoin-cash-logo-horizontal-grey.png';
 import dotComLogo from '../../../../static/images/uploads/logo_black.png';
+import dotComLogoGrey from '../../../../static/images/uploads/logo_bw.png';
 import shareIcon from '../../../../static/images/uploads/share-24px.svg';
 
 const Tip = ({
@@ -73,22 +75,35 @@ const Tip = ({
               <img src={tipsLogo} alt="Bitcoin Cash Tips" />
             </TipHeader>
             <TipAmount>
-              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+              <CryptoAmount>You have received:</CryptoAmount>
               <FiatAmount>
+                {fiatCurrency === 'JPY' && '¥'}
+                {fiatCurrency === 'GBP' && '£'}
+                {fiatCurrency === 'EUR' && '€'}
+                {fiatCurrency === 'USD' ||
+                  (fiatCurrency === 'CAD' && '$') ||
+                  (fiatCurrency === 'AUD' && '$')}
                 {tipWallet.sats !== 0 ? (
                   <React.Fragment>
-                    ~ {fiatAmount} {fiatCurrency}
+                    {fiatAmount} {fiatCurrency}
                   </React.Fragment>
                 ) : (
                   <React.Fragment>0 {fiatCurrency}</React.Fragment>
                 )}
               </FiatAmount>
+              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
             </TipAmount>
             {dateStr !== null && (
               <TipExchangeRate>
                 {tipWallet.sats !== 0 ? (
                   <React.Fragment>
-                    1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                    1 BCH ~{fiatCurrency === 'JPY' && '¥'}
+                    {fiatCurrency === 'GBP' && '£'}
+                    {fiatCurrency === 'EUR' && '€'}
+                    {fiatCurrency === 'USD' ||
+                      (fiatCurrency === 'CAD' && '$') ||
+                      (fiatCurrency === 'AUD' && '$')}
+                    {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
                     {fiatCurrency} on {dateStr}
                   </React.Fragment>
                 ) : (
@@ -119,13 +134,14 @@ const Tip = ({
             )}
             <HowToClaim show>
               <HowToList>
-                <StepOne>
-                  Download the <DotComImg src={dotComLogo} /> wallet
-                </StepOne>
+                <StepOne>Download the Bitcoin.com wallet</StepOne>
                 <StepTwo>Select &quot;Settings&quot;</StepTwo>
                 <StepThree>Select &quot;Paper Wallet Sweep&quot;</StepThree>
               </HowToList>
             </HowToClaim>
+            <LogoFooter>
+              <DotComImg src={dotComLogo} />
+            </LogoFooter>
             {showGiftNames && (
               <TipExchangeRate>Gift Name: {tipWallet.callsign}</TipExchangeRate>
             )}
@@ -139,22 +155,35 @@ const Tip = ({
               <img src={oldSchoolGiftsLogo} alt="Bitcoin Cash Tips" />
             </TipHeader>
             <TipAmountThrowback>
-              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+              <CryptoAmount>You have received:</CryptoAmount>
               <FiatAmount>
+                {fiatCurrency === 'JPY' && '¥'}
+                {fiatCurrency === 'GBP' && '£'}
+                {fiatCurrency === 'EUR' && '€'}
+                {fiatCurrency === 'USD' ||
+                  (fiatCurrency === 'CAD' && '$') ||
+                  (fiatCurrency === 'AUD' && '$')}
                 {tipWallet.sats !== 0 ? (
                   <React.Fragment>
-                    ~ {fiatAmount} {fiatCurrency}
+                    {fiatAmount} {fiatCurrency}
                   </React.Fragment>
                 ) : (
                   <React.Fragment>0 {fiatCurrency}</React.Fragment>
                 )}
               </FiatAmount>
+              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
             </TipAmountThrowback>
             {dateStr !== null && (
               <TipExchangeRateThrowback>
                 {tipWallet.sats !== 0 ? (
                   <React.Fragment>
-                    1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                    1 BCH ~{fiatCurrency === 'JPY' && '¥'}
+                    {fiatCurrency === 'GBP' && '£'}
+                    {fiatCurrency === 'EUR' && '€'}
+                    {fiatCurrency === 'USD' ||
+                      (fiatCurrency === 'CAD' && '$') ||
+                      (fiatCurrency === 'AUD' && '$')}{' '}
+                    {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
                     {fiatCurrency} on {dateStr}
                   </React.Fragment>
                 ) : (
@@ -209,22 +238,35 @@ const Tip = ({
               <img src={ezPrintGiftsLogo} alt="Bitcoin Cash Tips" />
             </TipHeader>
             <TipAmountEZ>
-              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+              <CryptoAmount>You have received:</CryptoAmount>
               <FiatAmount>
+                {fiatCurrency === 'JPY' && '¥'}
+                {fiatCurrency === 'GBP' && '£'}
+                {fiatCurrency === 'EUR' && '€'}
+                {fiatCurrency === 'USD' ||
+                  (fiatCurrency === 'CAD' && '$') ||
+                  (fiatCurrency === 'AUD' && '$')}
                 {tipWallet.sats !== 0 ? (
                   <React.Fragment>
-                    ~ {fiatAmount} {fiatCurrency}
+                    {fiatAmount} {fiatCurrency}
                   </React.Fragment>
                 ) : (
                   <React.Fragment>0 {fiatCurrency}</React.Fragment>
                 )}
               </FiatAmount>
+              <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
             </TipAmountEZ>
             {dateStr !== null && (
               <TipExchangeRateEZ>
                 {tipWallet.sats !== 0 ? (
                   <React.Fragment>
-                    1 BCH ~ {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                    1 BCH ~{fiatCurrency === 'JPY' && '¥'}
+                    {fiatCurrency === 'GBP' && '£'}
+                    {fiatCurrency === 'EUR' && '€'}
+                    {fiatCurrency === 'USD' ||
+                      (fiatCurrency === 'CAD' && '$') ||
+                      (fiatCurrency === 'AUD' && '$')}{' '}
+                    {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
                     {fiatCurrency} on {dateStr}
                   </React.Fragment>
                 ) : (
@@ -261,6 +303,9 @@ const Tip = ({
                 <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
               </HowToList>
             </HowToClaim>
+            <LogoFooter>
+              <DotComImg src={dotComLogoGrey} />
+            </LogoFooter>
             {showGiftNames && (
               <TipExchangeRateEZ>
                 Gift Name: {tipWallet.callsign}
