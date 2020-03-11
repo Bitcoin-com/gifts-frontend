@@ -87,9 +87,9 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 // Dev
-const giftsBackendBase = 'http://localhost:3001';
+// const giftsBackendBase = 'http://localhost:3001';
 
 const giftsBackend = `${giftsBackendBase}/setClaimChecks`;
 const giftsQuery = `${giftsBackendBase}/tips`; // :creationTxid
