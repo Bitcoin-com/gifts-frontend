@@ -209,11 +209,13 @@ export const Buttons = styled.div`
   `}
 `;
 export const MobileTipTable = styled(Table)`
+  margin-bottom: 12px;
   @media screen and (min-width: 556px) {
     display: none;
   }
 `;
 export const TipTable = styled(Table)`
+  margin-bottom: 12px;
   @media screen and (max-width: 555px) {
     display: none;
   }
@@ -341,6 +343,9 @@ export const TipContainer = styled.div`
     grid-column-gap: 0in !important;
     grid-row-gap: 0in !important;
     & > div:nth-child(5n) > div {
+      border-right: 1px solid black;
+    }
+    & > div:last-child > div {
       border-right: 1px solid black;
     }
   }
