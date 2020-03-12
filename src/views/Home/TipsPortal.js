@@ -91,8 +91,8 @@ const giftsBackendBase = 'https://cashtips-api.btctest.net';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 
-const giftsBackend = `${giftsBackendBase}/setClaimChecks`;
-const giftsQuery = `${giftsBackendBase}/tips`; // :creationTxid
+const giftsBackend = `${giftsBackendBase}/new`;
+const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
 
 const appStates = {
   initial: 0,
@@ -548,11 +548,11 @@ class TipsPortal extends React.Component {
     let expirationDate;
 
     switch (dateSelection) {
-      case 'twoMinutes':
-        expirationDate = new Date(now.setTime(now.getTime() + 2 * 60000));
+      case 'oneDay':
+        expirationDate = new Date(now.setDate(now.getDate() + 1));
         break;
-      case 'tenMinutes':
-        expirationDate = new Date(now.setTime(now.getTime() + 10 * 60000));
+      case 'oneWeek':
+        expirationDate = new Date(now.setDate(now.getDate() + 7));
         break;
       case 'twoWeeks':
         expirationDate = new Date(now.setDate(now.getDate() + 14));
@@ -894,8 +894,8 @@ class TipsPortal extends React.Component {
           returnTxInfo.email = formData.emailAddress.value;
           returnTxInfo.rawTx = returnRawTxs[i];
           returnTxInfo.expirationStamp = expirationStamp;
-          returnTxInfo.tipAddress = tipAddress;
-          returnTxInfo.tipNote = tipNote;
+          returnTxInfo.giftAddress = tipAddress;
+          returnTxInfo.giftNote = tipNote;
           returnTxInfo.refundAddress = refundAddress;
           returnTxInfos.push(returnTxInfo);
         }
@@ -2054,16 +2054,16 @@ class TipsPortal extends React.Component {
       { value: 'JOD', label: 'JOD - Jordanian Dinar' },
     ];
 
-    const twoMinutes = 'twoMinutes';
-    const tenMinutes = 'tenMinutes';
+    const oneDay = 'oneDay';
+    const oneWeek = 'oneWeek';
     const twoWeeks = 'twoWeeks';
     const oneMonth = 'oneMonth';
     const threeMonths = 'threeMonths';
     const custom = 'custom';
 
     const expirationDateOptions = [
-      { value: twoMinutes, label: '2 minutes' },
-      { value: tenMinutes, label: '10 minutes' },
+      { value: oneDay, label: '24 hours' },
+      { value: oneWeek, label: '1 week' },
       { value: twoWeeks, label: '2 weeks' },
       { value: oneMonth, label: '1 month' },
       { value: threeMonths, label: '3 months' },
@@ -2563,6 +2563,7 @@ class TipsPortal extends React.Component {
                       <CustomDatePicker
                         selected={formData.expirationDate.value}
                         onChange={this.handleExpirationDateChange} // only when value has changed
+                        dateFormat="Pp"
                       />
                       <InputError>{formData.expirationDate.error}</InputError>
                     </InputWrapper>
