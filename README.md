@@ -1,6 +1,6 @@
-# Bitcoin.com Client-only Tips
+# Bitcoin.com Client-only Gifts
 
-Redeemable BCH tips with a client-side management portal
+Redeemable BCH gifts with a client-side management portal
 
 ## Dev Roadmap
 
@@ -13,3 +13,4 @@ Redeemable BCH tips with a client-side management portal
 ## Production
 
 1. Updating README to test another prod build
+2. Test prod changes
