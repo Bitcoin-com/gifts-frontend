@@ -131,6 +131,12 @@ export const CustomDatePicker = styled(DatePicker)`
 export const AddressInputLabel = styled(InputLabel)`
   text-align: left;
 `;
+export const HeaderContentBlock = styled(ContentBlock)`
+  padding-bottom: 0px;
+  & > div > div {
+    padding-bottom: 0px;
+  }
+`;
 export const PrintableContentBlock = styled(ContentBlock)`
   @media print {
     margin: 0mm;
@@ -268,7 +274,20 @@ export const SeedWrapper = styled.div`
     border-color: #0fcb97;
   }
 `;
-export const SeedWarning = styled.p``;
+export const SeedWrapperAbove = styled.div`
+  margin-bottom: 0px;
+  border: 2px solid black;
+  padding: ${theme.spacing.unit * 2}px;
+  border-radius: 5px;
+  & :hover {
+    background-color: #0fcb97;
+    color: #fff;
+    border-color: #0fcb97;
+  }
+`;
+export const SeedWarning = styled.p`
+  color: Red;
+`;
 export const SweepInstructions = styled.p`
   margin-top: 0px;
   padding: 0px 24px;
@@ -289,6 +308,18 @@ export const SeedReminder = styled.h5`
   text-align: center;
   margin: auto;
   padding-top: ${theme.spacing.unit * 2}px;
+`;
+export const SeedReminderAbove = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: 4px;
+  padding-bottom: 4px;
+`;
+export const SeedReminderBelow = styled.h5`
+  text-align: center;
+  margin: auto;
+  padding-top: 4px;
+  color: red;
 `;
 export const SweepNotice = styled.h5`
   text-align: center;
