@@ -13,6 +13,8 @@ import {
   Input,
   Select,
   Checkbox,
+  H1,
+  Paragraph,
 } from 'bitcoincom-storybook';
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
@@ -21,6 +23,7 @@ import htmlToImage from 'html-to-image';
 // import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import {
+  HeaderContentBlock,
   PrintableContentBlock,
   CardButton,
   MobileButton,
@@ -48,11 +51,12 @@ import {
   MobileButtonHider,
   TipContainerWrapper,
   SeedCard,
-  SeedWrapper,
+  SeedWrapperAbove,
+  SeedReminderBelow,
   SeedWarning,
   Buttons,
   // CustomInfo,
-  SeedReminder,
+  SeedReminderAbove,
   AddressForm,
   SweepNotice,
   AddressInputLabel,
@@ -314,12 +318,17 @@ class TipsPortal extends React.Component {
 
     // If date is in the past, also error
     const now = new Date();
+    const expirationMinOffset = 1; // hours
+    const expirationMin = new Date(
+      now.setHours(now.getHours() + expirationMinOffset),
+    );
+
     if (date > expirationMax) {
       field.state = inputState.invalid;
       field.error = formatMessage({
         id: 'home.errors.invalidExpirationDate',
       });
-    } else if (date < now) {
+    } else if (date < expirationMin) {
       field.state = inputState.invalid;
       field.error = formatMessage({
         id: 'home.errors.expirationMustBeFuture',
@@ -713,10 +722,6 @@ class TipsPortal extends React.Component {
       // Then the API post has already happened, don't do it again
       return console.log(`Packet already sent to server, not re-sending`);
     }
-    // Dev
-    // const api = 'http://localhost:3001/setClaimChecks';
-    // Prod
-    // const api = 'https://cashtips-api.btctest.net/setClaimChecks';
     fetch(giftsBackend, {
       method: 'POST',
       headers: {
@@ -1747,7 +1752,7 @@ class TipsPortal extends React.Component {
       });
     }
 
-    const invoiceMemo = `Funding transaction for ${tipCount} BCH gifts of ${tipAmountFiat} dollars each`;
+    const invoiceMemo = `Funding transaction for ${tipCount} BCH gifts of ${tipAmountFiat} ${selectedCurrency} each`;
     const tipWallets = [];
     const fundingOutputs = [];
 
@@ -2212,6 +2217,16 @@ class TipsPortal extends React.Component {
 
     return (
       <React.Fragment>
+        {appState === appStates.initial && !importedMnemonic && (
+          <HeaderContentBlock hero>
+            <H1>
+              <FormattedMessage id="home.header.title" />
+            </H1>
+            <Paragraph center>
+              <FormattedMessage id="home.header.description" />
+            </Paragraph>
+          </HeaderContentBlock>
+        )}
         <PrintableContentBlock>
           <ApiErrorPopup open={apiPostFailed}>
             <ApiErrorPopupCloser>X</ApiErrorPopupCloser>
@@ -2350,17 +2365,19 @@ class TipsPortal extends React.Component {
             }
           >
             <SeedCard title="Save Your Recovery Seed">
-              <SeedWarning>
-                Please write down your recovery seed. This 12-word phrase will
-                be the only way to manage your Gifts after closing your browser
-                window!
-              </SeedWarning>
+              <SeedReminderAbove>
+                Save this 12-word seed to access your gifts in the future
+              </SeedReminderAbove>
               <CopyToClipboard
                 text={walletInfo.mnemonic}
                 onCopy={() => this.handleSeedCopied()}
               >
-                <SeedWrapper>{walletInfo.mnemonic}</SeedWrapper>
+                <SeedWrapperAbove>{walletInfo.mnemonic}</SeedWrapperAbove>
               </CopyToClipboard>
+              <SeedWarning>
+                Bitcoin.com never has access to your seed and we cannot help you
+                if you lose it!
+              </SeedWarning>
               <Buttons show>
                 <CopyToClipboard
                   text={walletInfo.mnemonic}
@@ -2463,32 +2480,6 @@ class TipsPortal extends React.Component {
                       />
                       <InputError>{formData.tipAmountFiat.error}</InputError>
                     </InputWrapper>
-
-                    {/* <InputWrapper show>
-                      <InputLabel>
-                        <FormattedMessage id="home.labels.tipAmountFiat" />{' '}
-                        <Red>*</Red>
-                      </InputLabel>
-                      <InputSelect
-                        name="tipAmountFiat"
-                        min="0"
-                        step="0.01"
-                        selected={selectedCurrency}
-                        value={formData.tipAmountFiat.value}
-                        onChange={this.handleTipAmountFiatChange}
-                        select={this.handleSelectedCurrencyChange}
-                        options={currencies}
-                        initialOptions={messages['home.initialCurrencies']}
-                        searchable
-                        placeholder={formatMessage({
-                          id: 'home.placeholders.tipAmountFiat',
-                        })}
-                        searchPlaceholder="Search Currency"
-                        type="currency"
-                        required
-                      />
-                      <InputError>{formData.tipAmountFiat.error}</InputError>
-                      </InputWrapper> */}
 
                     <InputWrapper show>
                       <InputLabel>
@@ -2633,6 +2624,23 @@ class TipsPortal extends React.Component {
                       </tr>
                     </tbody>
                   </MobileTipTable>
+                  {!tipsFunded && (
+                    <React.Fragment>
+                      <SeedReminderAbove>
+                        Save this 12-word seed to access your gifts in the
+                        future
+                      </SeedReminderAbove>
+                      <CopyToClipboard
+                        text={walletInfo.mnemonic}
+                        onCopy={() => this.handleSeedCopied()}
+                      >
+                        <SeedWrapperAbove>
+                          {walletInfo.mnemonic}
+                        </SeedWrapperAbove>
+                      </CopyToClipboard>
+                    </React.Fragment>
+                  )}
+
                   <BadgerWrap>
                     <MobileBadgerCover>
                       <a href={invoiceUri}>
@@ -2648,30 +2656,7 @@ class TipsPortal extends React.Component {
                       successFn={this.invoiceSuccessThrottled}
                     />
                   </BadgerWrap>
-                  {tipsFunded ? (
-                    <React.Fragment>
-                      <CopyToClipboard
-                        text={walletInfo.mnemonic}
-                        onCopy={() => this.handleSeedCopied()}
-                      >
-                        <SeedWrapper>{walletInfo.mnemonic}</SeedWrapper>
-                      </CopyToClipboard>
-                      <CopyToClipboard
-                        text={walletInfo.mnemonic}
-                        onCopy={() => this.handleSeedCopied()}
-                      >
-                        <CardButton
-                          primary
-                          style={{ margin: 'auto', maxWidth: '212px' }}
-                        >
-                          <FormattedMessage id="home.buttons.copySeed" />
-                        </CardButton>
-                      </CopyToClipboard>
-                      <SeedReminder>
-                        Save this seed to access your gifts in the future.
-                      </SeedReminder>
-                    </React.Fragment>
-                  ) : (
+                  {!tipsFunded && (
                     <React.Fragment>
                       <MobileButtonHider show={!tipsFunded}>
                         <MobileButton
@@ -2866,9 +2851,23 @@ class TipsPortal extends React.Component {
                   onChange={this.handleGiftDesignChange}
                   options={giftDesignOptions}
                   defaultValue={giftDesignOptions[0]}
+                  isSearchable={false}
                 />
               </InputWrapper>
             </ControlPanelForm>
+            <SeedReminderAbove>
+              Save this 12-word seed to access your gifts in the future
+            </SeedReminderAbove>
+            <CopyToClipboard
+              text={walletInfo.mnemonic}
+              onCopy={() => this.handleSeedCopied()}
+            >
+              <SeedWrapperAbove>{walletInfo.mnemonic}</SeedWrapperAbove>
+            </CopyToClipboard>
+            <SeedReminderBelow>
+              Bitcoin.com never has access to your seed and we cannot help you
+              if you lose it!
+            </SeedReminderBelow>
           </GiftsControlPanel>
           <TipContainerWrapper maxWidth={displayWidth}>
             <TipContainer
