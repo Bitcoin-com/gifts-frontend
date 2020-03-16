@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Boilerplate | Bitcoin.com",
-    "description": "Bitcoin.com Boilerplate",
+    "title": "BCH Gifts  | Bitcoin.com",
+    "description": "Create trackable cash gifts in your local currency with Bitcoin Cash (BCH)",
     "twitter": "bitcoincom",
     "image": "/images/uploads/facebook.png",
     "schema": {
@@ -20,18 +20,96 @@
       ]
     }
   },
-  "content": {
-    "logo": "/images/uploads/full-logo-white-500px.png",
-    "logo-alt": "Bitcoin.com",
-    "title": "Boilerplate",
-    "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc at rhoncus dolor. Morbi id nulla lacus.<br /><br />Praesent nec laoreet dolor. Aliquam sit amet elit blandit ante viverra molestie vitae ut purus. Aliquam ultrices suscipit est eu lobortis.",
-    "image": "/images/uploads/icon-512x512.png",
-    "image-alt": "Logo"
+  "header": {
+    "title": "Bitcoin.com Gifts",
+    "description": "Create and manage Bitcoin Cash (BCH) gifts. Unredeemed gifts are automatically returned!"
   },
-  "newsletter": {
-    "title": "Subscribe to our newsletter",
-    "text": "Get weekly content highlights including video, podcasts, and more delivered to your inbox.",
-    "button": "Subscribe",
-    "acList": "22"
+  "strings": {
+    "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed",
+    "seedReminderAbove": "Save this 12-word seed to access your gifts in the future",
+    "seedReminderBelow": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+    "seedWarning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+    "inputExtra": "If no refund address is provided, unclaimed tips will be donated to Bitcoin.com to help promote peer to peer electronic cash.",
+    "sweepInstructions": "Bitcoin.com never has access to your seed and we cannot help you if you lose it! You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+  },
+  "labels": {
+    "tipCount": "Number of gifts",
+    "tipAmountFiat": "Fiat amount (per gift) in your selected currency",
+    "refundAddress": "Your refund address",
+    "localCurrency": "Selected Currency",
+    "changeCurrency": "Change currency",
+    "selectCurrency": "Select your local currency",
+    "expirationDate": "Choose custom expiration date",
+    "expirationDateSelect": "Expiration date",
+    "emailAddress": "Email address (receive notifications)",
+    "giftDesignSelect": "Select design",
+    "tableQty": "Quantity",
+    "tableValue": "Value per gift",
+    "tableCurrency": "Currency",
+    "tableExpiration": "Expiration"
+  },
+  "notifications": {
+    "seedCopied": "Recovery seed copied to clipboard",
+    "giftsSwept": "{tipsSweptCount} of original {tipWalletsCount} gifts have been <a href=https://explorer.bitcoin.com/bch/tx/{sweptTxid} target=_blank rel=noopener>swept</a> to <a href=https://explorer.bitcoin.com/bch/address/{userRefundAddress} target=_blank rel=noopener>{userRefundAddress}</a>"
+  },
+  "buttons": {
+    "createTips": "Go",
+    "goBack": "Back",
+    "copyUri": "Copy Invoice URL",
+    "copySeed": "Copy",
+    "sweepAll": "Sweep All",
+    "newTips": "New Gifts",
+    "loading": "Generating invoice...",
+    "loadTips": "Import",
+    "refresh": "Refresh",
+    "processing": "Processing...",
+    "mobilePay": "Pay in app",
+    "next": "Next",
+    "confirm": "Confirm",
+    "repost": "Repost",
+    "retry": "Retry"
+  },
+  "placeholders": {
+    "tipCount": "Enter desired number of gifts",
+    "tipAmountFiat": "Enter the fiat currency value desired for each gift",
+    "importMnemonic": "Enter your 12-word seed",
+    "userConfirmedMnemonic": "Enter your 12-word seed",
+    "userRefundAddress": "All swept gifts will be returned to this address.",
+    "userRefundAddressOnCreate": "Unclaimed gifts return to this address",
+    "emailAddress": "Enter your email address"
+  },
+  "alerts": {
+    "warning": "Warning!",
+    "giftDidNotPost": "Gift information failed to post to backend. Your gifts will not be automatically returned to you on expiration.",
+    "reclaim": "Error creating your reclaim transactions. Your gifts will not be automatically returned to you on expiration.",
+    "apiErrorWarningAlpha": "Failed to post your gift expiration claim transactions to the server.",
+    "apiErrorWarningBeta": "Your gifts will not automatically be returned to your refund address after their expiration date!",
+    "apiErrorWarningGamma": "Make sure to save your 12-word backup seed above. You can still access your gifts with this phrase.",
+    "apiErrorWarningDelta": "Please try to repost your gift information. If the issue persists, contact tips-support@bitcoin.com",
+    "txErrorWarningAlpha": "API error while creating your auto-reclaim transactions.",
+    "txErrorWarningBeta": "Your gifts will not be automatically returned on their expiration date!",
+    "txErrorWarningGamma": "Make sure you have written down your 12-word backup seed.",
+    "txErrorWarningDelta": "Please try again with the button below. If the issue persists, contact tips-support@bitcoin.com"
+  },
+  "errors": {
+    "tipCountNoTips": "Gift count must be greater than zero",
+    "tipCountNotInteger": "Gift count must be an integer",
+    "tipCountNum": "Gift count must be a number",
+    "fiatTipAmountNum": "Gift amount in local currency must be a number",
+    "fiatTipAmountRequired": "Desired gift in local currency is required",
+    "noMnemonic": "To import a mnemonic, you must enter a 12-word seed",
+    "invalidMnemonic": "Please enter a valid 12-word mnemonic",
+    "noTipsAtMnemonic": "No gifts found for this mnemonic",
+    "invalidUserMnemonic": "Must match 12-word seed created in previous step",
+    "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
+    "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",
+    "youreTooCheap": "Error: Value of gift is too low. Gifts must be at least 0.0005 BCH. Increase your fiat amount per gift.",
+    "tipCountTooManyTips": "Gift creation is currently limited to 20.",
+    "networkError": "Network error, the API at rest.bitcoin.com did not respond.",
+    "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
+    "invalidEmail": "Please enter a valid email address (or none at all)",
+    "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
+    "priceApiError": "Error obtaining BCH price in selected currency from price API.",
+    "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!"
   }
 }
