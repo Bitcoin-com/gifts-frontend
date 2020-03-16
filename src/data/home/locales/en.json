@@ -24,6 +24,14 @@
     "title": "Bitcoin.com Gifts",
     "description": "Create and manage Bitcoin Cash (BCH) gifts. Unredeemed gifts are automatically returned!"
   },
+  "strings": {
+    "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed",
+    "seedReminderAbove": "Save this 12-word seed to access your gifts in the future",
+    "seedReminderBelow": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+    "seedWarning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+    "inputExtra": "If no refund address is provided, unclaimed tips will be donated to Bitcoin.com to help promote peer to peer electronic cash.",
+    "sweepInstructions": "Bitcoin.com never has access to your seed and we cannot help you if you lose it! You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+  },
   "labels": {
     "tipCount": "Number of gifts",
     "tipAmountFiat": "Fiat amount (per gift) in your selected currency",
@@ -34,7 +42,15 @@
     "expirationDate": "Choose custom expiration date",
     "expirationDateSelect": "Expiration date",
     "emailAddress": "Email address (receive notifications)",
-    "giftDesignSelect": "Select design"
+    "giftDesignSelect": "Select design",
+    "tableQty": "Quantity",
+    "tableValue": "Value per gift",
+    "tableCurrency": "Currency",
+    "tableExpiration": "Expiration"
+  },
+  "notifications": {
+    "seedCopied": "Recovery seed copied to clipboard",
+    "giftsSwept": "{tipsSweptCount} of original {tipWalletsCount} gifts have been <a href=https://explorer.bitcoin.com/bch/tx/{sweptTxid} target=_blank rel=noopener>swept</a> to <a href=https://explorer.bitcoin.com/bch/address/{userRefundAddress} target=_blank rel=noopener>{userRefundAddress}</a>"
   },
   "buttons": {
     "createTips": "Go",
@@ -47,7 +63,11 @@
     "loadTips": "Import",
     "refresh": "Refresh",
     "processing": "Processing...",
-    "mobilePay": "Pay in app"
+    "mobilePay": "Pay in app",
+    "next": "Next",
+    "confirm": "Confirm",
+    "repost": "Repost",
+    "retry": "Retry"
   },
   "placeholders": {
     "tipCount": "Enter desired number of gifts",
@@ -57,6 +77,19 @@
     "userRefundAddress": "All swept gifts will be returned to this address.",
     "userRefundAddressOnCreate": "Unclaimed gifts return to this address",
     "emailAddress": "Enter your email address"
+  },
+  "alerts": {
+    "warning": "Warning!",
+    "giftDidNotPost": "Gift information failed to post to backend. Your gifts will not be automatically returned to you on expiration.",
+    "reclaim": "Error creating your reclaim transactions. Your gifts will not be automatically returned to you on expiration.",
+    "apiErrorWarningAlpha": "Failed to post your gift expiration claim transactions to the server.",
+    "apiErrorWarningBeta": "Your gifts will not automatically be returned to your refund address after their expiration date!",
+    "apiErrorWarningGamma": "Make sure to save your 12-word backup seed above. You can still access your gifts with this phrase.",
+    "apiErrorWarningDelta": "Please try to repost your gift information. If the issue persists, contact tips-support@bitcoin.com",
+    "txErrorWarningAlpha": "API error while creating your auto-reclaim transactions.",
+    "txErrorWarningBeta": "Your gifts will not be automatically returned on their expiration date!",
+    "txErrorWarningGamma": "Make sure you have written down your 12-word backup seed.",
+    "txErrorWarningDelta": "Please try again with the button below. If the issue persists, contact tips-support@bitcoin.com"
   },
   "errors": {
     "tipCountNoTips": "Gift count must be greater than zero",
@@ -76,7 +109,8 @@
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
     "invalidEmail": "Please enter a valid email address (or none at all)",
     "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
-    "priceApiError": "Error obtaining BCH price in selected currency from price API."
+    "priceApiError": "Error obtaining BCH price in selected currency from price API.",
+    "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!"
   },
   "selectedCurrenciesFull": [
     { "value": "FJD", "label": "FJD - Fijian Dollar" },

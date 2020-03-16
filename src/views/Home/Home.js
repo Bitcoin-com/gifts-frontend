@@ -7,42 +7,6 @@ import SEO from './SEO';
 import TipsPortal from './TipsPortal';
 import './print.css';
 
-// Next steps
-
-// DONE 1 - InputSelect for currency and amount
-// 2 - next thing to get the app just working
-// - import badger-react-components
-// - based on input from create tips form, generate an invoice for badger-react-components
-//    note: clicking the create tip button should hide the create tip button, lock the input,
-//          and show an invoice with a "go back" option to undo all this
-// - when invoice is paid, execute a function
-
-// next; define what that function does; make it create tips
-
-// 3 - stuff like login, polishing
-// 4 - css review
-
-// Display QR code -- actually do this with badger-components-react
-// AFTER user has filled out what kind of tips they want
-
-// make other card an 'import wallet' card
-
-// use inputselect to pick a currency, like in price converter
-
-// functionality for generate wallet
-// functionality for import wallet
-// that's it for today
-
-// after wallet creation, prompt user to save their seed phrase, paste it back into a field
-// THEN show next step
-
-// App requirements
-// seed validation
-// login with seed
-// handle payments of incorrect amounts
-// consider max amount for tips, auto-return tips
-// save sending address
-
 const Home = ({ locale }) => {
   return (
     <React.Fragment>
