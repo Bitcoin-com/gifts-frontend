@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 import Popup from 'reactjs-popup';
 import {
   theme,
+  Paragraph,
   ContentBlock,
   Image,
   media,
@@ -528,4 +529,8 @@ export const CustomContentBlock = styled(ContentBlock)`
 export const Logo = styled(Image)`
   width: 100%;
   margin-bottom: ${theme.spacing.unit * 2}px;
+`;
+
+export const CustomParagraph = styled(Paragraph)`
+  margin-top: ${theme.spacing.unit * 3}px;
 `;

@@ -1,6 +1,6 @@
 import React from 'react';
 import throttle from 'lodash.throttle';
-import { injectIntl, FormattedMessage } from 'react-intl';
+import { injectIntl, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BITBOX } from 'bitbox-sdk';
 import { BadgerButton } from 'badger-components-react';
@@ -72,12 +72,12 @@ import {
   GiftsControlPanel,
   ControlPanelForm,
   SweepInstructions,
+  CustomParagraph,
 } from './styled';
 import Tip from './Tip';
-// disable PDF functionality
-// import TipPdf from './TipPdf';
-// import TipPdfDocument from './TipPdfDocument';
+
 const Chance = require('chance');
+const selectedCurrenciesFull = require('./currencies');
 const callsigns = require('./Tip/callsigns');
 
 const bitbox = new BITBOX({
@@ -91,6 +91,7 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
+
 const giftsBackendBase = 'https://cashtips-api.btctest.net';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
@@ -606,12 +607,7 @@ class TipsPortal extends React.Component {
         link.download = `${fileName}.png`;
         link.href = dataUrl.replace(imageType, 'image/octet-stream');
         link.click();
-        /*
-        document.location.href = dataUrl.replace(
-          imageType,
-          'image/octet-stream',
-        );
-        */
+
         this.setState({ pngLoading: false });
       },
       err => {
@@ -621,28 +617,6 @@ class TipsPortal extends React.Component {
       },
     );
   }
-  /*
-    html2canvas(document.querySelector(`#${elementId}`)).then(
-      canvasElm => {
-        console.log(`canvas generation success!`);
-
-        // Get a base64 data string
-        const imageType = 'image/png';
-        const imageData = canvasElm.toDataURL(imageType); // Open the data string in the current window
-        console.log(imageData);
-        // Download the image
-
-        document.location.href = imageData.replace(
-          imageType,
-          'image/octet-stream',
-        );
-      },
-      err => {
-        console.log(`error in shareTip(#${tipId})`);
-        console.log(err);
-      },
-    );
-    */
 
   handleImportedMnemonicChange(e) {
     const { value, name } = e.target;
@@ -987,8 +961,13 @@ class TipsPortal extends React.Component {
 
   handleSeedCopied() {
     const { appState } = this.state;
+    const {
+      intl: { formatMessage },
+    } = this.props;
 
-    toast.notify('Recovery seed copied to clipboard', {
+    const seedCopied = formatMessage({ id: 'home.notifications.seedCopied' });
+
+    toast.notify(seedCopied, {
       position: 'bottom-right',
       duration: 1500,
     });
@@ -1212,7 +1191,6 @@ class TipsPortal extends React.Component {
     const currency = e.value;
 
     const priceSource = `https://markets.api.bitcoin.com/rates/convertor?c=BCH&q=${currency}`;
-    // const priceSource = `https://index-api.bitcoin.com/api/v0/cash/price/${currencyCode}`;
     let price;
     let priceJson;
     try {
@@ -1234,7 +1212,6 @@ class TipsPortal extends React.Component {
     }
 
     const fiatPrice = priceJson[currency].rate;
-    // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
     );
@@ -1278,7 +1255,7 @@ class TipsPortal extends React.Component {
     this.setDefaultExpirationDate();
     const { walletInfo } = this.state;
     const entropy = bitbox.Crypto.randomBytes(16);
-    //
+
     // turn entropy to 12 word mnemonic
     const mnemonic = bitbox.Mnemonic.fromEntropy(entropy);
 
@@ -1345,8 +1322,7 @@ class TipsPortal extends React.Component {
     }
     // Use already-validated user mnemonic
     const mnemonic = formData.importedMnemonic.value;
-    // const mnemonic = 'road adapt scorpion buzz home sentence puzzle bracket carry potato fault arrow';
-    // const mnemonic ='report enact exclude useless fun scale recipe moral join lobster wasp flower';
+
     // console.log(mnemonic);
 
     // root seed buffer
@@ -1355,21 +1331,9 @@ class TipsPortal extends React.Component {
     // master HDNode
     const masterHDNode = bitbox.HDNode.fromSeed(rootSeed, 'bitcoincash');
 
-    // HDNode of BIP44 account
-    /*
-    const account = bitbox.HDNode.derivePath(
-      masterHDNode,
-      `${walletInfo.derivePath}0`,
-    );
-    */
-
     // get the first child node
     const childNode = masterHDNode.derivePath(`${derivePath}${0}`);
 
-    // const account = bitbox.HDNode.createAccount([childNode]);
-    // const test = account.getChainAddress(0);
-    // console.log(`chainAddress:`);
-    // console.log(test);
     const fundingAddress = bitbox.HDNode.toCashAddress(childNode);
     const fundingWif = bitbox.HDNode.toWIF(childNode);
 
@@ -1567,12 +1531,6 @@ class TipsPortal extends React.Component {
           importingMnemonic: false,
         });
       }
-
-      // else just load the next stuff as usual
-
-      // validate history for tip site behavior
-      // if yes, load it as tip site
-      // if no, say there seems to be something weird
     } catch (err) {
       console.log(`Error in bitbox.Address.details(firstTipAddr)`);
       console.log(err);
@@ -1620,10 +1578,6 @@ class TipsPortal extends React.Component {
       });
     }
 
-    // NEXT STEP
-    // get the forex endpoint working, you can use legacy
-    // get tips created with forex and all the data you want on them
-    // log in with a mnemonic
     const fiatPrice = priceJson[selectedCurrency].rate;
     // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
@@ -1731,9 +1685,6 @@ class TipsPortal extends React.Component {
       });
     }
 
-    // NEXT STEP
-    // get the forex endpoint working, you can use legacy
-    // get tips created with forex and all the data you want on them
     // log in with a mnemonic
     const fiatPrice = priceJson[selectedCurrency].rate;
     // console.log(`fiatPrice: ${fiatPrice}`);
@@ -1895,184 +1846,13 @@ class TipsPortal extends React.Component {
       { value: 'CAD', label: 'CAD' },
     ];
 
-    const selectedCurrenciesFull = [
-      { value: 'FJD', label: 'FJD - Fijian Dollar' },
-      { value: 'DJF', label: 'DJF - Djiboutian Franc' },
-      { value: 'AED', label: 'AED - UAE Dirham' },
-      { value: 'SVC', label: 'SVC - Salvadoran Colón' },
-      { value: 'MZN', label: 'MZN - Mozambican Metical' },
-      { value: 'ISK', label: 'ISK - Icelandic Króna' },
-      { value: 'CHF', label: 'CHF - Swiss Franc' },
-      { value: 'HRK', label: 'HRK - Croatian Kuna' },
-      { value: 'ALL', label: 'ALL - Albanian Lek' },
-      { value: 'TWD', label: 'TWD - New Taiwan Dollar' },
-      { value: 'RWF', label: 'RWF - Rwandan Franc' },
-      { value: 'JMD', label: 'JMD - Jamaican Dollar' },
-      { value: 'HKD', label: 'HKD - Hong Kong Dollar' },
-      { value: 'MWK', label: 'MWK - Malawian Kwacha' },
-      { value: 'LVL', label: 'LVL - Latvian Lats' },
-      { value: 'SCR', label: 'SCR - Seychellois Rupee' },
-      { value: 'QAR', label: 'QAR - Qatari Rial' },
-      { value: 'EUR', label: 'EUR - Eurozone Euro' },
-      { value: 'ARS', label: 'ARS - Argentine Peso' },
-      { value: 'MXN', label: 'MXN - Mexican Peso' },
-      { value: 'STD', label: 'STD - São Tomé and Príncipe Dobra' },
-      { value: 'RSD', label: 'RSD - Serbian Dinar' },
-      { value: 'BBD', label: 'BBD - Barbadian Dollar' },
-      { value: 'DKK', label: 'DKK - Danish Krone' },
-      { value: 'GTQ', label: 'GTQ - Guatemalan Quetzal' },
-      { value: 'COP', label: 'COP - Colombian Peso' },
-      { value: 'TTD', label: 'TTD - Trinidad and Tobago Dollar' },
-      { value: 'KMF', label: 'KMF - Comorian Franc' },
-      { value: 'ZMW', label: 'ZMW - Zambian Kwacha' },
-      { value: 'LTL', label: 'LTL - Lithuanian Litas' },
-      { value: 'SAR', label: 'SAR - Saudi Riyal' },
-      { value: 'CDF', label: 'CDF - Congolese Franc' },
-      { value: 'KZT', label: 'KZT - Kazakhstani Tenge' },
-      { value: 'DOP', label: 'DOP - Dominican Peso' },
-      { value: 'SRD', label: 'SRD - Surinamese Dollar' },
-      { value: 'SZL', label: 'SZL - Swazi Lilangeni' },
-      { value: 'LSL', label: 'LSL - Lesotho Loti' },
-      { value: 'HNL', label: 'HNL - Honduran Lempira' },
-      { value: 'UGX', label: 'UGX - Ugandan Shilling' },
-      { value: 'MYR', label: 'MYR - Malaysian Ringgit' },
-      { value: 'USD', label: 'USD - US Dollar' },
-      { value: 'MKD', label: 'MKD - Macedonian Denar' },
-      { value: 'YER', label: 'YER - Yemeni Rial' },
-      { value: 'CAD', label: 'CAD - Canadian Dollar' },
-      { value: 'CLP', label: 'CLP - Chilean Peso' },
-      { value: 'MGA', label: 'MGA - Malagasy Ariary' },
-      { value: 'IRR', label: 'IRR - Iranian Rial' },
-      { value: 'BGN', label: 'BGN - Bulgarian Lev' },
-      { value: 'AFN', label: 'AFN - Afghan Afghani' },
-      { value: 'MVR', label: 'MVR - Maldivian Rufiyaa' },
-      { value: 'TND', label: 'TND - Tunisian Dinar' },
-      { value: 'NOK', label: 'NOK - Norwegian Krone' },
-      { value: 'SYP', label: 'SYP - Syrian Pound' },
-      { value: 'MRO', label: 'MRO - Mauritanian Ouguiya' },
-      { value: 'MUR', label: 'MUR - Mauritian Rupee' },
-      { value: 'FKP', label: 'FKP - Falkland Islands Pound' },
-      { value: 'ZAR', label: 'ZAR - South African Rand' },
-      { value: 'MMK', label: 'MMK - Myanma Kyat' },
-      { value: 'EEK', label: 'EEK - Estonian Kroon' },
-      { value: 'VND', label: 'VND - Vietnamese Dong' },
-      { value: 'XAU', label: 'XAU - Gold (troy ounce)' },
-      { value: 'BZD', label: 'BZD - Belize Dollar' },
-      { value: 'TZS', label: 'TZS - Tanzanian Shilling' },
-      { value: 'INR', label: 'INR - Indian Rupee' },
-      { value: 'THB', label: 'THB - Thai Baht' },
-      { value: 'XPF', label: 'XPF - CFP Franc' },
-      { value: 'CNY', label: 'CNY - Chinese Yuan' },
-      { value: 'UZS', label: 'UZS - Uzbekistan Som' },
-      { value: 'DZD', label: 'DZD - Algerian Dinar' },
-      { value: 'MOP', label: 'MOP - Macanese Pataca' },
-      { value: 'GEL', label: 'GEL - Georgian Lari' },
-      { value: 'GIP', label: 'GIP - Gibraltar Pound' },
-      { value: 'EGP', label: 'EGP - Egyptian Pound' },
-      { value: 'BAM', label: 'BAM - Bosnia-Herzegovina Convertible Mark' },
-      { value: 'XOF', label: 'XOF - CFA Franc BCEAO' },
-      { value: 'ZWL', label: 'ZWL - Zimbabwean Dollar' },
-      { value: 'SGD', label: 'SGD - Singapore Dollar' },
-      { value: 'MAD', label: 'MAD - Moroccan Dirham' },
-      { value: 'AUD', label: 'AUD - Australian Dollar' },
-      { value: 'NPR', label: 'NPR - Nepalese Rupee' },
-      { value: 'ILS', label: 'ILS - Israeli Shekel' },
-      { value: 'KRW', label: 'KRW - South Korean Won' },
-      { value: 'PAB', label: 'PAB - Panamanian Balboa' },
-      { value: 'NAD', label: 'NAD - Namibian Dollar' },
-      { value: 'RON', label: 'RON - Romanian Leu' },
-      { value: 'UYU', label: 'UYU - Uruguayan Peso' },
-      { value: 'AWG', label: 'AWG - Aruban Florin' },
-      { value: 'BDT', label: 'BDT - Bangladeshi Taka' },
-      { value: 'GYD', label: 'GYD - Guyanaese Dollar' },
-      { value: 'PLN', label: 'PLN - Polish Zloty' },
-      { value: 'CVE', label: 'CVE - Cape Verdean Escudo' },
-      { value: 'GHS', label: 'GHS - Ghanaian Cedi' },
-      { value: 'KPW', label: 'KPW - North Korean Won' },
-      { value: 'SLL', label: 'SLL - Sierra Leonean Leone' },
-      { value: 'ETB', label: 'ETB - Ethiopian Birr' },
-      { value: 'AOA', label: 'AOA - Angolan Kwanza' },
-      { value: 'BSD', label: 'BSD - Bahamian Dollar' },
-      { value: 'LKR', label: 'LKR - Sri Lankan Rupee' },
-      { value: 'MNT', label: 'MNT - Mongolian Tugrik' },
-      { value: 'JPY', label: 'JPY - Japanese Yen' },
-      { value: 'PGK', label: 'PGK - Papua New Guinean Kina' },
-      { value: 'CRC', label: 'CRC - Costa Rican Colón' },
-      { value: 'NIO', label: 'NIO - Nicaraguan Córdoba' },
-      { value: 'OMR', label: 'OMR - Omani Rial' },
-      { value: 'CZK', label: 'CZK - Czech Koruna' },
-      { value: 'TOP', label: 'TOP - Tongan Paʻanga' },
-      { value: 'BOB', label: 'BOB - Bolivian Boliviano' },
-      { value: 'MDL', label: 'MDL - Moldovan Leu' },
-      { value: 'NGN', label: 'NGN - Nigerian Naira' },
-      { value: 'JEP', label: 'JEP - Jersey Pound' },
-      { value: 'KHR', label: 'KHR - Cambodian Riel' },
-      { value: 'GBP', label: 'GBP - Pound Sterling' },
-      { value: 'AZN', label: 'AZN - Azerbaijani Manat' },
-      { value: 'SBD', label: 'SBD - Solomon Islands Dollar' },
-      { value: 'SDG', label: 'SDG - Sudanese Pound' },
-      { value: 'KYD', label: 'KYD - Cayman Islands Dollar' },
-      { value: 'LAK', label: 'LAK - Laotian Kip' },
-      { value: 'LYD', label: 'LYD - Libyan Dinar' },
-      { value: 'SOS', label: 'SOS - Somali Shilling' },
-      { value: 'VUV', label: 'VUV - Vanuatu Vatu' },
-      { value: 'PKR', label: 'PKR - Pakistani Rupee' },
-      { value: 'KGS', label: 'KGS - Kyrgystani Som' },
-      { value: 'IDR', label: 'IDR - Indonesian Rupiah' },
-      { value: 'VEF', label: 'VEF - Venezuelan Bolívar Fuerte' },
-      { value: 'KWD', label: 'KWD - Kuwaiti Dinar' },
-      { value: 'WST', label: 'WST - Samoan Tala' },
-      { value: 'PHP', label: 'PHP - Philippine Peso' },
-      { value: 'BND', label: 'BND - Brunei Dollar' },
-      { value: 'AMD', label: 'AMD - Armenian Dram' },
-      { value: 'NZD', label: 'NZD - New Zealand Dollar' },
-      { value: 'SEK', label: 'SEK - Swedish Krona' },
-      { value: 'HUF', label: 'HUF - Hungarian Forint' },
-      { value: 'PEN', label: 'PEN - Peruvian Nuevo Sol' },
-      { value: 'BMD', label: 'BMD - Bermudan Dollar' },
-      { value: 'KES', label: 'KES - Kenyan Shilling' },
-      { value: 'XCD', label: 'XCD - East Caribbean Dollar' },
-      { value: 'LBP', label: 'LBP - Lebanese Pound' },
-      { value: 'ANG', label: 'ANG - Netherlands Antillean Guilder' },
-      { value: 'SHP', label: 'SHP - Saint Helena Pound' },
-      { value: 'HTG', label: 'HTG - Haitian Gourde' },
-      { value: 'TMT', label: 'TMT - Turkmenistani Manat' },
-      { value: 'TRY', label: 'TRY - Turkish Lira' },
-      { value: 'BWP', label: 'BWP - Botswanan Pula' },
-      { value: 'BYR', label: 'BYR - Belarusian Ruble' },
-      { value: 'IQD', label: 'IQD - Iraqi Dinar' },
-      { value: 'BRL', label: 'BRL - Brazilian Real' },
-      { value: 'BTN', label: 'BTN - Bhutanese Ngultrum' },
-      { value: 'UAH', label: 'UAH - Ukrainian Hryvnia' },
-      { value: 'TJS', label: 'TJS - Tajikistani Somoni' },
-      { value: 'CLF', label: 'CLF - Chilean Unit of Account (UF)' },
-      { value: 'XAF', label: 'XAF - CFA Franc BEAC' },
-      { value: 'GMD', label: 'GMD - Gambian Dalasi' },
-      { value: 'BHD', label: 'BHD - Bahraini Dinar' },
-      { value: 'CUP', label: 'CUP - Cuban Peso' },
-      { value: 'XAG', label: 'XAG - Silver (troy ounce)' },
-      { value: 'PYG', label: 'PYG - Paraguayan Guarani' },
-      { value: 'LRD', label: 'LRD - Liberian Dollar' },
-      { value: 'GNF', label: 'GNF - Guinean Franc' },
-      { value: 'BIF', label: 'BIF - Burundian Franc' },
-      { value: 'RUB', label: 'RUB - Russian Ruble' },
-      { value: 'JOD', label: 'JOD - Jordanian Dinar' },
-    ];
-
-    const oneDay = 'oneDay';
-    const oneWeek = 'oneWeek';
-    const twoWeeks = 'twoWeeks';
-    const oneMonth = 'oneMonth';
-    const threeMonths = 'threeMonths';
-    const custom = 'custom';
-
     const expirationDateOptions = [
-      { value: oneDay, label: '24 hours' },
-      { value: oneWeek, label: '1 week' },
-      { value: twoWeeks, label: '2 weeks' },
-      { value: oneMonth, label: '1 month' },
-      { value: threeMonths, label: '3 months' },
-      { value: custom, label: 'Custom' },
+      { value: 'oneDay', label: '24 hours' },
+      { value: 'oneWeek', label: '1 week' },
+      { value: 'twoWeeks', label: '2 weeks' },
+      { value: 'oneMonth', label: '1 month' },
+      { value: 'threeMonths', label: '3 months' },
+      { value: 'custom', label: 'Custom' },
     ];
 
     const giftDesignOptions = [
@@ -2172,22 +1952,15 @@ class TipsPortal extends React.Component {
     const sweepNotice = (
       <React.Fragment>
         <SweepNotice>
-          {tipsSweptCount} of original {tipWallets.length} gifts have been{' '}
-          <a
-            href={`https://explorer.bitcoin.com/bch/tx/${sweptTxid}`}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            swept
-          </a>{' '}
-          to{' '}
-          <a
-            href={`https://explorer.bitcoin.com/bch/address/${formData.userRefundAddress.value}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {formData.userRefundAddress.value}
-          </a>
+          <FormattedHTMLMessage
+            id="home.notifications.giftsSwept"
+            values={{
+              tipsSweptCount,
+              tipWalletsCount: tipWallets.length,
+              sweptTxid,
+              userRefundAddress: formData.userRefundAddress.value,
+            }}
+          />
           <br />
           <CardButton
             primary
@@ -2202,7 +1975,7 @@ class TipsPortal extends React.Component {
     const tipsAlreadySweptNotice = (
       <React.Fragment>
         <ErrorNotice>
-          Error: Cannot sweep tips, all gifts have already been claimed!
+          <FormattedMessage id="home.errors.cannotSweep" />
           <br />
           <CardButton
             primary
@@ -2231,20 +2004,22 @@ class TipsPortal extends React.Component {
           <ApiErrorPopup open={apiPostFailed}>
             <ApiErrorPopupCloser>X</ApiErrorPopupCloser>
             <ApiErrorPopupMsg>
-              <ApiErrorWarning>Warning!</ApiErrorWarning>
               <ApiErrorWarning>
-                Tip information failed to post to backend. Your gifts will not
-                be automatically returned to you on expiration.
+                <FormattedMessage id="home.alerts.warning" />
+              </ApiErrorWarning>
+              <ApiErrorWarning>
+                <FormattedMessage id="home.alerts.giftDidNotPost" />
               </ApiErrorWarning>
             </ApiErrorPopupMsg>
           </ApiErrorPopup>
           <ApiErrorPopup open={createExpirationTxsFailed}>
             <ApiErrorPopupCloser>X</ApiErrorPopupCloser>
             <ApiErrorPopupMsg>
-              <ApiErrorWarning>Warning!</ApiErrorWarning>
               <ApiErrorWarning>
-                Error creating your reclaim transactions. Your gifts will not be
-                automatically returned to you on expiration.
+                <FormattedMessage id="home.alerts.warning" />
+              </ApiErrorWarning>
+              <ApiErrorWarning>
+                <FormattedMessage id="home.alerts.reclaim" />
               </ApiErrorWarning>
             </ApiErrorPopupMsg>
           </ApiErrorPopup>
@@ -2350,10 +2125,15 @@ class TipsPortal extends React.Component {
               )}
               {importedMnemonic && (
                 <React.Fragment>
-                  <p>
-                    {tipsClaimedCount} of {tipWallets.length} gifts have been
-                    claimed
-                  </p>
+                  <CustomParagraph>
+                    <FormattedMessage
+                      id="home.strings.claimedCount"
+                      values={{
+                        tipsClaimedCount,
+                        tipsTotalCount: tipWallets.length,
+                      }}
+                    />
+                  </CustomParagraph>
                 </React.Fragment>
               )}
             </Card>
@@ -2366,7 +2146,7 @@ class TipsPortal extends React.Component {
           >
             <SeedCard title="Save Your Recovery Seed">
               <SeedReminderAbove>
-                Save this 12-word seed to access your gifts in the future
+                <FormattedMessage id="home.strings.seedReminderAbove" />
               </SeedReminderAbove>
               <CopyToClipboard
                 text={walletInfo.mnemonic}
@@ -2375,8 +2155,7 @@ class TipsPortal extends React.Component {
                 <SeedWrapperAbove>{walletInfo.mnemonic}</SeedWrapperAbove>
               </CopyToClipboard>
               <SeedWarning>
-                Bitcoin.com never has access to your seed and we cannot help you
-                if you lose it!
+                <FormattedMessage id="home.strings.seedWarning" />
               </SeedWarning>
               <Buttons show>
                 <CopyToClipboard
@@ -2389,7 +2168,7 @@ class TipsPortal extends React.Component {
                 </CopyToClipboard>
                 <ButtonHider show={appState === appStates.seedSaved}>
                   <CardButton dark onClick={this.handleSeedSavedConfirmed}>
-                    Next
+                    <FormattedMessage id="home.buttons.next" />
                   </CardButton>
                 </ButtonHider>
               </Buttons>
@@ -2424,9 +2203,11 @@ class TipsPortal extends React.Component {
                   onClick={this.handleConfirmSeedButton}
                   action="submit"
                 >
-                  Confirm
+                  <FormattedMessage id="home.buttons.confirm" />
                 </CardButton>
-                <CardButton onClick={this.goBackOneStep}>Back</CardButton>
+                <CardButton onClick={this.goBackOneStep}>
+                  <FormattedMessage id="home.buttons.goBack" />
+                </CardButton>
               </Buttons>
             </SeedCard>
           </CustomFlexCardContainer>
@@ -2525,9 +2306,7 @@ class TipsPortal extends React.Component {
                         })}
                       />
                       <InputExtra>
-                        If no refund address is provided, unclaimed tips will be
-                        donated to Bitcoin.com to help promote peer to peer
-                        electronic cash.
+                        <FormattedMessage id="home.strings.inputExtra" />
                       </InputExtra>
                       <InputError>
                         {formData.userRefundAddressOnCreate.error}
@@ -2585,10 +2364,18 @@ class TipsPortal extends React.Component {
                   <TipTable>
                     <thead>
                       <tr>
-                        <TipTh>Quantity</TipTh>
-                        <TipTh>Value per gift</TipTh>
-                        <TipTh>Currency</TipTh>
-                        <TipTh>Expiration</TipTh>
+                        <TipTh>
+                          <FormattedMessage id="home.labels.tableQty" />
+                        </TipTh>
+                        <TipTh>
+                          <FormattedMessage id="home.labels.tableValue" />
+                        </TipTh>
+                        <TipTh>
+                          <FormattedMessage id="home.labels.tableCurrency" />
+                        </TipTh>
+                        <TipTh>
+                          <FormattedMessage id="home.labels.tableExpiration" />
+                        </TipTh>
                       </tr>
                     </thead>
                     <tbody>
@@ -2605,19 +2392,27 @@ class TipsPortal extends React.Component {
                   <MobileTipTable>
                     <tbody>
                       <tr>
-                        <MobileTipTh>Quantity</MobileTipTh>
+                        <MobileTipTh>
+                          <FormattedMessage id="home.labels.tableQty" />
+                        </MobileTipTh>
                         <TipTd>{formData.tipCount.value}</TipTd>
                       </tr>
                       <tr>
-                        <MobileTipTh>Value per gift</MobileTipTh>
+                        <MobileTipTh>
+                          <FormattedMessage id="home.labels.tableValue" />
+                        </MobileTipTh>
                         <TipTd>{formData.tipAmountFiat.value.toFixed(2)}</TipTd>
                       </tr>
                       <tr>
-                        <MobileTipTh>Currency</MobileTipTh>
+                        <MobileTipTh>
+                          <FormattedMessage id="home.labels.tableCurrency" />
+                        </MobileTipTh>
                         <TipTd>{selectedCurrency}</TipTd>
                       </tr>
                       <tr>
-                        <MobileTipTh>Expiration</MobileTipTh>
+                        <MobileTipTh>
+                          <FormattedMessage id="home.labels.tableExpiration" />
+                        </MobileTipTh>
                         <TipTd>
                           {formData.expirationDate.value.toString()}
                         </TipTd>
@@ -2627,8 +2422,7 @@ class TipsPortal extends React.Component {
                   {!tipsFunded && (
                     <React.Fragment>
                       <SeedReminderAbove>
-                        Save this 12-word seed to access your gifts in the
-                        future
+                        <FormattedMessage id="home.strings.seedReminderAbove" />
                       </SeedReminderAbove>
                       <CopyToClipboard
                         text={walletInfo.mnemonic}
@@ -2706,20 +2500,16 @@ class TipsPortal extends React.Component {
           <CustomFlexCardContainer show={apiPostFailed}>
             <ApiErrorCard show={apiPostFailed}>
               <ApiErrorWarning>
-                Failed to post your tip expiration claim transactions to the
-                server.
+                <FormattedMessage id="home.alerts.apiErrorWarningAlpha" />
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Your gifts will not automatically be returned to your refund
-                address after their expiration date!
+                <FormattedMessage id="home.alerts.apiErrorWarningBeta" />
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Make sure to save your 12-word backup seed above. You can still
-                access your gifts with this phrase.
+                <FormattedMessage id="home.alerts.apiErrorWarningGamma" />
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Please try to repost your tip information. If the issue
-                persists, contact tips-support@bitcoin.com
+                <FormattedMessage id="home.alerts.apiErrorWarningDelta" />
               </ApiErrorWarning>
               <CardButton
                 dark
@@ -2730,25 +2520,23 @@ class TipsPortal extends React.Component {
                 }}
                 onClick={this.retryPostReturnTxInfos}
               >
-                Repost
+                <FormattedMessage id="home.buttons.repost" />
               </CardButton>
             </ApiErrorCard>
           </CustomFlexCardContainer>
           <CustomFlexCardContainer show={createExpirationTxsFailed}>
             <ApiErrorCard show={createExpirationTxsFailed}>
               <ApiErrorWarning>
-                API error while creating your auto-reclaim transactions.
+                <FormattedMessage id="home.alerts.txErrorWarningAlpha" />
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Your gifts will not be automatically returned on their
-                expiration date!
+                <FormattedMessage id="home.alerts.txErrorWarningBeta" />
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Make sure you have written down your 12-word backup seed.
+                <FormattedMessage id="home.alerts.txErrorWarningGamma" />
               </ApiErrorWarning>
               <ApiErrorWarning>
-                Please try again with the button below. If the issue persists,
-                contact tips-support@bitcoin.com
+                <FormattedMessage id="home.alerts.txErrorWarningDelta" />
               </ApiErrorWarning>
               <CardButton
                 dark
@@ -2759,7 +2547,7 @@ class TipsPortal extends React.Component {
                 }}
                 onClick={this.retryInvoiceSuccess}
               >
-                Retry
+                <FormattedMessage id="home.buttons.retry" />
               </CardButton>
             </ApiErrorCard>
           </CustomFlexCardContainer>
@@ -2768,21 +2556,23 @@ class TipsPortal extends React.Component {
             className="noPrint"
             show={tipWallets.length > 0 && tipsFunded}
           >
-            {/* expirationDate = importedGiftInfo[0].expirationStamp * 1000;
-        giftInfoFiatCurrency = importedGiftInfo[0].fiatCode;
-        giftInfoFiatAmount = importedGiftInfo[0].fiatAmount;
-        giftInfoGiftQty = importedGiftInfo.length;
-        giftInfoSuccess = true; */}
-
             {importedMnemonic && giftInfoSuccess && (
               <React.Fragment>
                 <TipTable>
                   <thead>
                     <tr>
-                      <TipTh>Quantity</TipTh>
-                      <TipTh>Value per gift</TipTh>
-                      <TipTh>Currency</TipTh>
-                      <TipTh>Expiration</TipTh>
+                      <TipTh>
+                        <FormattedMessage id="home.labels.tableQty" />
+                      </TipTh>
+                      <TipTh>
+                        <FormattedMessage id="home.labels.tableValue" />
+                      </TipTh>
+                      <TipTh>
+                        <FormattedMessage id="home.labels.tableCurrency" />
+                      </TipTh>
+                      <TipTh>
+                        <FormattedMessage id="home.labels.tableExpiration" />
+                      </TipTh>
                     </tr>
                   </thead>
                   <tbody>
@@ -2797,19 +2587,29 @@ class TipsPortal extends React.Component {
                 <MobileTipTable>
                   <tbody>
                     <tr>
-                      <MobileTipTh>Quantity</MobileTipTh>
+                      <MobileTipTh>
+                        <FormattedMessage id="home.labels.tableQty" />
+                      </MobileTipTh>
                       <TipTd>{giftInfoGiftQty}</TipTd>
                     </tr>
                     <tr>
-                      <MobileTipTh>Value per gift</MobileTipTh>
+                      <MobileTipTh>
+                        <FormattedMessage id="home.labels.tableValue" />
+                      </MobileTipTh>
                       <TipTd>{giftInfoFiatAmount}</TipTd>
                     </tr>
                     <tr>
-                      <MobileTipTh>Currency</MobileTipTh>
+                      <MobileTipTh>
+                        <FormattedMessage id="home.labels.tableCurrency" />
+                      </MobileTipTh>
                       <TipTd>{giftInfoFiatCurrency}</TipTd>
                     </tr>
                     <tr>
-                      <MobileTipTh>Expiration</MobileTipTh>
+                      <MobileTipTh>
+                        <MobileTipTh>
+                          <FormattedMessage id="home.labels.tableExpiration" />
+                        </MobileTipTh>
+                      </MobileTipTh>
                       <TipTd>{expirationDate}</TipTd>
                     </tr>
                   </tbody>
@@ -2856,7 +2656,7 @@ class TipsPortal extends React.Component {
               </InputWrapper>
             </ControlPanelForm>
             <SeedReminderAbove>
-              Save this 12-word seed to access your gifts in the future
+              <FormattedMessage id="home.strings.seedReminderAbove" />
             </SeedReminderAbove>
             <CopyToClipboard
               text={walletInfo.mnemonic}
@@ -2865,8 +2665,7 @@ class TipsPortal extends React.Component {
               <SeedWrapperAbove>{walletInfo.mnemonic}</SeedWrapperAbove>
             </CopyToClipboard>
             <SeedReminderBelow>
-              Bitcoin.com never has access to your seed and we cannot help you
-              if you lose it!
+              <FormattedMessage id="home.strings.seedReminderBelow" />
             </SeedReminderBelow>
           </GiftsControlPanel>
           <TipContainerWrapper maxWidth={displayWidth}>
@@ -2877,28 +2676,6 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
-          {/* tipWallets.length > 0 && qrCodeImgs.length > 0 && (
-            <PDFDownloadLink
-              document={
-                <TipPdfDocument
-                  tipWallets={tipWallets}
-                  qrCodeImgs={qrCodeImgs}
-                  fiatAmount={
-                    calculatedFiatAmount === null
-                      ? formData.tipAmountFiat.value
-                      : calculatedFiatAmount
-                  }
-                  fiatCurrency={selectedCurrency}
-                  dateStr={dateStr}
-                />
-              }
-              fileName="gifts.pdf"
-            >
-              {({ blob, url, loading, error }) =>
-                loading ? 'Loading...' : 'Print PDF'
-              }
-            </PDFDownloadLink>
-            ) */}
 
           <SweepAllCard
             title="Want your money back?"
@@ -2906,8 +2683,7 @@ class TipsPortal extends React.Component {
             show={tipWallets.length > 0 && tipsFunded}
           >
             <SweepInstructions>
-              You can send all the BCH from your unclaimed gifts to a single
-              address in one transaction.
+              <FormattedMessage id="home.strings.sweepInstructions" />
             </SweepInstructions>
             <ButtonHider show={!showSweepForm}>
               <CardButton
