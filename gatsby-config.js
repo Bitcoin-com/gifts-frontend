@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
-    title: `Bitcoin.com Homepage`,
-    siteUrl: 'https://www.bitcoin.com',
+    title: `Bitcoin.com Gifts`,
+    siteUrl: 'https://gifts.bitcoin.com',
   },
   plugins: [
     { resolve: `gatsby-plugin-react-helmet` },

@@ -26,6 +26,7 @@ import {
   HeaderContentBlock,
   PrintableContentBlock,
   CardButton,
+  CustomLink,
   MobileButton,
   CustomCardContainer,
   CustomFlexCardContainer,
@@ -598,13 +599,13 @@ class TipsPortal extends React.Component {
     const { currency } = e.target.dataset;
     // console.log(`elementId: ${elementId}`);
     const node = document.getElementById(elementId);
-    htmlToImage.toPng(node).then(
+    htmlToImage.toJpeg(node).then(
       dataUrl => {
-        const imageType = 'image/png';
+        const imageType = 'image/jpg';
         // Download the image
         const fileName = `BCH_Gift_${fiatAmount}${currency}_${giftName}`;
         const link = document.createElement('a');
-        link.download = `${fileName}.png`;
+        link.download = `${fileName}.jpg`;
         link.href = dataUrl.replace(imageType, 'image/octet-stream');
         link.click();
 
@@ -1998,6 +1999,9 @@ class TipsPortal extends React.Component {
             <Paragraph center>
               <FormattedMessage id="home.header.description" />
             </Paragraph>
+            <CustomLink href="/faq">
+              <FormattedMessage id="home.strings.faq" />
+            </CustomLink>
           </HeaderContentBlock>
         )}
         <PrintableContentBlock>
@@ -2027,7 +2031,12 @@ class TipsPortal extends React.Component {
             show={fundingAddress === '' || importedMnemonic}
             columns={!importedMnemonic ? 2 : 1}
           >
-            <WalletCard show={!importedMnemonic} title="Make New Gifts">
+            <WalletCard
+              show={!importedMnemonic}
+              title={formatMessage({
+                id: 'home.cardTitles.makeNew',
+              })}
+            >
               <CardButton
                 primary
                 style={{ margin: 'auto' }}
@@ -2036,7 +2045,11 @@ class TipsPortal extends React.Component {
                 <FormattedMessage id="home.buttons.createTips" />
               </CardButton>
             </WalletCard>
-            <Card title="Manage Gifts">
+            <Card
+              title={formatMessage({
+                id: 'home.cardTitles.manageGifts',
+              })}
+            >
               <InputWrapper show>
                 <Input
                   name="importedMnemonic"
@@ -2552,7 +2565,9 @@ class TipsPortal extends React.Component {
             </ApiErrorCard>
           </CustomFlexCardContainer>
           <GiftsControlPanel
-            title="Customize"
+            title={formatMessage({
+              id: 'home.cardTitles.customize',
+            })}
             className="noPrint"
             show={tipWallets.length > 0 && tipsFunded}
           >
@@ -2678,7 +2693,9 @@ class TipsPortal extends React.Component {
           </TipContainerWrapper>
 
           <SweepAllCard
-            title="Want your money back?"
+            title={formatMessage({
+              id: 'home.cardTitles.sweepTitle',
+            })}
             className="noPrint"
             show={tipWallets.length > 0 && tipsFunded}
           >

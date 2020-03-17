@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "BCH Gifts  | Bitcoin.com",
+    "description": "Create trackable cash gifts in your local currency with Bitcoin Cash (BCH)",
+    "twitter": "bitcoincom",
+    "image": "/images/uploads/facebook.png",
+    "schema": {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "https://www.bitcoin.com",
+      "name": "Bitcoin.com",
+      "logo": "https://www.bitcoin.com/icons/icon-512x512.png",
+      "sameAs": [
+        "https://www.facebook.com/buy.bitcoin.news",
+        "https://twitter.com/bitcoincom",
+        "https://www.instagram.com/bitcoin.com_official/",
+        "https://www.youtube.com/channel/UCetxkZolEBHX47BqtZktbkg",
+        "https://www.linkedin.com/company/bitcoin.com/",
+        "https://github.com/bitcoin-com"
+      ]
+    }
+  },
+  "header": {
+    "title": "Bitcoin.com Gifts",
+    "description": "Create and manage Bitcoin Cash (BCH) gifts. Unredeemed gifts are automatically returned!"
+  },
+  "strings": {
+    "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed",
+    "seedReminderAbove": "Save this 12-word seed to access your gifts in the future",
+    "seedReminderBelow": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+    "seedWarning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+    "inputExtra": "If no refund address is provided, unclaimed tips will be donated to Bitcoin.com to help promote peer to peer electronic cash.",
+    "sweepInstructions": "Bitcoin.com never has access to your seed and we cannot help you if you lose it! You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+  }
+}
