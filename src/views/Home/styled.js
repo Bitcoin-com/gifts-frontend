@@ -13,6 +13,7 @@ import {
   Input,
   InputLabel,
   Select,
+  Link,
 } from 'bitcoincom-storybook';
 import DatePicker from 'react-datepicker';
 
@@ -501,6 +502,8 @@ export const Wrapper = styled.div`
 export const HeadSection = styled.div`
   background-color: ${theme.palette.background.dark};
 `;
+
+export const CustomLink = styled(Link)``;
 
 export const CustomContentBlock = styled(ContentBlock)`
   & > div > div:first-child > img {
