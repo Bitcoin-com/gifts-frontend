@@ -75,7 +75,9 @@ const Tip = ({
               <img src={tipsLogo} alt="Bitcoin Cash Tips" />
             </TipHeader>
             <TipAmount>
-              <CryptoAmount>You have received:</CryptoAmount>
+              <CryptoAmount>
+                <FormattedMessage id="home.gift.youGot" />:
+              </CryptoAmount>
               <FiatAmount>
                 {fiatCurrency === 'JPY' && '¥'}
                 {fiatCurrency === 'GBP' && '£'}
@@ -104,7 +106,8 @@ const Tip = ({
                       (fiatCurrency === 'CAD' && '$') ||
                       (fiatCurrency === 'AUD' && '$')}
                     {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-                    {fiatCurrency} on {dateStr}
+                    {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
+                    {dateStr}
                   </React.Fragment>
                 ) : (
                   <React.Fragment>&nbsp;</React.Fragment>
@@ -130,20 +133,31 @@ const Tip = ({
               </ClaimedBlock>
             )}
             {expirationDate !== '' && (
-              <TipExchangeRate>Claim by {expirationDate}</TipExchangeRate>
+              <TipExchangeRate>
+                <FormattedMessage id="home.gift.claimBy" /> {expirationDate}
+              </TipExchangeRate>
             )}
             <HowToClaim show>
               <HowToList>
-                <StepOne>Download the Bitcoin.com wallet</StepOne>
-                <StepTwo>Select &quot;Settings&quot;</StepTwo>
-                <StepThree>Select &quot;Paper Wallet Sweep&quot;</StepThree>
+                <StepOne>
+                  <FormattedMessage id="home.gift.stepOne" />
+                </StepOne>
+                <StepTwo>
+                  <FormattedMessage id="home.gift.stepTwo" />
+                </StepTwo>
+                <StepThree>
+                  <FormattedMessage id="home.gift.stepThree" />
+                </StepThree>
               </HowToList>
             </HowToClaim>
             <LogoFooter>
               <DotComImg src={dotComLogo} />
             </LogoFooter>
             {showGiftNames && (
-              <TipExchangeRate>Gift Name: {tipWallet.callsign}</TipExchangeRate>
+              <TipExchangeRate>
+                <FormattedMessage id="home.gift.giftName" />:{' '}
+                {tipWallet.callsign}
+              </TipExchangeRate>
             )}
           </SnapshotHolder>
         </React.Fragment>
@@ -155,7 +169,9 @@ const Tip = ({
               <img src={oldSchoolGiftsLogo} alt="Bitcoin Cash Tips" />
             </TipHeader>
             <TipAmountThrowback>
-              <CryptoAmount>You have received:</CryptoAmount>
+              <CryptoAmount>
+                <FormattedMessage id="home.gift.youGot" />:
+              </CryptoAmount>
               <FiatAmount>
                 {fiatCurrency === 'JPY' && '¥'}
                 {fiatCurrency === 'GBP' && '£'}
@@ -184,7 +200,8 @@ const Tip = ({
                       (fiatCurrency === 'CAD' && '$') ||
                       (fiatCurrency === 'AUD' && '$')}{' '}
                     {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-                    {fiatCurrency} on {dateStr}
+                    {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
+                    {dateStr}
                   </React.Fragment>
                 ) : (
                   <React.Fragment>&nbsp;</React.Fragment>
@@ -212,19 +229,26 @@ const Tip = ({
             )}
             {expirationDate !== '' && (
               <TipExchangeRateThrowback>
-                Claim by {expirationDate}
+                <FormattedMessage id="home.gift.claimBy" /> {expirationDate}
               </TipExchangeRateThrowback>
             )}
             <HowToClaim show>
               <HowToList>
-                <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
-                <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
-                <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
+                <StepOneOG>
+                  <FormattedMessage id="home.gift.stepOne" />
+                </StepOneOG>
+                <StepTwoOG>
+                  <FormattedMessage id="home.gift.stepTwo" />
+                </StepTwoOG>
+                <StepThreeOG>
+                  <FormattedMessage id="home.gift.stepThree" />
+                </StepThreeOG>
               </HowToList>
             </HowToClaim>
             {showGiftNames && (
               <TipExchangeRateThrowback>
-                Gift Name: {tipWallet.callsign}
+                <FormattedMessage id="home.gift.giftName" />:{' '}
+                {tipWallet.callsign}
               </TipExchangeRateThrowback>
             )}
           </SnapshotHolder>
@@ -238,7 +262,9 @@ const Tip = ({
               <img src={ezPrintGiftsLogo} alt="Bitcoin Cash Tips" />
             </TipHeader>
             <TipAmountEZ>
-              <CryptoAmount>You have received:</CryptoAmount>
+              <CryptoAmount>
+                <FormattedMessage id="home.gift.youGot" />:
+              </CryptoAmount>
               <FiatAmount>
                 {fiatCurrency === 'JPY' && '¥'}
                 {fiatCurrency === 'GBP' && '£'}
@@ -267,7 +293,8 @@ const Tip = ({
                       (fiatCurrency === 'CAD' && '$') ||
                       (fiatCurrency === 'AUD' && '$')}{' '}
                     {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
-                    {fiatCurrency} on {dateStr}
+                    {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
+                    {dateStr}
                   </React.Fragment>
                 ) : (
                   <React.Fragment>&nbsp;</React.Fragment>
@@ -294,13 +321,21 @@ const Tip = ({
               </ClaimedBlock>
             )}
             {expirationDate !== '' && (
-              <TipExchangeRateEZ>Claim by {expirationDate}</TipExchangeRateEZ>
+              <TipExchangeRateEZ>
+                <FormattedMessage id="home.gift.claimBy" /> {expirationDate}
+              </TipExchangeRateEZ>
             )}
             <HowToClaim show>
               <HowToList>
-                <StepOneOG>Download the Bitcoin.com wallet</StepOneOG>
-                <StepTwoOG>Select &quot;Settings&quot;</StepTwoOG>
-                <StepThreeOG>Select &quot;Paper Wallet Sweep&quot;</StepThreeOG>
+                <StepOneOG>
+                  <FormattedMessage id="home.gift.stepOne" />
+                </StepOneOG>
+                <StepTwoOG>
+                  <FormattedMessage id="home.gift.stepTwo" />
+                </StepTwoOG>
+                <StepThreeOG>
+                  <FormattedMessage id="home.gift.stepThree" />
+                </StepThreeOG>
               </HowToList>
             </HowToClaim>
             <LogoFooter>
@@ -308,7 +343,8 @@ const Tip = ({
             </LogoFooter>
             {showGiftNames && (
               <TipExchangeRateEZ>
-                Gift Name: {tipWallet.callsign}
+                <FormattedMessage id="home.gift.giftName" />:{' '}
+                {tipWallet.callsign}
               </TipExchangeRateEZ>
             )}
           </SnapshotHolder>
@@ -319,7 +355,9 @@ const Tip = ({
       <StatusTable>
         <tbody>
           <tr>
-            <LabelTd>Status:</LabelTd>
+            <LabelTd>
+              <FormattedMessage id="home.gift.status" />:
+            </LabelTd>
             {design === 'throwback' ? (
               <StatusTdOldschool funded={tipWallet.status === 'unclaimed'}>
                 {tipWallet.status === 'unclaimed' ? (
@@ -365,7 +403,9 @@ const Tip = ({
             )}
           </tr>
           <tr>
-            <LabelTd>Label:</LabelTd>
+            <LabelTd>
+              <FormattedMessage id="home.gift.label" />:
+            </LabelTd>
             <StatusTd>{tipWallet.callsign}</StatusTd>
           </tr>
         </tbody>
@@ -386,7 +426,9 @@ const Tip = ({
       >
         <ShareMenuList>
           {pngLoading ? (
-            <LoadingButton>Downloading...</LoadingButton>
+            <LoadingButton>
+              <FormattedMessage id="home.gift.downloading" />
+            </LoadingButton>
           ) : (
             <ShareMenuButton
               type="button"
@@ -396,7 +438,7 @@ const Tip = ({
               data-currency={fiatCurrency}
               onClick={share}
             >
-              PNG
+              <FormattedMessage id="home.gift.jpg" />
             </ShareMenuButton>
           )}
           {/* <ShareMenuButtonPDF
