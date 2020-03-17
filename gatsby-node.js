@@ -1,6 +1,7 @@
 const path = require('path');
 
 const { homeBuild } = require('./src/views/Home/config/gatsby');
+const { faqBuild } = require('./src/views/Faq/config/gatsby');
 const { errorBuild } = require('./src/views/404/config/gatsby');
 
 const replacePath = pagePath =>
@@ -11,6 +12,7 @@ exports.onCreatePage = params => {
   const { createPage, deletePage } = actions;
 
   if (page.path === '/') return homeBuild(params);
+  if (page.path === '/faq/') return faqBuild(params);
   if (page.path === '/subpage/') return homeBuild(params);
 
   if (page.path === '/404.html') return errorBuild(params);

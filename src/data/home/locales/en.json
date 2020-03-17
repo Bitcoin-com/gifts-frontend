@@ -22,15 +22,35 @@
   },
   "header": {
     "title": "Bitcoin.com Gifts",
-    "description": "Create and manage Bitcoin Cash (BCH) gifts. Unredeemed gifts are automatically returned!"
+    "description": "Create and manage Bitcoin Cash (BCH) Gifts. Unredeemed Gifts are automatically returned!"
+  },
+  "cardTitles": {
+    "sweepTitle": "Want your money back?",
+    "manageGifts": "Manage Gifts",
+    "customize": "Customize",
+    "makeNew": "Make New Gifts"
   },
   "strings": {
+    "faq": "FAQ",
     "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed",
     "seedReminderAbove": "Save this 12-word seed to access your gifts in the future",
     "seedReminderBelow": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
     "seedWarning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
     "inputExtra": "If no refund address is provided, unclaimed tips will be donated to Bitcoin.com to help promote peer to peer electronic cash.",
-    "sweepInstructions": "Bitcoin.com never has access to your seed and we cannot help you if you lose it! You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+    "sweepInstructions": "You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+  },
+  "gift": {
+    "downloading": "Processing...",
+    "jpg": "JPG",
+    "youGot": "You have received",
+    "on": "on",
+    "claimBy": "Claim by",
+    "stepOne": "Download the Bitcoin.com wallet",
+    "stepTwo": "Select 'Settings'",
+    "stepThree": "Select 'Paper Wallet Sweep'",
+    "giftName": "Gift Name",
+    "status": "Status",
+    "label": "Label"
   },
   "labels": {
     "tipCount": "Number of gifts",
