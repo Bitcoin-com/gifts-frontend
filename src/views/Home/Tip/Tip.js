@@ -18,6 +18,11 @@ import {
   TipExchangeRateEZ,
   StatusWrap,
   ClaimedBlock,
+  ClaimedBlockOG,
+  ClaimedBlockEZ,
+  ExpiredBlock,
+  ExpiredBlockOG,
+  ExpiredBlockEZ,
   HowToClaim,
   HowToList,
   StepOne,
@@ -114,7 +119,7 @@ const Tip = ({
                 )}
               </TipExchangeRate>
             )}
-            {tipWallet.status === 'unclaimed' ? (
+            {tipWallet.status === 'unclaimed' && (
               <QRCode
                 id="borderedQRCode"
                 value={tipWallet.wif}
@@ -127,11 +132,17 @@ const Tip = ({
                 quietZone={10}
                 bgColor="#fff"
               />
-            ) : (
+            )}
+            {tipWallet.status !== 'expired' ? (
               <ClaimedBlock status={tipWallet.status}>
                 [{tipWallet.status}]
               </ClaimedBlock>
+            ) : (
+              <ExpiredBlock status={tipWallet.status}>
+                [{tipWallet.status}]
+              </ExpiredBlock>
             )}
+
             {expirationDate !== '' && (
               <TipExchangeRate>
                 <FormattedMessage id="home.gift.claimBy" /> {expirationDate}
@@ -208,7 +219,7 @@ const Tip = ({
                 )}
               </TipExchangeRateThrowback>
             )}
-            {tipWallet.status === 'unclaimed' ? (
+            {tipWallet.status === 'unclaimed' && (
               <QRCode
                 id="borderedQRCode"
                 value={tipWallet.wif}
@@ -222,10 +233,15 @@ const Tip = ({
                 bgColor="#fff"
                 fgColor="#000"
               />
-            ) : (
-              <ClaimedBlock status={tipWallet.status}>
+            )}
+            {tipWallet.status !== 'expired' ? (
+              <ClaimedBlockOG status={tipWallet.status}>
                 [{tipWallet.status}]
-              </ClaimedBlock>
+              </ClaimedBlockOG>
+            ) : (
+              <ExpiredBlockOG status={tipWallet.status}>
+                [{tipWallet.status}]
+              </ExpiredBlockOG>
             )}
             {expirationDate !== '' && (
               <TipExchangeRateThrowback>
@@ -301,7 +317,7 @@ const Tip = ({
                 )}
               </TipExchangeRateEZ>
             )}
-            {tipWallet.status === 'unclaimed' ? (
+            {tipWallet.status === 'unclaimed' && (
               <QRCode
                 id="borderedQRCode"
                 value={tipWallet.wif}
@@ -315,10 +331,15 @@ const Tip = ({
                 bgColor="#fff"
                 fgColor="#000"
               />
-            ) : (
-              <ClaimedBlock status={tipWallet.status}>
+            )}
+            {tipWallet.status !== 'expired' ? (
+              <ClaimedBlockEZ status={tipWallet.status}>
                 [{tipWallet.status}]
-              </ClaimedBlock>
+              </ClaimedBlockEZ>
+            ) : (
+              <ExpiredBlockEZ status={tipWallet.status}>
+                [{tipWallet.status}]
+              </ExpiredBlockEZ>
             )}
             {expirationDate !== '' && (
               <TipExchangeRateEZ>

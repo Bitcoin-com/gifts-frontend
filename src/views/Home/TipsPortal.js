@@ -87,15 +87,18 @@ const bitbox = new BITBOX({
 
 const inputState = { untouched: 0, valid: 1, invalid: 2 };
 
+// Client websocket to watch for claimed tips in real time
+const AddressWatcher = new WebSocket('wss://ws.blockchain.info/bch/inv');
 const defaultRefundAddress =
   'bitcoincash:qq9qmugsdua78g7jjjykh9r4zku3wmyhnvdl8ucu0e';
 
 // set api here
 // Prod
-
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
+// Staging
+const giftsBackendBase = 'https://cashtips-api.btctest.net/';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -213,6 +216,11 @@ class TipsPortal extends React.Component {
     this.handleGiftDesignChange = this.handleGiftDesignChange.bind(this);
     this.handleEmailAddressChange = this.handleEmailAddressChange.bind(this);
     this.createExpirationTxs = this.createExpirationTxs.bind(this);
+    // this.handleNoCreationTxidInDb = this.handleNoCreationTxidInDb.bind(this);
+    this.subscribeToGifts = this.subscribeToGifts.bind(this);
+    this.unsubscribeToGifts = this.unsubscribeToGifts.bind(this);
+    this.onNewTx = this.onNewTx.bind(this);
+    this.setClaimedFromWebsocket = this.setClaimedFromWebsocket.bind(this);
     this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
     this.setDefaultExpirationDate = this.setDefaultExpirationDate.bind(this);
     this.retryPostReturnTxInfos = this.retryPostReturnTxInfos.bind(this);
@@ -274,11 +282,92 @@ class TipsPortal extends React.Component {
   }
 
   componentDidMount() {
+    this.onNewTx();
     // this.setDefaultExpirationDate();
   }
 
   componentWillUnmount() {
     this.invoiceSuccessThrottled.cancel();
+  }
+
+  onNewTx() {
+    AddressWatcher.onmessage = event => {
+      const wsTx = JSON.parse(event.data);
+      // console.log(`New tx:`);
+      // console.log(wsTx);
+      return this.setClaimedFromWebsocket(wsTx);
+      // Get address of tx
+
+      /* Example format
+      {
+  "op": "utx",
+  "x": {
+    "lock_time": 0,
+    "ver": 2,
+    "size": 191,
+    "inputs": [
+      {
+        "sequence": 4294967295,
+        "prev_out": {
+          "spent": false,
+          "tx_index": 0,
+          "type": 0,
+          "addr": "13Q5y8zgPvXbZ6deNtzk9tCELaBL88j6MQ",
+          "value": 88616,
+          "n": 3,
+          "script": "76a9141a4df736a4bd4c33d14370b81ce825546412e39488ac"
+        },
+        "script": "47304402200b8b21c1fd9d58e9989a6c8c730f3a3c0ce4d6dd7a50acfcea55a82f2e45390c022019e387f7da44f71869db3eb46b299cdfac983c74690a6f1b4cde1e2c55a6988e4121036b9b2fdd4197af3460f322921a0e007a0aea7f708aa7d3755bc6fe6d584d9098"
+      }
+    ],
+    "time": 1584531098,
+    "tx_index": 0,
+    "vin_sz": 1,
+    "hash": "8dc8ccfcbd499b2d4bceec4a038f44e495e3ddc4d1e0c569e79b258df0a29147",
+    "vout_sz": 1,
+    "relayed_by": "",
+    "out": [
+      {
+        "spent": false,
+        "tx_index": 0,
+        "type": 0,
+        "addr": "15oGjdeS9fTs6njk4zSMMxrANaACSXByWw",
+        "value": 88384,
+        "n": 0,
+        "script": "76a91434a0c5b6c531a85f0ba7e616f603db7d099f6a0988ac"
+      }
+    ]
+  }
+}
+      */
+    };
+  }
+
+  // eslint-disable-next-line consistent-return
+  setClaimedFromWebsocket(wsTx) {
+    // console.log(`setClaimedFromWebsocket`);
+    const { tipWallets } = this.state;
+    try {
+      const txAddr = bitbox.Address.toCashAddress(
+        wsTx.x.inputs[0].prev_out.addr,
+      );
+      const claimedTxid = wsTx.x.hash;
+      // console.log(`Tx at ${txAddr}`);
+      // Set that tips status to claimed
+
+      for (let i = 0; i < tipWallets.length; i += 1) {
+        if (tipWallets[i].addr === txAddr) {
+          // console.log(`Match found, updating status`);
+          tipWallets[i].status = 'claimed';
+          tipWallets[i].claimedTxid = claimedTxid;
+        }
+      }
+
+      return this.setState({ tipWallets });
+    } catch (err) {
+      console.log(`Error in parsing websocket tx object for address`);
+      console.log(err);
+    }
   }
 
   setDefaultExpirationDate() {
@@ -526,6 +615,34 @@ class TipsPortal extends React.Component {
     return field;
   };
 
+  // eslint-disable-next-line class-methods-use-this
+  subscribeToGifts(tipWallets) {
+    // Parse for addresses
+    for (let i = 0; i < tipWallets.length; i += 1) {
+      // Get address of Gift
+      const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
+      // Subscribe to websocket for gift address
+      AddressWatcher.send(
+        JSON.stringify({ op: 'addr_sub', addr: watchedAddr }),
+      );
+      // console.log(`Subscribed to ${watchedAddr}`);
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  unsubscribeToGifts(tipWallets) {
+    // Parse for addresses
+    for (let i = 0; i < tipWallets.length; i += 1) {
+      // Get address of Gift
+      const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
+      // Subscribe to websocket for gift address
+      AddressWatcher.send(
+        JSON.stringify({ op: 'addr_unsub', addr: watchedAddr }),
+      );
+      // console.log(`Unsubscribed to ${watchedAddr}`);
+    }
+  }
+
   toggleGiftNames(e) {
     const { target } = e;
     const value = target.type === 'checkbox' ? target.checked : target.value;
@@ -760,6 +877,14 @@ class TipsPortal extends React.Component {
   retryInvoiceSuccess() {
     this.setState({ createExpirationTxsFailed: false }, this.invoiceSuccess);
   }
+
+  /*
+  handleNoCreationTxidInDb() {
+    // Function to create one expiration tx to get tip info from db if creationTxid was not collected
+    // Probably not worth the dev effort, would only take effect in case where
+    // 1) creationTxid failed to post to server
+    // 2) At least one of tipWallets has been claimed
+  } */
 
   createExpirationTxs() {
     // console.log(`createExpirationTxs`);
@@ -1299,12 +1424,18 @@ class TipsPortal extends React.Component {
       tipsAlreadySweptError,
       showSweepForm,
     } = this.state;
+    let { tipWallets } = this.state;
+    // If you are doing this with a seed already loaded, unsubscribe from previous websockets
+    if (tipWallets.length > 0) {
+      this.unsubscribeToGifts(tipWallets);
+      // Re-initialize
+      tipWallets = [];
+    }
     const { derivePath } = walletInfo;
     let claimedTipCount = 0;
-    this.setState({ importingMnemonic: true });
+    this.setState({ importingMnemonic: true, networkError: '' });
 
     // reset to 0 in case the user is importing with tips already on the page
-    const tipWallets = [];
 
     if (formData.importedMnemonic.state !== 1) {
       // console.log(`Invalid Mnemonic, kicked out of function`);
@@ -1351,6 +1482,7 @@ class TipsPortal extends React.Component {
       const addrDetails = await bitbox.Address.details(fundingAddress);
       // console.log(addrDetails);
       const txHistory = addrDetails.transactions;
+      // console.log(txHistory);
       // check tx history
       // actually what you need to do first is get an object with all the tips
       const potentialTipWallets = [];
@@ -1364,7 +1496,7 @@ class TipsPortal extends React.Component {
           claimedTxid: '',
         };
         // determine status
-        let creationTxid;
+        const creationTxid = txHistory[0];
 
         if (
           txHistory.length === 1 &&
@@ -1373,10 +1505,8 @@ class TipsPortal extends React.Component {
           firstTipWallet.status = 'unclaimed';
           // get creation txid
           // eslint-disable-next-line prefer-destructuring
-          creationTxid = txHistory[0];
         } else if (txHistory.length > 1 && addrDetails.balance === 0) {
           firstTipWallet.status = 'claimed';
-          creationTxid = txHistory[txHistory.length - 1];
         }
 
         // console.log(`Creation txid: ${creationTxid}`);
@@ -1395,7 +1525,31 @@ class TipsPortal extends React.Component {
             // console.log(importedGiftInfoJson);
             // console.log(`Server Data for Gifts at Imported Seed:`);
             importedGifts = importedGiftInfoJson.result;
-            // console.log(importedGifts);
+            console.log(importedGifts);
+
+            // If this is empty, chance that first tip is claimed and you don't have the right txid
+            // Try that
+            if (importedGifts.length === 0) {
+              const creationTxidTakeTwo = txHistory[txHistory.length - 1];
+              const queryApiRetry = `${giftsQuery}/${creationTxidTakeTwo}`;
+              try {
+                importedGiftInfo = await fetch(queryApiRetry);
+                try {
+                  importedGiftInfoJson = await importedGiftInfo.json();
+                  // console.log(`Fetched importedGiftInfo:`);
+                  // console.log(importedGiftInfoJson);
+                  // console.log(`Server Data for Gifts at Imported Seed:`);
+                  importedGifts = importedGiftInfoJson.result;
+                  console.log(importedGifts);
+                } catch (err) {
+                  console.log(`Error in importedGiftInfo JSON retry:`);
+                  console.log(err);
+                }
+              } catch (err) {
+                console.log(`Error in importedGiftInfo retry:`);
+                console.log(err);
+              }
+            }
 
             this.setState({ importedGiftInfo: importedGifts });
           } catch (err) {
@@ -1491,11 +1645,13 @@ class TipsPortal extends React.Component {
                 tipWallet.claimedTxid = potentialTipDetails[i].transactions[0];
               }
               if (typeof importedGifts !== 'undefined') {
-                try {
-                  tipWallet.status = importedGifts[i].status;
-                } catch (err) {
-                  console.log(`Error in applying server tip status`);
-                  console.log(err);
+                if (importedGifts.length > 0) {
+                  try {
+                    tipWallet.status = importedGifts[i].status;
+                  } catch (err) {
+                    console.log(`Error in applying server tip status`);
+                    console.log(err);
+                  }
                 }
               }
 
@@ -1594,17 +1750,20 @@ class TipsPortal extends React.Component {
       allTipsSwept = true;
     }
 
-    this.setState({
-      walletInfo,
-      fundingAddress,
-      tipWallets,
-      calculatedFiatAmount,
-      importedMnemonic: true,
-      tipsFunded: true,
-      tipsClaimedCount: claimedTipCount,
-      tipsAlreadySweptError: allTipsSwept,
-      importingMnemonic: false,
-    });
+    this.setState(
+      {
+        walletInfo,
+        fundingAddress,
+        tipWallets,
+        calculatedFiatAmount,
+        importedMnemonic: true,
+        tipsFunded: true,
+        tipsClaimedCount: claimedTipCount,
+        tipsAlreadySweptError: allTipsSwept,
+        importingMnemonic: false,
+      },
+      this.subscribeToGifts(tipWallets),
+    );
   }
 
   handleCreateTipSubmitButton() {
@@ -1781,11 +1940,14 @@ class TipsPortal extends React.Component {
           // console.log(`funding outputs used:`);
           // console.log(fundingOutputs);
           const { paymentId } = res;
-          return this.setState({
-            generatingInvoice: false,
-            invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
-            tipWallets,
-          });
+          return this.setState(
+            {
+              generatingInvoice: false,
+              invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+              tipWallets,
+            },
+            this.subscribeToGifts(tipWallets),
+          );
         },
         err => {
           console.log(`Error creating invoice`);
@@ -2621,9 +2783,7 @@ class TipsPortal extends React.Component {
                     </tr>
                     <tr>
                       <MobileTipTh>
-                        <MobileTipTh>
-                          <FormattedMessage id="home.labels.tableExpiration" />
-                        </MobileTipTh>
+                        <FormattedMessage id="home.labels.tableExpiration" />
                       </MobileTipTh>
                       <TipTd>{expirationDate}</TipTd>
                     </tr>
@@ -2683,9 +2843,10 @@ class TipsPortal extends React.Component {
               <FormattedMessage id="home.strings.seedReminderBelow" />
             </SeedReminderBelow>
           </GiftsControlPanel>
+
           <TipContainerWrapper maxWidth={displayWidth}>
             <TipContainer
-              show={tipWallets.length > 0 && tipsFunded}
+              show={tipWallets.length > 0 && tipsFunded && !importingMnemonic}
               columns={4}
             >
               {tipWallets.length > 0 && printingTips}
