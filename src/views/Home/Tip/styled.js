@@ -132,8 +132,78 @@ export const StatusLabel = styled.div`
 `;
 export const TipStatus = styled.div``;
 export const ClaimedBlock = styled.div`
+  opacity: ${({ status = 'unclaimed' }) => (status !== 'unclaimed' ? 1 : 0)};
+  position: ${({ status = 'unclaimed' }) =>
+    status !== 'unclaimed' ? 'relative' : 'absolute'};
   background-color: ${({ status = 'claimed' }) =>
-    status === 'expired' ? '#ffbaba;' : '#0fcb97;'};
+    status === 'unclaimed' ? '#fff;' : '#0fcb97;'};
+  border-radius: 5px;
+  margin: 24px;
+  padding: 39px 0px;
+  -webkit-transition: background-color 3s ease-out;
+  -moz-transition: background-color 3s ease-out;
+  -o-transition: background-color 3s ease-out;
+  transition: background-color 3s ease-out;
+  -webkit-transition: opacity 3s ease-out;
+  -moz-transition: opacity 3s ease-out;
+  -o-transition: opacity 3s ease-out;
+  transition: opacity 3s ease-out;
+`;
+
+export const ClaimedBlockOG = styled.div`
+  opacity: ${({ status = 'unclaimed' }) => (status !== 'unclaimed' ? 1 : 0)};
+  position: ${({ status = 'unclaimed' }) =>
+    status !== 'unclaimed' ? 'relative' : 'absolute'};
+  background-color: ${({ status = 'claimed' }) =>
+    status === 'unclaimed' ? '#fff;' : '#f59332;'};
+  border-radius: 5px;
+  margin: 24px;
+  padding: 39px 0px;
+  -webkit-transition: background-color 3s ease-out;
+  -moz-transition: background-color 3s ease-out;
+  -o-transition: background-color 3s ease-out;
+  transition: background-color 3s ease-out;
+  -webkit-transition: opacity 3s ease-out;
+  -moz-transition: opacity 3s ease-out;
+  -o-transition: opacity 3s ease-out;
+  transition: opacity 3s ease-out;
+`;
+
+export const ClaimedBlockEZ = styled.div`
+  opacity: ${({ status = 'unclaimed' }) => (status !== 'unclaimed' ? 1 : 0)};
+  position: ${({ status = 'unclaimed' }) =>
+    status !== 'unclaimed' ? 'relative' : 'absolute'};
+  background-color: ${({ status = 'claimed' }) =>
+    status === 'unclaimed' ? '#fff;' : 'grey;'};
+  border-radius: 5px;
+  margin: 24px;
+  padding: 39px 0px;
+  -webkit-transition: background-color 3s ease-out;
+  -moz-transition: background-color 3s ease-out;
+  -o-transition: background-color 3s ease-out;
+  transition: background-color 3s ease-out;
+  -webkit-transition: opacity 3s ease-out;
+  -moz-transition: opacity 3s ease-out;
+  -o-transition: opacity 3s ease-out;
+  transition: opacity 3s ease-out;
+`;
+
+export const ExpiredBlock = styled.div`
+  background-color: #ffbaba;
+  border-radius: 5px;
+  margin: 24px;
+  padding: 39px 0px;
+`;
+export const ExpiredBlockOG = styled.div`
+  background-color: #fff;
+  border: 3px solid #f59332;
+  border-radius: 5px;
+  margin: 24px;
+  padding: 39px 0px;
+`;
+export const ExpiredBlockEZ = styled.div`
+  background-color: #fff;
+  border: 3px solid grey;
   border-radius: 5px;
   margin: 24px;
   padding: 39px 0px;
