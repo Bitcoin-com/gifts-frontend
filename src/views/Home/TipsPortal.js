@@ -88,7 +88,7 @@ const bitbox = new BITBOX({
 const inputState = { untouched: 0, valid: 1, invalid: 2 };
 
 // Client websocket to watch for claimed tips in real time
-const AddressWatcher = new WebSocket('wss://ws.blockchain.info/bch/inv');
+
 const defaultRefundAddress =
   'bitcoincash:qq9qmugsdua78g7jjjykh9r4zku3wmyhnvdl8ucu0e';
 
@@ -219,7 +219,7 @@ class TipsPortal extends React.Component {
     // this.handleNoCreationTxidInDb = this.handleNoCreationTxidInDb.bind(this);
     this.subscribeToGifts = this.subscribeToGifts.bind(this);
     this.unsubscribeToGifts = this.unsubscribeToGifts.bind(this);
-    this.onNewTx = this.onNewTx.bind(this);
+    this.initializeWebsocket = this.initializeWebsocket.bind(this);
     this.setClaimedFromWebsocket = this.setClaimedFromWebsocket.bind(this);
     this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
     this.setDefaultExpirationDate = this.setDefaultExpirationDate.bind(this);
@@ -278,69 +278,16 @@ class TipsPortal extends React.Component {
       qrLogo: true,
       selectedGiftDesign: 'default',
       pngLoading: false,
+      ws: null,
     };
   }
 
   componentDidMount() {
-    this.onNewTx();
-    // this.setDefaultExpirationDate();
+    this.initializeWebsocket();
   }
 
   componentWillUnmount() {
     this.invoiceSuccessThrottled.cancel();
-  }
-
-  onNewTx() {
-    AddressWatcher.onmessage = event => {
-      const wsTx = JSON.parse(event.data);
-      // console.log(`New tx:`);
-      // console.log(wsTx);
-      return this.setClaimedFromWebsocket(wsTx);
-      // Get address of tx
-
-      /* Example format
-      {
-  "op": "utx",
-  "x": {
-    "lock_time": 0,
-    "ver": 2,
-    "size": 191,
-    "inputs": [
-      {
-        "sequence": 4294967295,
-        "prev_out": {
-          "spent": false,
-          "tx_index": 0,
-          "type": 0,
-          "addr": "13Q5y8zgPvXbZ6deNtzk9tCELaBL88j6MQ",
-          "value": 88616,
-          "n": 3,
-          "script": "76a9141a4df736a4bd4c33d14370b81ce825546412e39488ac"
-        },
-        "script": "47304402200b8b21c1fd9d58e9989a6c8c730f3a3c0ce4d6dd7a50acfcea55a82f2e45390c022019e387f7da44f71869db3eb46b299cdfac983c74690a6f1b4cde1e2c55a6988e4121036b9b2fdd4197af3460f322921a0e007a0aea7f708aa7d3755bc6fe6d584d9098"
-      }
-    ],
-    "time": 1584531098,
-    "tx_index": 0,
-    "vin_sz": 1,
-    "hash": "8dc8ccfcbd499b2d4bceec4a038f44e495e3ddc4d1e0c569e79b258df0a29147",
-    "vout_sz": 1,
-    "relayed_by": "",
-    "out": [
-      {
-        "spent": false,
-        "tx_index": 0,
-        "type": 0,
-        "addr": "15oGjdeS9fTs6njk4zSMMxrANaACSXByWw",
-        "value": 88384,
-        "n": 0,
-        "script": "76a91434a0c5b6c531a85f0ba7e616f603db7d099f6a0988ac"
-      }
-    ]
-  }
-}
-      */
-    };
   }
 
   // eslint-disable-next-line consistent-return
@@ -615,30 +562,39 @@ class TipsPortal extends React.Component {
     return field;
   };
 
+  initializeWebsocket() {
+    const ws = new WebSocket('wss://ws.blockchain.info/bch/inv');
+    ws.onmessage = event => {
+      const wsTx = JSON.parse(event.data);
+      // console.log(`New tx:`);
+      // console.log(wsTx);
+      return this.setClaimedFromWebsocket(wsTx);
+    };
+    this.setState({ ws });
+  }
+
   // eslint-disable-next-line class-methods-use-this
   subscribeToGifts(tipWallets) {
+    const { ws } = this.state;
     // Parse for addresses
     for (let i = 0; i < tipWallets.length; i += 1) {
       // Get address of Gift
       const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
       // Subscribe to websocket for gift address
-      AddressWatcher.send(
-        JSON.stringify({ op: 'addr_sub', addr: watchedAddr }),
-      );
+      ws.send(JSON.stringify({ op: 'addr_sub', addr: watchedAddr }));
       // console.log(`Subscribed to ${watchedAddr}`);
     }
   }
 
   // eslint-disable-next-line class-methods-use-this
   unsubscribeToGifts(tipWallets) {
+    const { ws } = this.state;
     // Parse for addresses
     for (let i = 0; i < tipWallets.length; i += 1) {
       // Get address of Gift
       const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
       // Subscribe to websocket for gift address
-      AddressWatcher.send(
-        JSON.stringify({ op: 'addr_unsub', addr: watchedAddr }),
-      );
+      ws.send(JSON.stringify({ op: 'addr_unsub', addr: watchedAddr }));
       // console.log(`Unsubscribed to ${watchedAddr}`);
     }
   }
@@ -1309,6 +1265,7 @@ class TipsPortal extends React.Component {
       qrLogo: true,
       selectedGiftDesign: 'default',
       pngLoading: false,
+      ws: null,
     });
   }
 
