@@ -220,6 +220,7 @@ class TipsPortal extends React.Component {
     this.subscribeToGifts = this.subscribeToGifts.bind(this);
     this.unsubscribeToGifts = this.unsubscribeToGifts.bind(this);
     this.initializeWebsocket = this.initializeWebsocket.bind(this);
+    this.reconnectWebsocket = this.reconnectWebsocket.bind(this);
     this.setClaimedFromWebsocket = this.setClaimedFromWebsocket.bind(this);
     this.postReturnTxInfos = this.postReturnTxInfos.bind(this);
     this.setDefaultExpirationDate = this.setDefaultExpirationDate.bind(this);
@@ -563,6 +564,8 @@ class TipsPortal extends React.Component {
   };
 
   initializeWebsocket() {
+    const { tipWallets } = this.state;
+    let connectInterval;
     const ws = new WebSocket('wss://ws.blockchain.info/bch/inv');
     ws.onmessage = event => {
       const wsTx = JSON.parse(event.data);
@@ -570,7 +573,41 @@ class TipsPortal extends React.Component {
       // console.log(wsTx);
       return this.setClaimedFromWebsocket(wsTx);
     };
-    this.setState({ ws });
+    ws.onopen = () => {
+      console.log('Websocket connected');
+      if (tipWallets.length > 0) {
+        console.log(`Reconnected. Subscribing to Gifts...`);
+        this.setState({ ws }, this.subscribeToGifts(tipWallets));
+      } else {
+        // console.log('No Gifts to watch');
+        this.setState({ ws });
+      }
+
+      clearTimeout(connectInterval); // clear Interval on on open of websocket connection
+    };
+    // websocket onclose event listener
+    ws.onclose = e => {
+      console.log(`Websocket closed.`);
+      console.log(e);
+      console.log(`Reconnecting in 5s...`);
+
+      connectInterval = setTimeout(this.reconnectWebsocket, 5000); // call check function after 5 seconds
+    };
+    ws.onerror = err => {
+      console.error(
+        'Webocket encountered error: ',
+        err.message,
+        'Closing websocket',
+      );
+      ws.close();
+    };
+  }
+
+  reconnectWebsocket() {
+    const { ws } = this.state;
+    if (!ws || ws.readyState === WebSocket.CLOSED) {
+      this.initializeWebsocket();
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -582,7 +619,7 @@ class TipsPortal extends React.Component {
       const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
       // Subscribe to websocket for gift address
       ws.send(JSON.stringify({ op: 'addr_sub', addr: watchedAddr }));
-      // console.log(`Subscribed to ${watchedAddr}`);
+      console.log(`Subscribed to ${watchedAddr}`);
     }
   }
 
@@ -595,7 +632,7 @@ class TipsPortal extends React.Component {
       const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
       // Subscribe to websocket for gift address
       ws.send(JSON.stringify({ op: 'addr_unsub', addr: watchedAddr }));
-      // console.log(`Unsubscribed to ${watchedAddr}`);
+      console.log(`Unsubscribed to ${watchedAddr}`);
     }
   }
 
@@ -674,6 +711,7 @@ class TipsPortal extends React.Component {
     const node = document.getElementById(elementId);
     htmlToImage.toJpeg(node).then(
       dataUrl => {
+        // console.log(dataUrl);
         const imageType = 'image/jpg';
         // Download the image
         const fileName = `BCH_Gift_${fiatAmount}${currency}_${giftName}`;
