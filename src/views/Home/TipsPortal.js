@@ -94,11 +94,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-const giftsBackendBase = 'https://cashtips-api.btctest.net/';
+// const giftsBackendBase = 'https://cashtips-api.btctest.net/';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -711,7 +711,7 @@ class TipsPortal extends React.Component {
     const node = document.getElementById(elementId);
     htmlToImage.toJpeg(node).then(
       dataUrl => {
-        console.log(dataUrl);
+        // console.log(dataUrl);
         const imageType = 'image/jpg';
         // Download the image
         const fileName = `BCH_Gift_${fiatAmount}${currency}_${giftName}`;
