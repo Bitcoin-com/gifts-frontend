@@ -564,6 +564,7 @@ class TipsPortal extends React.Component {
   };
 
   initializeWebsocket() {
+    const { tipWallets } = this.state;
     let connectInterval;
     const ws = new WebSocket('wss://ws.blockchain.info/bch/inv');
     ws.onmessage = event => {
@@ -574,8 +575,13 @@ class TipsPortal extends React.Component {
     };
     ws.onopen = () => {
       console.log('Websocket connected');
-
-      this.setState({ ws });
+      if (tipWallets.length > 0) {
+        console.log(`Reconnected. Subscribing to Gifts...`);
+        this.setState({ ws }, this.subscribeToGifts(tipWallets));
+      } else {
+        // console.log('No Gifts to watch');
+        this.setState({ ws });
+      }
 
       clearTimeout(connectInterval); // clear Interval on on open of websocket connection
     };
