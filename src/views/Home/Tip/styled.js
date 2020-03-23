@@ -104,6 +104,7 @@ export const TipWrapper = styled.div`
 
   @media print {
     display: inline-block;
+    height: auto;
     page-break-inside: avoid !important;
   }
 `;
