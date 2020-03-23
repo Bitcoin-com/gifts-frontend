@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import Popup from 'reactjs-popup';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import {
   theme,
   Paragraph,
@@ -30,8 +31,12 @@ const reset = css`
   box-sizing: border-box;
 `;
 
+export const CustomPdfDownloadLink = styled(PDFDownloadLink)`
+  margin: 12px auto;
+`;
+
 export const CustomSelect = styled(Select)`
-  z-index: 2;
+  z-index: 5;
   min-width: 185px;
 `;
 
