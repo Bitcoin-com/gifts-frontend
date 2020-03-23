@@ -83,11 +83,14 @@
     "loadTips": "Import",
     "refresh": "Refresh",
     "processing": "Processing...",
+    "loadingPdf": "loading",
+    "downloadPdf": "Download PDF",
     "mobilePay": "Pay in app",
     "next": "Next",
     "confirm": "Confirm",
     "repost": "Repost",
-    "retry": "Retry"
+    "retry": "Retry",
+    "makePdf": "Generate PDF"
   },
   "placeholders": {
     "tipCount": "Enter desired number of gifts",
