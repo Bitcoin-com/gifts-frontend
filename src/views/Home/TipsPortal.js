@@ -15,6 +15,7 @@ import {
   Checkbox,
   H1,
   Paragraph,
+  Loader,
 } from 'bitcoincom-storybook';
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
@@ -2877,17 +2878,17 @@ class TipsPortal extends React.Component {
               </InputWrapper>
             </ControlPanelForm>
 
-            <CardButton
-              primary
-              onClick={this.makePdf}
-              style={{ margin: 'auto' }}
-            >
-              {pdfLoading ? (
-                <FormattedMessage id="home.buttons.processing" />
-              ) : (
+            {pdfLoading ? (
+              <Loader style={{ margin: 'auto' }}></Loader>
+            ) : (
+              <CardButton
+                primary
+                onClick={this.makePdf}
+                style={{ margin: 'auto' }}
+              >
                 <FormattedMessage id="home.buttons.makePdf" />
-              )}
-            </CardButton>
+              </CardButton>
+            )}
 
             {pdfPngs.length > 0 && (
               <React.Fragment>
@@ -2921,17 +2922,21 @@ class TipsPortal extends React.Component {
           </TipContainerWrapper>
 
           {tipWallets.length > 0 && (
-            <CardButton
-              primary
-              onClick={this.makePdf}
-              style={{ margin: 'auto' }}
-            >
-              {pdfLoading ? (
-                <FormattedMessage id="home.buttons.processing" />
-              ) : (
-                <FormattedMessage id="home.buttons.makePdf" />
-              )}
-            </CardButton>
+            <React.Fragment>
+              <ButtonHider className="noPrint" show>
+                {pdfLoading ? (
+                  <Loader style={{ margin: 'auto' }}></Loader>
+                ) : (
+                  <CardButton
+                    primary
+                    onClick={this.makePdf}
+                    style={{ margin: 'auto' }}
+                  >
+                    <FormattedMessage id="home.buttons.makePdf" />
+                  </CardButton>
+                )}
+              </ButtonHider>
+            </React.Fragment>
           )}
 
           {pdfPngs.length > 0 && (
