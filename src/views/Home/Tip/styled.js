@@ -104,7 +104,6 @@ export const TipWrapper = styled.div`
 
   @media print {
     display: inline-block;
-    height: auto;
     page-break-inside: avoid !important;
   }
 `;
@@ -304,6 +303,9 @@ export const TipExchangeRate = styled.div`
   color: #fff;
   font-size: 12px;
   font-weight: 600;
+  @media print {
+    font-size: 10px;
+  }
 `;
 export const LogoFooter = styled.div`
   padding: 3px 0px;

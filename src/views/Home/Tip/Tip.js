@@ -128,7 +128,7 @@ const Tip = ({
                 logoOpacity={0.25}
                 logoWidth={125}
                 qrStyle={qrDots ? 'dots' : 'squares'}
-                ecLevel="M"
+                ecLevel="L"
                 quietZone={10}
                 bgColor="#fff"
               />

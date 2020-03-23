@@ -148,8 +148,9 @@ export const PrintableContentBlock = styled(ContentBlock)`
   @media print {
     margin: 0mm;
     padding: 0mm;
+
     & > div {
-      margin: 10mm 7.5mm;
+      margin: 0mm;
       padding: 0mm;
       & > div {
         margin: 0mm;
@@ -364,6 +365,8 @@ export const TipContainerWrapper = styled.div`
   @media print {
     margin: 0mm;
     padding: 0mm;
+    -webkit-transform-origin: 0 0 !important;
+    transform: scale(0.575) !important;
     max-width: none;
   }
 `;
@@ -377,7 +380,9 @@ export const TipContainer = styled.div`
   @media print {
     margin: 0mm;
     padding: 0mm;
-    width: 10in;
+
+    width: 19cm;
+
     grid-template-columns: repeat(5, 0fr) !important;
     grid-column-gap: 0in !important;
     grid-row-gap: 0in !important;
