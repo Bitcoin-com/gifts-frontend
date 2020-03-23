@@ -98,7 +98,7 @@ const defaultRefundAddress =
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-const giftsBackendBase = 'https://cashtips-api.btctest.net/';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -895,10 +895,7 @@ class TipsPortal extends React.Component {
         console.log(`Error in postReturnTxInfos`);
         console.log(err);
         // should try to post it again here, mb email the error to admin
-        return this.setState(
-          { apiPostFailed: true, returnTxInfos },
-          this.handleReturnTxInfosError(),
-        );
+        return this.setState({ apiPostFailed: true, returnTxInfos });
       },
     );
   }
@@ -2941,6 +2938,7 @@ class TipsPortal extends React.Component {
             <React.Fragment>
               <br></br>
               <CustomPdfDownloadLink
+                className="noPrint"
                 document={<TipPdf images={pdfPngs} />}
                 fileName={`${pdfDownloadFiatAmount}${giftInfoFiatCurrency}x${tipWallets.length}_gifts.pdf`}
               >
