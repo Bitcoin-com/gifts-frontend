@@ -19,8 +19,7 @@ import {
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
 import htmlToImage from 'html-to-image';
-
-// import { PDFDownloadLink } from '@react-pdf/renderer';
+import TipPdf from './TipPdf';
 
 import {
   HeaderContentBlock,
@@ -74,6 +73,7 @@ import {
   ControlPanelForm,
   SweepInstructions,
   CustomParagraph,
+  CustomPdfDownloadLink,
 } from './styled';
 import Tip from './Tip';
 
@@ -229,6 +229,7 @@ class TipsPortal extends React.Component {
       this,
     );
     this.shareTip = this.shareTip.bind(this);
+    this.makePdf = this.makePdf.bind(this);
     this.handleSelectedExpirationDateChange = this.handleSelectedExpirationDateChange.bind(
       this,
     );
@@ -279,6 +280,8 @@ class TipsPortal extends React.Component {
       qrLogo: true,
       selectedGiftDesign: 'default',
       pngLoading: false,
+      pdfLoading: false,
+      pdfPngs: [],
       ws: null,
     };
   }
@@ -698,6 +701,38 @@ class TipsPortal extends React.Component {
         [`expirationDate`]: field,
       },
     });
+  }
+
+  makePdf() {
+    this.setState({ pdfLoading: true, pdfPngs: [] });
+    const { tipWallets } = this.state;
+    const imagePromises = [];
+    for (let i = 0; i < tipWallets.length; i += 1) {
+      const tipWallet = tipWallets[i];
+      const elementId = tipWallet.addr.substr(12);
+      const node = document.getElementById(elementId);
+      const imagePromise = htmlToImage.toPng(node);
+      imagePromises.push(imagePromise);
+    }
+    Promise.all(imagePromises).then(
+      imgArr => {
+        console.log(`Images processed for pdf`);
+        // console.log(imgArr);
+        this.setState({
+          pdfPngs: imgArr,
+          pdfLoading: false,
+        });
+        // put it in state, then pdf element can get it
+        // then mb just call this function by default when gifts are created
+      },
+      err => {
+        console.log(`Error in Promise.all(imagePromises)`);
+        console.log(err);
+        this.setState({
+          pdfLoading: false,
+        });
+      },
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -1303,6 +1338,8 @@ class TipsPortal extends React.Component {
       qrLogo: true,
       selectedGiftDesign: 'default',
       pngLoading: false,
+      pdfLoading: false,
+      pdfPngs: [],
       ws: null,
     });
   }
@@ -1355,7 +1392,7 @@ class TipsPortal extends React.Component {
 
   handleGiftDesignChange(selectedGiftDesignOption) {
     const { value } = selectedGiftDesignOption;
-    this.setState({ selectedGiftDesign: value });
+    this.setState({ selectedGiftDesign: value, pdfPngs: [] });
   }
 
   handleSelectedCurrencyChange(e) {
@@ -1991,6 +2028,8 @@ class TipsPortal extends React.Component {
       qrLogo,
       selectedGiftDesign,
       pngLoading,
+      pdfLoading,
+      pdfPngs,
     } = this.state;
 
     const selectCurrencies = [
@@ -2047,6 +2086,7 @@ class TipsPortal extends React.Component {
     let giftInfoFiatCurrency = selectedCurrency;
     let giftInfoFiatAmount = calculatedFiatAmount;
     let giftInfoGiftQty;
+    let pdfDownloadFiatAmount = formData.tipAmountFiat.value;
 
     if (importedMnemonic) {
       try {
@@ -2055,8 +2095,10 @@ class TipsPortal extends React.Component {
         giftInfoFiatAmount = importedGiftInfo[0].fiatAmount;
         giftInfoGiftQty = importedGiftInfo.length;
         giftInfoSuccess = true;
+        pdfDownloadFiatAmount = giftInfoFiatAmount;
       } catch (err) {
         expirationDate = formData.expirationDate.value;
+        pdfDownloadFiatAmount = giftInfoFiatAmount;
       }
     } else {
       expirationDate = formData.expirationDate.value;
@@ -2728,6 +2770,18 @@ class TipsPortal extends React.Component {
             className="noPrint"
             show={tipWallets.length > 0 && tipsFunded}
           >
+            <SeedReminderAbove>
+              <FormattedMessage id="home.strings.seedReminderAbove" />
+            </SeedReminderAbove>
+            <CopyToClipboard
+              text={walletInfo.mnemonic}
+              onCopy={() => this.handleSeedCopied()}
+            >
+              <SeedWrapperAbove>{walletInfo.mnemonic}</SeedWrapperAbove>
+            </CopyToClipboard>
+            <SeedReminderBelow>
+              <FormattedMessage id="home.strings.seedReminderBelow" />
+            </SeedReminderBelow>
             {importedMnemonic && giftInfoSuccess && (
               <React.Fragment>
                 <TipTable>
@@ -2825,18 +2879,39 @@ class TipsPortal extends React.Component {
                 />
               </InputWrapper>
             </ControlPanelForm>
-            <SeedReminderAbove>
-              <FormattedMessage id="home.strings.seedReminderAbove" />
-            </SeedReminderAbove>
-            <CopyToClipboard
-              text={walletInfo.mnemonic}
-              onCopy={() => this.handleSeedCopied()}
+
+            <CardButton
+              primary
+              onClick={this.makePdf}
+              style={{ margin: 'auto' }}
             >
-              <SeedWrapperAbove>{walletInfo.mnemonic}</SeedWrapperAbove>
-            </CopyToClipboard>
-            <SeedReminderBelow>
-              <FormattedMessage id="home.strings.seedReminderBelow" />
-            </SeedReminderBelow>
+              {pdfLoading ? (
+                <FormattedMessage id="home.buttons.processing" />
+              ) : (
+                <FormattedMessage id="home.buttons.makePdf" />
+              )}
+            </CardButton>
+
+            {pdfPngs.length > 0 && (
+              <React.Fragment>
+                <br></br>
+                <CustomPdfDownloadLink
+                  document={<TipPdf images={pdfPngs} />}
+                  fileName={`${pdfDownloadFiatAmount}${giftInfoFiatCurrency}x${tipWallets.length}_gifts.pdf`}
+                >
+                  {({ loading }) =>
+                    loading ? (
+                      <FormattedMessage id="home.buttons.loadingPdf" />
+                    ) : (
+                      <FormattedMessage id="home.buttons.downloadPdf" />
+                    )
+                  }
+                </CustomPdfDownloadLink>
+                {/* <PDFViewer>
+                <TipPdf images={pdfPngs} />
+              </PDFViewer> */}
+              </React.Fragment>
+            )}
           </GiftsControlPanel>
 
           <TipContainerWrapper maxWidth={displayWidth}>
@@ -2847,6 +2922,41 @@ class TipsPortal extends React.Component {
               {tipWallets.length > 0 && printingTips}
             </TipContainer>
           </TipContainerWrapper>
+
+          {tipWallets.length > 0 && (
+            <CardButton
+              primary
+              onClick={this.makePdf}
+              style={{ margin: 'auto' }}
+            >
+              {pdfLoading ? (
+                <FormattedMessage id="home.buttons.processing" />
+              ) : (
+                <FormattedMessage id="home.buttons.makePdf" />
+              )}
+            </CardButton>
+          )}
+
+          {pdfPngs.length > 0 && (
+            <React.Fragment>
+              <br></br>
+              <CustomPdfDownloadLink
+                document={<TipPdf images={pdfPngs} />}
+                fileName={`${pdfDownloadFiatAmount}${giftInfoFiatCurrency}x${tipWallets.length}_gifts.pdf`}
+              >
+                {({ loading }) =>
+                  loading ? (
+                    <FormattedMessage id="home.buttons.loadingPdf" />
+                  ) : (
+                    <FormattedMessage id="home.buttons.downloadPdf" />
+                  )
+                }
+              </CustomPdfDownloadLink>
+              {/* <PDFViewer>
+                <TipPdf images={pdfPngs} />
+              </PDFViewer> */}
+            </React.Fragment>
+          )}
 
           <SweepAllCard
             title={formatMessage({
