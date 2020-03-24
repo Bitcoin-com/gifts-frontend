@@ -117,6 +117,7 @@ const appStates = {
 class TipsPortal extends React.Component {
   constructor(props) {
     super(props);
+    this.wsTimeout = 250; // Initial timeout duration as a class variable
     this.initialFormData = {
       inputMnemonic: {
         value: '',
@@ -220,6 +221,8 @@ class TipsPortal extends React.Component {
     // this.handleNoCreationTxidInDb = this.handleNoCreationTxidInDb.bind(this);
     this.subscribeToGifts = this.subscribeToGifts.bind(this);
     this.unsubscribeToGifts = this.unsubscribeToGifts.bind(this);
+    this.watchInvoiceByAddr = this.watchInvoiceByAddr.bind(this);
+    this.setInvoiceInterval = this.setInvoiceInterval.bind(this);
     this.initializeWebsocket = this.initializeWebsocket.bind(this);
     this.reconnectWebsocket = this.reconnectWebsocket.bind(this);
     this.setClaimedFromWebsocket = this.setClaimedFromWebsocket.bind(this);
@@ -284,6 +287,7 @@ class TipsPortal extends React.Component {
       pdfLoading: false,
       pdfPngs: [],
       ws: null,
+      invoiceInterval: null,
     };
   }
 
@@ -570,7 +574,9 @@ class TipsPortal extends React.Component {
   initializeWebsocket() {
     const { tipWallets } = this.state;
     let connectInterval;
+
     const ws = new WebSocket('wss://ws.blockchain.info/bch/inv');
+    const that = this; // cache the this
     ws.onmessage = event => {
       const wsTx = JSON.parse(event.data);
       // console.log(`New tx:`);
@@ -579,6 +585,7 @@ class TipsPortal extends React.Component {
     };
     ws.onopen = () => {
       console.log('Websocket connected');
+
       if (tipWallets.length > 0) {
         console.log(`Reconnected. Subscribing to Gifts...`);
         this.setState({ ws }, this.subscribeToGifts(tipWallets));
@@ -586,16 +593,32 @@ class TipsPortal extends React.Component {
         // console.log('No Gifts to watch');
         this.setState({ ws });
       }
-
+      that.wsTimeout = 250; // reset timer to 250 on open of websocket connection
       clearTimeout(connectInterval); // clear Interval on on open of websocket connection
     };
     // websocket onclose event listener
+    // eslint-disable-next-line consistent-return
     ws.onclose = e => {
       console.log(`Websocket closed.`);
-      console.log(e);
-      console.log(`Reconnecting in 5s...`);
+      console.log(
+        `Socket is closed. Reconnect will be attempted in ${Math.min(
+          10000 / 1000,
+          (that.wsTimeout + that.wsTimeout) / 1000,
+        )} s`,
+        e.reason,
+      );
 
-      connectInterval = setTimeout(this.reconnectWebsocket, 5000); // call check function after 5 seconds
+      that.wsTimeout += that.wsTimeout; // increment retry interval
+      console.log(that.wsTimeout);
+      if (that.wsTimeout > 8000) {
+        // stop trying to reconnect
+        return console.log(`Websocket is unavailable.`);
+      }
+
+      connectInterval = setTimeout(
+        this.reconnectWebsocket,
+        Math.min(10000, that.wsTimeout),
+      ); // call check function after timeout
     };
     ws.onerror = err => {
       console.error(
@@ -614,9 +637,54 @@ class TipsPortal extends React.Component {
     }
   }
 
+  watchInvoiceByAddr() {
+    const { fundingAddress, invoiceInterval } = this.state;
+    bitbox.Address.details(fundingAddress).then(
+      details => {
+        // console.log(details);
+        const txs = details.transactions;
+        // console.log(`Transactions seen: ${txs.length}`);
+        if (txs.length > 0) {
+          // stop watching the interval
+          clearInterval(invoiceInterval);
+          // return invoiceSuccess
+          this.setState({ invoiceInterval: null }, this.invoiceSuccess());
+        }
+      },
+      err => {
+        console.log(`Error in watching address details for ${fundingAddress}`);
+        console.log(err);
+        clearInterval(invoiceInterval);
+        // Probably a rate limiting error, clear it again in  30s
+        setTimeout(this.setInvoiceInterval, 30000);
+        this.setState({ invoiceInterval: null });
+        // clear interval and set timeout to set it again
+      },
+    );
+    // Instead of trying to watch the invoice, watch your tipWallets for a transaction
+  }
+
+  // eslint-disable-next-line react/sort-comp
+  setInvoiceInterval() {
+    console.log(`Setting interval again`);
+    let { invoiceInterval } = this.state;
+    invoiceInterval = setInterval(this.watchInvoiceByAddr, 1000);
+    this.setState({ invoiceInterval });
+  }
+
   // eslint-disable-next-line class-methods-use-this
-  subscribeToGifts(tipWallets) {
+  // eslint-disable-next-line consistent-return
+  subscribeToGifts(tipWallets, paymentId = null) {
     const { ws } = this.state;
+    let invoiceInterval;
+    // if there is an invoice url in  state, start watching it
+    if (paymentId !== null) {
+      invoiceInterval = setInterval(this.watchInvoiceByAddr, 3000);
+      this.setState({ invoiceInterval });
+    }
+    if (ws === null) {
+      return console.log(`No websocket connect, cannot subscribe to addresses`);
+    }
     // Parse for addresses
     for (let i = 0; i < tipWallets.length; i += 1) {
       // Get address of Gift
@@ -628,8 +696,14 @@ class TipsPortal extends React.Component {
   }
 
   // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line consistent-return
   unsubscribeToGifts(tipWallets) {
     const { ws } = this.state;
+    if (ws === null) {
+      return console.log(
+        `No websocket connect, cannot unsubscribe from addresses`,
+      );
+    }
     // Parse for addresses
     for (let i = 0; i < tipWallets.length; i += 1) {
       // Get address of Gift
@@ -1339,6 +1413,7 @@ class TipsPortal extends React.Component {
       pdfLoading: false,
       pdfPngs: [],
       ws: null,
+      invoiceInterval: null,
     });
   }
 
@@ -1401,9 +1476,13 @@ class TipsPortal extends React.Component {
   }
 
   handleCancelInvoice() {
+    const { invoiceInterval } = this.state;
+    console.log(`Clearing interval ${invoiceInterval}`);
+    clearInterval(invoiceInterval);
     this.setState({
       invoiceUrl: '',
       tipWallets: [],
+      invoiceInterval: null,
     });
   }
 
@@ -1976,7 +2055,7 @@ class TipsPortal extends React.Component {
               invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
               tipWallets,
             },
-            this.subscribeToGifts(tipWallets),
+            this.subscribeToGifts(tipWallets, paymentId),
           );
         },
         err => {
@@ -2921,7 +3000,7 @@ class TipsPortal extends React.Component {
             </TipContainer>
           </TipContainerWrapper>
 
-          {tipWallets.length > 0 && (
+          {tipWallets.length > 0 && tipsFunded && !importingMnemonic && (
             <React.Fragment>
               <ButtonHider className="noPrint" show>
                 {pdfLoading ? (
