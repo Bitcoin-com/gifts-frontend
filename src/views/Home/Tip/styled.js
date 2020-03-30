@@ -29,6 +29,23 @@ export const ShareMenuButton = styled.button`
     color: #000;
   }
 `;
+
+export const ShareMenuButtonLink = styled.button`
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  color: #4d4d4d;
+  cursor: pointer;
+  background-color: transparent;
+  background: url(${appIcon}) no-repeat 12px center;
+  border: none;
+  height: 100%;
+
+  & :hover {
+    background-color: #fff;
+    color: #000;
+  }
+`;
 export const LoadingButton = styled.button`
   width: 100%;
   outline: none;
