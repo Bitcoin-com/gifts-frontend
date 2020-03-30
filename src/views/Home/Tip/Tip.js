@@ -44,9 +44,9 @@ import {
   LoadingButton,
   ShareMenuButton,
   LogoFooter,
+  ShareMenuButtonLink,
 } from './styled';
-// import bchLogo from '../../../../static/images/uploads/bch-logo.png';
-import bchLogo from '../../../../static/images/uploads/bch-square-green.svg';
+import bchLogo from '../../../../static/images/uploads/bch-square-green.png';
 import bchLogoOldSchool from '../../../../static/images/uploads/bch-logo-oldschool.png';
 import bchLogoEZ from '../../../../static/images/uploads/bch-logo-grey.png';
 import tipsLogo from '../../../../static/images/uploads/logo-min.png';
@@ -470,7 +470,7 @@ const Tip = ({
             PDF
           </ShareMenuButtonPDF> */}
 
-          {/* <ShareMenuListItem>pdf</ShareMenuListItem> */}
+          {/* <ShareMenuButtonLink>Link</ShareMenuButtonLink> */}
         </ShareMenuList>
       </ShareMenu>
     </StatusWrap>
