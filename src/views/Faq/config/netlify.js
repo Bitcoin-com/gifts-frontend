@@ -20,7 +20,7 @@ export const FaqPreview = ({ entry }) => {
         defaultLocale={DEFAULT_LOCALE}
         messages={flattenMessages(messages, 'faq')}
       >
-        <Layout location={{ pathname: '/' }}>
+        <Layout location={{ pathname: '/faq' }}>
           <Faq locale={DEFAULT_LOCALE} />
         </Layout>
       </IntlProvider>
@@ -39,17 +39,50 @@ const faqConfig = {
   name: 'faq.content',
   fields: [
     {
-      label: 'Content',
+      label: 'Header',
       widget: 'object',
-      name: 'content',
+      name: 'header',
+      fields: [{ name: 'title', label: 'title', widget: 'string' }],
+    },
+    {
+      label: 'questions',
+      widget: 'object',
+      name: 'questions',
       fields: [
-        { name: 'logo', label: 'Logo image', widget: 'image' },
-        { name: 'logo-alt', label: 'Logo image alt', widget: 'string' },
-        { name: 'title', label: 'Title', widget: 'string' },
-        { name: 'subtitle', label: 'Description', widget: 'text' },
-        { name: 'image', label: 'Image', widget: 'image' },
-        { name: 'image-alt', label: 'Image Alt', widget: 'string' },
+        { name: 'whatsThis', label: 'whatsThis', widget: 'string' },
+        { name: 'nonCustodial', label: 'nonCustodial', widget: 'string' },
+        {
+          name: 'reallyNonCustodial',
+          label: 'reallyNonCustodial',
+          widget: 'string',
+        },
+        { name: 'openSource', label: 'openSource', widget: 'string' },
+        { name: 'infoShared', label: 'infoShared', widget: 'string' },
+        { name: 'loseKey', label: 'loseKey', widget: 'string' },
       ],
+    },
+    {
+      label: 'answers',
+      widget: 'object',
+      name: 'answers',
+      fields: [
+        { name: 'whatsThis', label: 'whatsThis', widget: 'string' },
+        { name: 'nonCustodial', label: 'nonCustodial', widget: 'string' },
+        {
+          name: 'reallyNonCustodial',
+          label: 'reallyNonCustodial',
+          widget: 'string',
+        },
+        { name: 'openSource', label: 'openSource', widget: 'string' },
+        { name: 'infoShared', label: 'infoShared', widget: 'string' },
+        { name: 'loseKey', label: 'loseKey', widget: 'string' },
+      ],
+    },
+    {
+      label: 'links',
+      widget: 'object',
+      name: 'links',
+      fields: [{ name: 'home', label: 'home', widget: 'string' }],
     },
     fieldNewsletter,
     fieldMeta,

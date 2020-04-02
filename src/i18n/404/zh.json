@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "title": "404 Page Not Found | Bitcoin.com",
+    "description": "404 Page Not Found",
+    "twitter": "bitcoincom",
+    "image": "/images/uploads/facebook.png"
+  },
+  "content": {
+    "title": "404 - Page Not Found",
+    "image": "/images/uploads/404.png",
+    "image-alt": "404 - Page Not Found",
+    "subtitle": "The link you clicked may be broken or the page may have been moved.",
+    "action": "Visit the <a href=\"https://www.bitcoin.com\">homepage</a> or <a href=\"mailto:contact@bitcoin.com\">contact us</a> about the problem"
+  },
+  "link": {
+    "home": "Gifts Home"
+  }
+}

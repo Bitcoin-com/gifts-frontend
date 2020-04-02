@@ -4,7 +4,6 @@ import { StyleSheetManager } from 'styled-components';
 import { IntlProvider } from 'react-intl';
 import Layout from '../../../components/Layout/Layout';
 import { DEFAULT_LOCALE } from '../../../i18n';
-/* import en from '../../../data/home/locales/en.json'; */
 import flattenMessages from '../../../helpers/flattenMessages';
 import Error from '../404';
 
@@ -61,6 +60,12 @@ export const error404Config = {
         { name: 'image', label: 'Image', widget: 'image' },
         { name: 'image-alt', label: 'Image Alt', widget: 'string' },
       ],
+    },
+    {
+      label: 'Link',
+      widget: 'object',
+      name: 'link',
+      fields: [{ name: 'home', label: 'home', widget: 'string' }],
     },
   ],
 };

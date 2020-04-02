@@ -1,41 +1,24 @@
 const path = require('path');
 
-const { homeBuild } = require('./src/views/Home/config/gatsby');
-const { faqBuild } = require('./src/views/Faq/config/gatsby');
-const { errorBuild } = require('./src/views/404/config/gatsby');
+const { appLocales } = require('./src/i18n');
 
-const replacePath = pagePath =>
-  pagePath === `/` ? pagePath : pagePath.replace(/\/$/, ``);
-
-exports.onCreatePage = params => {
-  const { page, actions } = params;
+exports.onCreatePage = async ({ page, actions }) => {
   const { createPage, deletePage } = actions;
+  const newPage = page;
 
-  if (page.path === '/') return homeBuild(params);
-  if (page.path === '/faq/') return faqBuild(params);
-  if (page.path === '/subpage/') return homeBuild(params);
+  deletePage(page);
 
-  if (page.path === '/404.html') return errorBuild(params);
-  if (page.path === '/404/') return errorBuild(params);
+  Object.keys(appLocales).forEach(locale => {
+    newPage.context = { locale };
+    newPage.path = appLocales[locale].default
+      ? page.path
+      : appLocales[locale].path + page.path;
 
-  const oldPage = Object.assign({}, page);
-
-  // Remove trailing slash unless page is /
-  if (!page.path.includes('.html')) {
-    page.path = replacePath(page.path);
-  }
-
-  if (
-    page.path !== oldPage.path ||
-    page.path === '/offline-plugin-app-shell-fallback/'
-  ) {
-    // Replace new page with old page
-    deletePage(oldPage);
-    createPage(page);
-  }
+    createPage(newPage);
+  });
 };
 
-exports.onCreateWebpackConfig = ({ actions }) => {
+exports.onCreateWebpackConfig = ({ actions, getConfig }) => {
   actions.setWebpackConfig({
     resolve: {
       alias: {
@@ -43,4 +26,14 @@ exports.onCreateWebpackConfig = ({ actions }) => {
       },
     },
   });
+
+  const webpackConfig = getConfig();
+  delete webpackConfig.resolve.alias['core-js'];
+
+  webpackConfig.resolve.modules = [
+    path.resolve(__dirname, 'node_modules/gatsby/node_modules'), // for Gatsby's core-js@2
+    'node_modules', // your modules w/ core-js@3
+  ];
+
+  actions.replaceWebpackConfig(webpackConfig);
 };
