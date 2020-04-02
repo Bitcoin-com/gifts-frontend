@@ -53,9 +53,7 @@ import {
   TipTh,
   MobileTipTh,
   BadgerWrap,
-  MobileBadgerCover,
   DesktopBadgerCover,
-  MobileBadgerUriOpener,
   ButtonHider,
   TipContainerWrapper,
   Buttons,
@@ -2790,11 +2788,6 @@ class GiftsPortal extends React.Component {
                     )}
 
                     <BadgerWrap>
-                      <MobileBadgerCover>
-                        <a href={invoiceUri}>
-                          <MobileBadgerUriOpener />
-                        </a>
-                      </MobileBadgerCover>
                       <DesktopBadgerCover />
                       <BadgerButton
                         text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}

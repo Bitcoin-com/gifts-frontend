@@ -313,12 +313,8 @@ export const BadgerWrap = styled.div`
   position: relative;
   margin: auto;
   padding: ${gifts.spacing.unit * 3}px;
-  @media screen and (max-width: 768px) {
-    & > div > div > div > div > button > div {
-      display: none;
-    }
-  }
 `;
+
 export const MobileBadgerCover = styled.div`
   @media screen and (min-width: 769px) {
     display: none;
