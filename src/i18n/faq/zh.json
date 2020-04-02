@@ -21,8 +21,7 @@
     }
   },
   "header": {
-    "title": "Bitcoin.com Gifts",
-    "description": "Create and manage Bitcoin Cash (BCH) Gifts. Unredeemed Gifts are automatically returned!"
+    "title": "FAQ"
   },
   "questions": {
     "whatsThis": "What are Bitcoin.com Gifts?",
@@ -39,5 +38,6 @@
     "infoShared": "When your Gifts are created, information about them is shared with a Bitcoin.com server. This information is either (a) publicly available on the BCH blockchain, (b) optional (your email address if you want to receive notifications), or (c) non-custodial, e.g. your refund transactions do not include your private key and can only be used to refund your money to the address you specified.",
     "openSource": "We advise against trusting third parties, especially when it comes to your money. Bitcoin.com Gifts is <a href=https://github.com/Bitcoin-com/gifts-frontend/ target=_blank rel=noopener>open source</a>. You can verify that no private key information is ever shared with our server.",
     "loseKey": "Since we do not have access to your 12-word seed, we can't help you import your seed to manage your Gifts. If you do lose your 12-word seed, your Gifts will still be refunded automatically according to your set expiration date."
-  }
+  },
+  "links": { "home": "Gifts Home" }
 }

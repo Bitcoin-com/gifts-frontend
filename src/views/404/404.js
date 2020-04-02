@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, FormattedHTMLMessage, injectIntl } from 'react-intl';
-import { Nav, Footer } from 'bitcoincom-universal';
-import { H1, Paragraph, ContentBlock } from 'bitcoincom-storybook';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import { Nav, Footer } from '@bitcoin-portal/bitcoincom-universal';
+import {
+  H1,
+  Paragraph,
+  ContentBlock,
+  Link,
+} from '@bitcoin-portal/bitcoincom-pkg-components';
 import { Wrapper } from './styled';
 import SEO from './SEO';
 
 const ErrorPage = ({ locale, intl: { messages } }) => (
-  <React.Fragment>
+  <>
     <SEO />
     <Wrapper>
       <Nav locale={locale} showLang={false} />
@@ -22,12 +27,14 @@ const ErrorPage = ({ locale, intl: { messages } }) => (
           <FormattedMessage id="404.content.subtitle" />
         </Paragraph>
         <Paragraph>
-          <FormattedHTMLMessage id="404.content.action" />
+          <Link href="/">
+            <FormattedMessage id="404.link.home" />
+          </Link>
         </Paragraph>
       </ContentBlock>
       <Footer locale={locale} />
     </Wrapper>
-  </React.Fragment>
+  </>
 );
 
 ErrorPage.propTypes = {

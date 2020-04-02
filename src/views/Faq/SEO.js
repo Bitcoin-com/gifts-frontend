@@ -11,6 +11,12 @@ const SEO = ({ intl }) => (
         id: 'faq.meta.description',
       })}
     />
+
+    <meta
+      property="og:title"
+      content={intl.formatMessage({ id: 'faq.meta.title' })}
+    />
+
     <meta
       property="og:title"
       content={intl.formatMessage({ id: 'faq.meta.title' })}
@@ -18,7 +24,7 @@ const SEO = ({ intl }) => (
     <meta
       property="og:description"
       content={intl.formatMessage({
-        id: 'home.meta.description',
+        id: 'faq.meta.description',
       })}
     />
     <meta

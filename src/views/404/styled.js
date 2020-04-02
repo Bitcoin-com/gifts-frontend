@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { media } from 'bitcoincom-storybook';
+import { media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 
 export const Wrapper = styled.div`
   width: 100%;

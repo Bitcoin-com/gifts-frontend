@@ -1,5 +1,6 @@
-import { enHomeConfig, zhHomeCOnfig } from '../views/Home/config/netlify';
+import { enHomeConfig, zhHomeConfig } from '../views/Home/config/netlify';
 import { error404Config } from '../views/404/config/netlify';
+import { enFaqConfig } from '../views/Faq/config/netlify';
 
 const sortItems = (a, b) => {
   const labelA = a.label.toUpperCase();
@@ -18,12 +19,12 @@ const sortItems = (a, b) => {
 const enConfigs = {
   name: 'pages.en',
   label: 'English',
-  files: [enHomeConfig, error404Config].sort(sortItems),
+  files: [enHomeConfig, error404Config, enFaqConfig].sort(sortItems),
 };
 const zhConfigs = {
   name: 'pages.zh',
   label: 'Chinese',
-  files: [zhHomeCOnfig].sort(sortItems),
+  files: [zhHomeConfig].sort(sortItems),
 };
 
 export default [enConfigs, zhConfigs];
