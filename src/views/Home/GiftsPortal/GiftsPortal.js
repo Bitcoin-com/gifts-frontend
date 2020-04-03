@@ -590,6 +590,7 @@ class GiftsPortal extends React.Component {
     return field;
   };
 
+  // eslint-disable-next-line react/sort-comp
   getWalletLinkStatus() {
     // Get wallet status
     const providerStatuses = bitcoincomLink.getWalletProviderStatus();
@@ -621,8 +622,9 @@ class GiftsPortal extends React.Component {
   }
 
   handleLinkAddress(e) {
-    const { formData } = this.state;
     e.preventDefault();
+    const addrType = e.target.name; // 'sweep' or 'new'
+    const { formData } = this.state;
 
     bitcoincomLink
       .getAddress({
@@ -639,12 +641,21 @@ class GiftsPortal extends React.Component {
         field.state = inputState.valid;
         field.error = null;
 
-        this.setState({
-          formData: {
-            ...formData,
-            userRefundAddressOnCreate: field,
-          },
-        });
+        if (addrType === 'new') {
+          this.setState({
+            formData: {
+              ...formData,
+              userRefundAddressOnCreate: field,
+            },
+          });
+        } else if (addrType === 'sweep') {
+          this.setState({
+            formData: {
+              ...formData,
+              userRefundAddress: field,
+            },
+          });
+        }
       })
       .catch(err => {
         console.log(`Error getting BCH address from bitcoincom-link`);
@@ -2469,6 +2480,22 @@ class GiftsPortal extends React.Component {
                         <AddressInputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />{' '}
                           <Red>*</Red>
+                          <WalletApiButton
+                            name="sweep"
+                            show={walletAvailable}
+                            onClick={this.handleLinkAddress}
+                          >
+                            &nbsp;
+                            <FormattedMessage
+                              id="home.buttons.getAddr"
+                              values={{
+                                walletType:
+                                  walletType === 'badger'
+                                    ? walletType
+                                    : 'mobile wallet',
+                              }}
+                            />
+                          </WalletApiButton>
                         </AddressInputLabel>
                         <Input
                           name="userRefundAddress"
@@ -2703,6 +2730,7 @@ class GiftsPortal extends React.Component {
                         <InputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />
                           <WalletApiButton
+                            name="new"
                             show={walletAvailable}
                             onClick={this.handleLinkAddress}
                           >
@@ -3236,6 +3264,22 @@ class GiftsPortal extends React.Component {
                       <AddressInputLabel>
                         <FormattedMessage id="home.labels.refundAddress" />{' '}
                         <Red>*</Red>
+                        <WalletApiButton
+                          name="sweep"
+                          show={walletAvailable}
+                          onClick={this.handleLinkAddress}
+                        >
+                          &nbsp;
+                          <FormattedMessage
+                            id="home.buttons.getAddr"
+                            values={{
+                              walletType:
+                                walletType === 'badger'
+                                  ? walletType
+                                  : 'mobile wallet',
+                            }}
+                          />
+                        </WalletApiButton>
                       </AddressInputLabel>
                       <Input
                         name="userRefundAddress"

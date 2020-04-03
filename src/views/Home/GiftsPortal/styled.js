@@ -26,52 +26,7 @@ const reset = css`
   padding: 0;
   box-sizing: border-box;
 `;
-const light = {
-  palette: {
-    text: {
-      default: colors.solid.vulcan,
-      secondary: colors.solid.vulcanLightest,
-      tertiary: colors.solid.ghostLight,
-      contrast: colors.solid.zircon,
-    },
-    background: {
-      default: colors.solid.zircon,
-      secondary: colors.solid.zirconDarkest,
-      tertiary: colors.solid.white,
-      alternate: colors.solid.vulcan,
-      contrast: colors.solid.vulcanLight,
-    },
-    border: {
-      default: colors.solid.ghostLight,
-      secondary: colors.solid.mystic,
-      tertiary: colors.solid.alto,
-      contrast: colors.solid.vulcanLightest,
-    },
-  },
-};
-const dark = {
-  palette: {
-    text: {
-      default: colors.solid.zircon,
-      secondary: colors.solid.comet,
-      tertiary: colors.solid.white,
-      contrast: colors.solid.vulcan,
-    },
-    background: {
-      default: colors.solid.vulcan,
-      secondary: colors.solid.vulcanLightest,
-      tertiary: colors.solid.cometDark,
-      alternate: colors.solid.bunker,
-      contrast: colors.solid.zirconDark,
-    },
-    border: {
-      default: colors.solid.cometDark,
-      secondary: colors.solid.cometDarkest,
-      tertiary: colors.solid.cometDarkest,
-      contrast: colors.solid.zirconDarkest,
-    },
-  },
-};
+
 const gifts = {
   palette: {
     primary: colors.solid.caribbeanGreen,
