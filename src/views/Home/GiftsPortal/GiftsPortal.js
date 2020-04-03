@@ -663,6 +663,7 @@ class GiftsPortal extends React.Component {
       .catch(err => {
         console.log(`Error getting BCH address from bitcoincom-link`);
         console.log(err);
+        this.setState({ testString: JSON.stringify(err) });
       });
   }
 
@@ -2751,8 +2752,7 @@ class GiftsPortal extends React.Component {
                             />
                           </WalletApiButton>
                         </InputLabel>
-                        {testString}
-
+                        Test: {testString}
                         <Input
                           name="userRefundAddressOnCreate"
                           type="text"
