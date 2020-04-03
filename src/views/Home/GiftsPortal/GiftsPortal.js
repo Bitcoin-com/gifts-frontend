@@ -296,8 +296,6 @@ class GiftsPortal extends React.Component {
       invoiceInterval: null,
       walletAvailable: true,
       walletType: '',
-      testString: '',
-      testProviderStatus: '',
     };
   }
 
@@ -650,7 +648,6 @@ class GiftsPortal extends React.Component {
               ...formData,
               userRefundAddressOnCreate: field,
             },
-            testString: JSON.stringify(data),
           });
         } else if (addrType === 'sweep') {
           this.setState({
@@ -658,14 +655,12 @@ class GiftsPortal extends React.Component {
               ...formData,
               userRefundAddress: field,
             },
-            testString: JSON.stringify(data),
           });
         }
       })
       .catch(err => {
         console.log(`Error getting BCH address from bitcoincom-link`);
         console.log(err);
-        this.setState({ testString: JSON.stringify(err) });
       });
   }
 
@@ -2227,8 +2222,6 @@ class GiftsPortal extends React.Component {
       bitboxSweepTxBuildError,
       walletAvailable,
       walletType,
-      testString,
-      testProviderStatus,
     } = this.state;
 
     // Parse tip amount fiat to be a 2-decimal place float
@@ -2488,22 +2481,24 @@ class GiftsPortal extends React.Component {
                         <AddressInputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />{' '}
                           <Red>*</Red>
-                          <WalletApiButton
-                            name="sweep"
-                            show={walletAvailable}
-                            onClick={this.handleLinkAddress}
-                          >
-                            &nbsp;
-                            <FormattedMessage
-                              id="home.buttons.getAddr"
-                              values={{
-                                walletType:
-                                  walletType === 'badger'
-                                    ? walletType
-                                    : 'mobile wallet',
-                              }}
-                            />
-                          </WalletApiButton>
+                          {walletAvailable && (
+                            <WalletApiButton
+                              name="sweep"
+                              show={walletAvailable}
+                              onClick={this.handleLinkAddress}
+                            >
+                              &nbsp;
+                              <FormattedMessage
+                                id="home.buttons.getAddr"
+                                values={{
+                                  walletType:
+                                    walletType === 'badger'
+                                      ? walletType
+                                      : 'mobile wallet',
+                                }}
+                              />
+                            </WalletApiButton>
+                          )}
                         </AddressInputLabel>
 
                         <Input
@@ -2738,25 +2733,26 @@ class GiftsPortal extends React.Component {
                       <InputWrapper show>
                         <InputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />
-                          <WalletApiButton
-                            name="new"
-                            show={walletAvailable}
-                            onClick={this.handleLinkAddress}
-                          >
-                            &nbsp;
-                            <FormattedMessage
-                              id="home.buttons.getAddr"
-                              values={{
-                                walletType:
-                                  walletType === 'badger'
-                                    ? walletType
-                                    : 'mobile wallet',
-                              }}
-                            />
-                          </WalletApiButton>
+                          {walletAvailable && (
+                            <WalletApiButton
+                              name="new"
+                              show={walletAvailable}
+                              onClick={this.handleLinkAddress}
+                            >
+                              &nbsp;
+                              <FormattedMessage
+                                id="home.buttons.getAddr"
+                                values={{
+                                  walletType:
+                                    walletType === 'badger'
+                                      ? walletType
+                                      : 'mobile wallet',
+                                }}
+                              />
+                            </WalletApiButton>
+                          )}
                         </InputLabel>
-                        Test: {testString}
-                        Status: {testProviderStatus}
+
                         <Input
                           name="userRefundAddressOnCreate"
                           type="text"
@@ -3274,22 +3270,24 @@ class GiftsPortal extends React.Component {
                       <AddressInputLabel>
                         <FormattedMessage id="home.labels.refundAddress" />{' '}
                         <Red>*</Red>
-                        <WalletApiButton
-                          name="sweep"
-                          show={walletAvailable}
-                          onClick={this.handleLinkAddress}
-                        >
-                          &nbsp;
-                          <FormattedMessage
-                            id="home.buttons.getAddr"
-                            values={{
-                              walletType:
-                                walletType === 'badger'
-                                  ? walletType
-                                  : 'mobile wallet',
-                            }}
-                          />
-                        </WalletApiButton>
+                        {walletAvailable && (
+                          <WalletApiButton
+                            name="sweep"
+                            show={walletAvailable}
+                            onClick={this.handleLinkAddress}
+                          >
+                            &nbsp;
+                            <FormattedMessage
+                              id="home.buttons.getAddr"
+                              values={{
+                                walletType:
+                                  walletType === 'badger'
+                                    ? walletType
+                                    : 'mobile wallet',
+                              }}
+                            />
+                          </WalletApiButton>
+                        )}
                       </AddressInputLabel>
                       <Input
                         name="userRefundAddress"
