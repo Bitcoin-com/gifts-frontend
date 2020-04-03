@@ -296,6 +296,7 @@ class GiftsPortal extends React.Component {
       invoiceInterval: null,
       walletAvailable: true,
       walletType: '',
+      testString: '',
     };
   }
 
@@ -631,7 +632,7 @@ class GiftsPortal extends React.Component {
         protocol: 'BCH',
       })
       .then(data => {
-        // console.log(data);
+        console.log(data);
         const { address } = data;
 
         // console.log(`User address: ${address}`);
@@ -647,6 +648,7 @@ class GiftsPortal extends React.Component {
               ...formData,
               userRefundAddressOnCreate: field,
             },
+            testString: JSON.stringify(data),
           });
         } else if (addrType === 'sweep') {
           this.setState({
@@ -654,6 +656,7 @@ class GiftsPortal extends React.Component {
               ...formData,
               userRefundAddress: field,
             },
+            testString: JSON.stringify(data),
           });
         }
       })
@@ -2221,6 +2224,7 @@ class GiftsPortal extends React.Component {
       bitboxSweepTxBuildError,
       walletAvailable,
       walletType,
+      testString,
     } = this.state;
 
     // Parse tip amount fiat to be a 2-decimal place float
@@ -2497,6 +2501,7 @@ class GiftsPortal extends React.Component {
                             />
                           </WalletApiButton>
                         </AddressInputLabel>
+
                         <Input
                           name="userRefundAddress"
                           type="text"
@@ -2746,6 +2751,7 @@ class GiftsPortal extends React.Component {
                             />
                           </WalletApiButton>
                         </InputLabel>
+                        {testString}
 
                         <Input
                           name="userRefundAddressOnCreate"
