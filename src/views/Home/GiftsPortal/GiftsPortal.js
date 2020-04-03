@@ -297,6 +297,7 @@ class GiftsPortal extends React.Component {
       walletAvailable: true,
       walletType: '',
       testString: '',
+      testProviderStatus: '',
     };
   }
 
@@ -596,6 +597,7 @@ class GiftsPortal extends React.Component {
     // Get wallet status
     const providerStatuses = bitcoincomLink.getWalletProviderStatus();
     console.log(`Provider statuses: ${JSON.stringify(providerStatuses)}`);
+    this.setState({ testProviderStatus: JSON.stringify(providerStatuses) });
     // Sample output
     /*
     {"badger":"LOGGED_IN","android":"NOT_AVAILABLE","ios":"NOT_AVAILABLE"}
@@ -2226,6 +2228,7 @@ class GiftsPortal extends React.Component {
       walletAvailable,
       walletType,
       testString,
+      testProviderStatus,
     } = this.state;
 
     // Parse tip amount fiat to be a 2-decimal place float
@@ -2753,6 +2756,7 @@ class GiftsPortal extends React.Component {
                           </WalletApiButton>
                         </InputLabel>
                         Test: {testString}
+                        Status: {testProviderStatus}
                         <Input
                           name="userRefundAddressOnCreate"
                           type="text"
