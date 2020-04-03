@@ -594,8 +594,8 @@ class GiftsPortal extends React.Component {
   getWalletLinkStatus() {
     // Get wallet status
     const providerStatuses = bitcoincomLink.getWalletProviderStatus();
-    console.log(`Provider statuses: ${JSON.stringify(providerStatuses)}`);
-    this.setState({ testProviderStatus: JSON.stringify(providerStatuses) });
+    // console.log(`Provider statuses: ${JSON.stringify(providerStatuses)}`);
+
     // Sample output
     /*
     {"badger":"LOGGED_IN","android":"NOT_AVAILABLE","ios":"NOT_AVAILABLE"}
