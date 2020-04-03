@@ -2832,6 +2832,14 @@ bitcoincash-ops@Bitcoin-com/bitcoincash-ops#2.0.0, "bitcoincash-ops@github:Bitco
   version "2.0.0"
   resolved "https://codeload.github.com/Bitcoin-com/bitcoincash-ops/tar.gz/6ab82cc7326c67236f3b2d9d0457258ac2ef48e3"
 
+bitcoincom-link@^0.1.10:
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/bitcoincom-link/-/bitcoincom-link-0.1.10.tgz#d01c11df571a885b988eb1b646259da0fde42bfe"
+  integrity sha512-Bymyt3ED4QmA9sVhnveseWqPotW5ViLWJyTtDYCIyRgReews91rKDkbq2q/OTCuBigLA/VLoco/g0xqXkkcX3Q==
+  dependencies:
+    bignumber.js "^9.0.0"
+    page-metadata-parser "^1.1.4"
+
 bitcoinjs-message@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/bitcoinjs-message/-/bitcoinjs-message-2.1.0.tgz#5fe36a7d92473bdc929d9183416970bbef1690ad"

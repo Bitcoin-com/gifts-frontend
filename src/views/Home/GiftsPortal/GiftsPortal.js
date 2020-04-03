@@ -4,6 +4,7 @@ import { injectIntl, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BITBOX } from 'bitbox-sdk';
 import { BadgerButton } from 'badger-components-react';
+import bitcoincomLink from 'bitcoincom-link';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
@@ -39,6 +40,7 @@ import {
   MobileShowButton,
   ShowCopyToClipboard,
   ShowFlexContainer,
+  ShowFlexContainerTwoCols,
   CloseIcon,
   InputWrapper,
   AddressInputWrapper,
@@ -53,7 +55,9 @@ import {
   TipTh,
   MobileTipTh,
   BadgerWrap,
+  MobileBadgerCover,
   DesktopBadgerCover,
+  MobileBadgerUriOpener,
   ButtonHider,
   TipContainerWrapper,
   Buttons,
@@ -71,6 +75,7 @@ import {
   SweepInstructions,
   CustomPdfDownloadLink,
   InputLabel,
+  WalletApiButton,
 } from './styled';
 import Gift from './Gift';
 
@@ -238,6 +243,8 @@ class GiftsPortal extends React.Component {
     this.toggleGiftNames = this.toggleGiftNames.bind(this);
     this.toggleQrDots = this.toggleQrDots.bind(this);
     this.toggleQrLogo = this.toggleQrLogo.bind(this);
+    this.handleLinkAddress = this.handleLinkAddress.bind(this);
+    this.getWalletLinkStatus = this.getWalletLinkStatus.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -287,11 +294,14 @@ class GiftsPortal extends React.Component {
       pdfPngs: [],
       ws: null,
       invoiceInterval: null,
+      walletAvailable: true,
+      walletType: '',
     };
   }
 
   componentDidMount() {
     this.initializeWebsocket();
+    this.getWalletLinkStatus();
   }
 
   componentWillUnmount() {
@@ -579,6 +589,68 @@ class GiftsPortal extends React.Component {
     }
     return field;
   };
+
+  getWalletLinkStatus() {
+    // Get wallet status
+    const providerStatuses = bitcoincomLink.getWalletProviderStatus();
+    console.log(`Provider statuses: ${JSON.stringify(providerStatuses)}`);
+    // Sample output
+    /*
+    {"badger":"LOGGED_IN","android":"NOT_AVAILABLE","ios":"NOT_AVAILABLE"}
+
+    TODO as more functionality is added, do this in componentDidMount then add user wallet type to state
+    */
+    let isWalletAvailable = false;
+    let walletType;
+    if (providerStatuses.badger !== 'NOT_AVAILABLE') {
+      isWalletAvailable = true;
+      walletType = 'badger';
+    }
+    if (providerStatuses.android !== 'NOT_AVAILABLE') {
+      isWalletAvailable = true;
+      walletType = 'android';
+    }
+    if (providerStatuses.ios !== 'NOT_AVAILABLE') {
+      isWalletAvailable = true;
+      walletType = 'ios';
+    }
+    if (isWalletAvailable) {
+      // wallet is available
+      this.setState({ walletAvailable: true, walletType });
+    }
+  }
+
+  handleLinkAddress(e) {
+    const { formData } = this.state;
+    e.preventDefault();
+
+    bitcoincomLink
+      .getAddress({
+        protocol: 'BCH',
+      })
+      .then(data => {
+        // console.log(data);
+        const { address } = data;
+
+        // console.log(`User address: ${address}`);
+
+        const field = {};
+        field.value = address;
+        field.state = inputState.valid;
+        field.error = null;
+
+        this.setState({
+          formData: {
+            ...formData,
+            userRefundAddressOnCreate: field,
+          },
+        });
+      })
+      .catch(err => {
+        console.log(`Error getting BCH address from bitcoincom-link`);
+        console.log(err);
+      });
+  }
 
   initializeWebsocket() {
     const { tipWallets } = this.state;
@@ -1438,6 +1510,8 @@ class GiftsPortal extends React.Component {
       pdfPngs: [],
       ws: null,
       invoiceInterval: null,
+      walletAvailable: true,
+      walletType: '',
     });
   }
 
@@ -2134,6 +2208,8 @@ class GiftsPortal extends React.Component {
       pdfPngs,
       sweepingGifts,
       bitboxSweepTxBuildError,
+      walletAvailable,
+      walletType,
     } = this.state;
 
     // Parse tip amount fiat to be a 2-decimal place float
@@ -2326,7 +2402,7 @@ class GiftsPortal extends React.Component {
                 </ApiErrorWarning>
               </ApiErrorPopupMsg>
             </ApiErrorPopup>
-            <ShowFlexContainer
+            <ShowFlexContainerTwoCols
               show={fundingAddress === '' || importedMnemonic}
               columns={!importedMnemonic ? 2 : 1}
             >
@@ -2452,7 +2528,7 @@ class GiftsPortal extends React.Component {
                   </Paragraph>
                 )}
               </Card>
-            </ShowFlexContainer>
+            </ShowFlexContainerTwoCols>
             <ShowFlexContainer
               columns={1}
               show={
@@ -2625,8 +2701,24 @@ class GiftsPortal extends React.Component {
 
                       <InputWrapper show>
                         <InputLabel>
-                          <FormattedMessage id="home.labels.refundAddress" />{' '}
+                          <FormattedMessage id="home.labels.refundAddress" />
+                          <WalletApiButton
+                            show={walletAvailable}
+                            onClick={this.handleLinkAddress}
+                          >
+                            &nbsp;
+                            <FormattedMessage
+                              id="home.buttons.getAddr"
+                              values={{
+                                walletType:
+                                  walletType === 'badger'
+                                    ? walletType
+                                    : 'mobile wallet',
+                              }}
+                            />
+                          </WalletApiButton>
                         </InputLabel>
+
                         <Input
                           name="userRefundAddressOnCreate"
                           type="text"
@@ -2788,6 +2880,11 @@ class GiftsPortal extends React.Component {
                     )}
 
                     <BadgerWrap>
+                      <MobileBadgerCover>
+                        <a href={invoiceUri}>
+                          <MobileBadgerUriOpener />
+                        </a>
+                      </MobileBadgerCover>
                       <DesktopBadgerCover />
                       <BadgerButton
                         text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}

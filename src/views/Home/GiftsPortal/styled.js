@@ -146,6 +146,17 @@ export const Centered = styled.div`
   text-align: center;
   width: 100%;
 `;
+export const ShowFlexContainerTwoCols = styled(FlexContainer)`
+  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  @media screen and (max-width: 665px) {
+    & > div {
+      max-width: 100%;
+    }
+  }
+  @media print {
+    display: none;
+  }
+`;
 export const ShowFlexContainer = styled(FlexContainer)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
   @media print {
@@ -159,6 +170,14 @@ export const ShowCard = styled(Card)`
 
 export const ShowButton = styled(Button)`
   display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+`;
+export const WalletApiButton = styled.button`
+  padding: 0px;
+  display: ${({ show = false }) => (show === true ? 'inline' : 'none')};
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: ${colors.solid.caribbeanGreen};
 `;
 export const StackedButtons = styled.div`
   width: 100%;
@@ -313,6 +332,11 @@ export const BadgerWrap = styled.div`
   position: relative;
   margin: auto;
   padding: ${gifts.spacing.unit * 3}px;
+  @media screen and (max-width: 768px) {
+    & > div > div > div > div > button > div {
+      display: none;
+    }
+  }
 `;
 
 export const MobileBadgerCover = styled.div`

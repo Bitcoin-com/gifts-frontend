@@ -233,6 +233,7 @@ const homeConfig = {
         { name: 'repost', label: 'repost', widget: 'string' },
         { name: 'retry', label: 'retry', widget: 'string' },
         { name: 'makePdf', label: 'makePdf', widget: 'string' },
+        { name: 'getAddr', label: 'getAddr', widget: 'string' },
       ],
     },
     {

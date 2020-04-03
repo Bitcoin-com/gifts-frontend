@@ -114,7 +114,8 @@
     "confirm": "Confirm",
     "repost": "Repost",
     "retry": "Retry",
-    "makePdf": "Generate PDF"
+    "makePdf": "Generate PDF",
+    "getAddr": "(Import from {walletType})"
   },
   "placeholders": {
     "tipCount": "Enter desired number of gifts",
