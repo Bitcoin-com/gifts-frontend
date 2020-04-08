@@ -102,7 +102,8 @@ export const Centered = styled.div`
   width: 100%;
 `;
 export const ShowFlexContainerTwoCols = styled(FlexContainer)`
-  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  display: ${({ show = false }) =>
+    show === true ? 'flex' : 'none !important'};
   @media screen and (max-width: 665px) {
     & > div {
       max-width: 100%;
@@ -113,7 +114,8 @@ export const ShowFlexContainerTwoCols = styled(FlexContainer)`
   }
 `;
 export const ShowFlexContainer = styled(FlexContainer)`
-  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  display: ${({ show = false }) =>
+    show === true ? 'flex' : 'none !important'};
   @media print {
     display: none;
   }

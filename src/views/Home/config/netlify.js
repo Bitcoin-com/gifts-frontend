@@ -234,6 +234,7 @@ const homeConfig = {
         { name: 'retry', label: 'retry', widget: 'string' },
         { name: 'makePdf', label: 'makePdf', widget: 'string' },
         { name: 'getAddr', label: 'getAddr', widget: 'string' },
+        { name: 'logInBadger', label: 'logInBadger', widget: 'string' },
       ],
     },
     {

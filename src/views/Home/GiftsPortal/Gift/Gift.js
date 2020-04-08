@@ -44,7 +44,7 @@ import {
   LoadingButton,
   ShareMenuButton,
   LogoFooter,
-  ShareMenuButtonLink,
+  // ShareMenuButtonLink,
 } from './styled';
 import bchLogo from '../../../../../static/images/uploads/bch-square-green.png';
 import bchLogoOldSchool from '../../../../../static/images/uploads/bch-logo-oldschool.png';

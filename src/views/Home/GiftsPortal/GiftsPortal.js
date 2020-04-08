@@ -195,7 +195,6 @@ class GiftsPortal extends React.Component {
     this.validateUserConfirmedMnemonic = this.validateUserConfirmedMnemonic.bind(
       this,
     );
-    this.handleConfirmSeedButton = this.handleConfirmSeedButton.bind(this);
     this.handleConfirmedMnemonic = this.handleConfirmedMnemonic.bind(this);
     this.handleSeedCopied = this.handleSeedCopied.bind(this);
     this.handleUriCopied = this.handleUriCopied.bind(this);
@@ -211,7 +210,6 @@ class GiftsPortal extends React.Component {
     this.handleUserRefundAddressOnCreateChange = this.handleUserRefundAddressOnCreateChange.bind(
       this,
     );
-    this.handleSweepAllTipsButton = this.handleSweepAllTipsButton.bind(this);
     this.toggleSweepForm = this.toggleSweepForm.bind(this);
     this.appStateInitial = this.appStateInitial.bind(this);
     this.handleExpirationDateChange = this.handleExpirationDateChange.bind(
@@ -294,8 +292,10 @@ class GiftsPortal extends React.Component {
       pdfPngs: [],
       ws: null,
       invoiceInterval: null,
-      walletAvailable: true,
+      isWalletAvailable: false,
+      isWalletLoggedIn: false,
       walletType: '',
+      badgerLoginCheckInterval: null,
     };
   }
 
@@ -308,7 +308,6 @@ class GiftsPortal extends React.Component {
     this.invoiceSuccessThrottled.cancel();
   }
 
-  // eslint-disable-next-line consistent-return
   setClaimedFromWebsocket(wsTx) {
     // console.log(`setClaimedFromWebsocket`);
     const { tipWallets } = this.state;
@@ -331,7 +330,7 @@ class GiftsPortal extends React.Component {
       return this.setState({ tipWallets });
     } catch (err) {
       console.log(`Error in parsing websocket tx object for address`);
-      console.log(err);
+      return console.log(err);
     }
   }
 
@@ -355,156 +354,67 @@ class GiftsPortal extends React.Component {
     });
   }
 
-  validateExpirationDateChange = ({ date }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
+  getWalletLinkStatus() {
+    const { badgerLoginCheckInterval } = this.state;
+    // Get wallet status
+    const providerStatuses = bitcoincomLink.getWalletProviderStatus();
+    // console.log(`Provider statuses: ${JSON.stringify(providerStatuses)}`);
 
-    const field = formData.expirationDate;
+    // Sample output
+    /*
+    {"badger":"LOGGED_IN","android":"NOT_AVAILABLE","ios":"NOT_AVAILABLE"}
 
-    field.value = date;
-    field.state = inputState.valid;
-    field.error = null;
+    TODO as more functionality is added, do this in componentDidMount then add user wallet type to state
+    */
+    let isWalletAvailable = false;
+    let isWalletLoggedIn = false;
 
-    // If date is > 1 year from today, error
-    const expirationMaxOffset = 12; // months
-    const expirationMax = new Date();
-    expirationMax.setMonth(expirationMax.getMonth() + expirationMaxOffset);
-
-    // If date is in the past, also error
-    const now = new Date();
-    const expirationMinOffset = 1; // hours
-    const expirationMin = new Date(
-      now.setHours(now.getHours() + expirationMinOffset),
-    );
-
-    if (date > expirationMax) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidExpirationDate',
-      });
-    } else if (date < expirationMin) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.expirationMustBeFuture',
-      });
+    let walletType;
+    if (providerStatuses.badger !== 'NOT_AVAILABLE') {
+      isWalletAvailable = true;
+      walletType = 'badger';
+      if (providerStatuses.badger === 'LOGGED_IN') {
+        isWalletLoggedIn = true;
+        if (badgerLoginCheckInterval !== null) {
+          // If interval was checking on badger availability and sees it's now logged in,
+          // clear the interval
+          clearInterval(badgerLoginCheckInterval);
+          this.setState({ badgerLoginCheckInterval: null });
+        }
+      } else if (badgerLoginCheckInterval === null) {
+        // If badger is available but not logged in, check status every second
+        const startBadgerLoginCheckInterval = setInterval(
+          this.getWalletLinkStatus,
+          1000,
+        );
+        this.setState({
+          badgerLoginCheckInterval: startBadgerLoginCheckInterval,
+        });
+      }
     }
-
-    return field;
-  };
-
-  validateUserRefundAddressChange = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    // validation goes here
-    try {
-      bitbox.Address.toLegacyAddress(value);
-    } catch (err) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidRefundAddress',
-      });
+    if (providerStatuses.android !== 'NOT_AVAILABLE') {
+      isWalletAvailable = true;
+      // Always logged in if available
+      isWalletLoggedIn = true;
+      walletType = 'android';
     }
-
-    return field;
-  };
-
-  validateUserConfirmedMnemonic = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData, walletInfo } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    if (value !== walletInfo.mnemonic) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidUserMnemonic',
-      });
+    if (providerStatuses.ios !== 'NOT_AVAILABLE') {
+      isWalletAvailable = true;
+      // Always logged in if available
+      isWalletLoggedIn = true;
+      walletType = 'ios';
     }
-    return field;
-  };
-
-  validateEmailAddress = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    // Basic email address validation
-    // eslint-disable-next-line no-useless-escape
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    const isValidEmail = re.test(String(value).toLowerCase());
-
-    if (!isValidEmail && value !== '') {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidEmail',
-      });
-      return field;
+    if (isWalletAvailable) {
+      // wallet is available
+      this.setState({ isWalletAvailable, walletType, isWalletLoggedIn });
     }
+  }
 
-    return field;
-  };
-
-  validateImportedMnemonic = ({ name, value }) => {
-    const {
-      intl: { formatMessage },
-    } = this.props;
-    const { formData } = this.state;
-
-    const field = formData[name];
-
-    field.value = value;
-    field.state = inputState.valid;
-    field.error = null;
-
-    const isValidMnemonic = bitbox.Mnemonic.validate(value);
-    if (isValidMnemonic !== 'Valid mnemonic') {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.invalidMnemonic',
-      });
-      return field;
-    }
-
-    if (!value) {
-      field.state = inputState.invalid;
-      field.error = formatMessage({
-        id: 'home.errors.noMnemonic',
-      });
-    }
-    return field;
-  };
-
-  // eslint-disable-next-line react/sort-comp
-  handleTipCountChange(e) {
-    const { value, name } = e.target;
-    const { formData } = this.state;
-    this.setState({
-      formData: { ...formData, [name]: this.validateTipCount({ name, value }) },
-    });
+  setInvoiceInterval() {
+    console.log(`Setting interval again`);
+    let { invoiceInterval } = this.state;
+    invoiceInterval = setInterval(this.watchInvoiceByAddr, 1000);
+    this.setState({ invoiceInterval });
   }
 
   validateTipCount = ({ name, value }) => {
@@ -549,16 +459,148 @@ class GiftsPortal extends React.Component {
     return field;
   };
 
-  handleTipAmountFiatChange(e) {
-    const { value, name } = e.target;
+  validateImportedMnemonic = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
     const { formData } = this.state;
-    this.setState({
-      formData: {
-        ...formData,
-        [name]: this.validateTipAmountFiat({ name, value }),
-      },
-    });
-  }
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    const isValidMnemonic = bitbox.Mnemonic.validate(value);
+    if (isValidMnemonic !== 'Valid mnemonic') {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidMnemonic',
+      });
+      return field;
+    }
+
+    if (!value) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.noMnemonic',
+      });
+    }
+    return field;
+  };
+
+  validateEmailAddress = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // Basic email address validation
+    // eslint-disable-next-line no-useless-escape
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const isValidEmail = re.test(String(value).toLowerCase());
+
+    if (!isValidEmail && value !== '') {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidEmail',
+      });
+      return field;
+    }
+
+    return field;
+  };
+
+  validateUserConfirmedMnemonic = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData, walletInfo } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    if (value !== walletInfo.mnemonic) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidUserMnemonic',
+      });
+    }
+    return field;
+  };
+
+  validateUserRefundAddressChange = ({ name, value }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData[name];
+
+    field.value = value;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // validation goes here
+    try {
+      bitbox.Address.toLegacyAddress(value);
+    } catch (err) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidRefundAddress',
+      });
+    }
+
+    return field;
+  };
+
+  validateExpirationDateChange = ({ date }) => {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+    const { formData } = this.state;
+
+    const field = formData.expirationDate;
+
+    field.value = date;
+    field.state = inputState.valid;
+    field.error = null;
+
+    // If date is > 1 year from today, error
+    const expirationMaxOffset = 12; // months
+    const expirationMax = new Date();
+    expirationMax.setMonth(expirationMax.getMonth() + expirationMaxOffset);
+
+    // If date is in the past, also error
+    const now = new Date();
+    const expirationMinOffset = 1; // hours
+    const expirationMin = new Date(
+      now.setHours(now.getHours() + expirationMinOffset),
+    );
+
+    if (date > expirationMax) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.invalidExpirationDate',
+      });
+    } else if (date < expirationMin) {
+      field.state = inputState.invalid;
+      field.error = formatMessage({
+        id: 'home.errors.expirationMustBeFuture',
+      });
+    }
+
+    return field;
+  };
 
   validateTipAmountFiat = ({ name, value }) => {
     const {
@@ -590,36 +632,23 @@ class GiftsPortal extends React.Component {
     return field;
   };
 
-  // eslint-disable-next-line react/sort-comp
-  getWalletLinkStatus() {
-    // Get wallet status
-    const providerStatuses = bitcoincomLink.getWalletProviderStatus();
-    // console.log(`Provider statuses: ${JSON.stringify(providerStatuses)}`);
+  handleTipAmountFiatChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+    this.setState({
+      formData: {
+        ...formData,
+        [name]: this.validateTipAmountFiat({ name, value }),
+      },
+    });
+  }
 
-    // Sample output
-    /*
-    {"badger":"LOGGED_IN","android":"NOT_AVAILABLE","ios":"NOT_AVAILABLE"}
-
-    TODO as more functionality is added, do this in componentDidMount then add user wallet type to state
-    */
-    let isWalletAvailable = false;
-    let walletType;
-    if (providerStatuses.badger !== 'NOT_AVAILABLE') {
-      isWalletAvailable = true;
-      walletType = 'badger';
-    }
-    if (providerStatuses.android !== 'NOT_AVAILABLE') {
-      isWalletAvailable = true;
-      walletType = 'android';
-    }
-    if (providerStatuses.ios !== 'NOT_AVAILABLE') {
-      isWalletAvailable = true;
-      walletType = 'ios';
-    }
-    if (isWalletAvailable) {
-      // wallet is available
-      this.setState({ walletAvailable: true, walletType });
-    }
+  handleTipCountChange(e) {
+    const { value, name } = e.target;
+    const { formData } = this.state;
+    this.setState({
+      formData: { ...formData, [name]: this.validateTipCount({ name, value }) },
+    });
   }
 
   handleLinkAddress(e) {
@@ -690,7 +719,6 @@ class GiftsPortal extends React.Component {
       clearTimeout(connectInterval); // clear Interval on on open of websocket connection
     };
     // websocket onclose event listener
-    // eslint-disable-next-line consistent-return
     ws.onclose = e => {
       // console.log(`Websocket closed.`);
       /*
@@ -714,6 +742,7 @@ class GiftsPortal extends React.Component {
         this.reconnectWebsocket,
         Math.min(10000, that.wsTimeout),
       ); // call check function after timeout
+      return console.log(`Websocket closed`);
     };
     ws.onerror = err => {
       console.error(
@@ -759,15 +788,8 @@ class GiftsPortal extends React.Component {
     // Instead of trying to watch the invoice, watch your tipWallets for a transaction
   }
 
-  // eslint-disable-next-line react/sort-comp
-  setInvoiceInterval() {
-    console.log(`Setting interval again`);
-    let { invoiceInterval } = this.state;
-    invoiceInterval = setInterval(this.watchInvoiceByAddr, 1000);
-    this.setState({ invoiceInterval });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
+  // If you want to allow functions to have different return behavior depending on code branching, then it is safe to disable this rule.
+  // https://eslint.org/docs/rules/consistent-return
   // eslint-disable-next-line consistent-return
   subscribeToGifts(tipWallets, paymentId = null) {
     const { ws } = this.state;
@@ -790,7 +812,8 @@ class GiftsPortal extends React.Component {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // If you want to allow functions to have different return behavior depending on code branching, then it is safe to disable this rule.
+  // https://eslint.org/docs/rules/consistent-return
   // eslint-disable-next-line consistent-return
   unsubscribeToGifts(tipWallets) {
     const { ws } = this.state;
@@ -905,7 +928,6 @@ class GiftsPortal extends React.Component {
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
   shareTip(e) {
     this.setState({ pngLoading: true });
     const elementId = e.target.dataset.id;
@@ -971,12 +993,6 @@ class GiftsPortal extends React.Component {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  handleSweepAllTipsButton() {
-    // stub method
-    // console.log(`handleSweepAllTipsButton`);
-  }
-
   handleUserRefundAddressOnCreateChange(e) {
     const { value, name } = e.target;
     const { formData } = this.state;
@@ -1001,6 +1017,7 @@ class GiftsPortal extends React.Component {
     });
   }
 
+  // Disable consistent return: code branching
   // eslint-disable-next-line consistent-return
   postReturnTxInfos(returnTxInfos) {
     // Before posting, check to make sure it hasn't happened already
@@ -1025,6 +1042,7 @@ class GiftsPortal extends React.Component {
         console.log(`returnTxInfos successully posted to API`);
         console.log(res);
 
+        // used in debugging
         // eslint-disable-next-line react/no-unused-state
         return this.setState({ returnTxInfos });
       },
@@ -1058,6 +1076,7 @@ class GiftsPortal extends React.Component {
         console.log(`returnTxInfos successully posted to API`);
         console.log(res);
 
+        // used in debugging
         // eslint-disable-next-line react/no-unused-state
         return this.setState({ apiPostFailed: false });
       },
@@ -1246,12 +1265,6 @@ class GiftsPortal extends React.Component {
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  handleConfirmSeedButton() {
-    // set state that seed is confirmed
-    // Leave in as stub method for now
-  }
-
   handleConfirmedMnemonic(e) {
     e.preventDefault();
     const { formData } = this.state;
@@ -1306,8 +1319,6 @@ class GiftsPortal extends React.Component {
     });
   }
 
-  // TODO refactor for try catch on the other await statement
-  // eslint-disable-next-line consistent-return
   async sweepAllTips(e) {
     e.preventDefault();
     this.setState({ bitboxSweepTxBuildError: false, sweepingGifts: true });
@@ -1522,8 +1533,10 @@ class GiftsPortal extends React.Component {
       pdfPngs: [],
       ws: null,
       invoiceInterval: null,
-      walletAvailable: true,
+      isWalletAvailable: false,
+      isWalletLoggedIn: false,
       walletType: '',
+      badgerLoginCheckInterval: null,
     });
   }
 
@@ -1898,7 +1911,6 @@ class GiftsPortal extends React.Component {
             id: 'home.errors.noTipsAtMnemonic',
           }),
         };
-        // eslint-disable-next-line consistent-return
         return this.setState({
           formData: {
             ...formData,
@@ -1910,7 +1922,6 @@ class GiftsPortal extends React.Component {
     } catch (err) {
       console.log(`Error in bitbox.Address.details(firstTipAddr)`);
       console.log(err);
-      // eslint-disable-next-line consistent-return
       return this.setState({
         networkError: formatMessage({
           id: 'home.errors.networkError',
@@ -2004,7 +2015,7 @@ class GiftsPortal extends React.Component {
     }
   }
 
-  // TODO deal with this error
+  // Code branching
   // eslint-disable-next-line consistent-return
   async handleCreateTipSubmit(e) {
     e.preventDefault();
@@ -2220,7 +2231,8 @@ class GiftsPortal extends React.Component {
       pdfPngs,
       sweepingGifts,
       bitboxSweepTxBuildError,
-      walletAvailable,
+      isWalletAvailable,
+      isWalletLoggedIn,
       walletType,
     } = this.state;
 
@@ -2481,10 +2493,16 @@ class GiftsPortal extends React.Component {
                         <AddressInputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />{' '}
                           <Red>*</Red>
-                          {walletAvailable && (
+                          {isWalletAvailable && !isWalletLoggedIn && (
+                            <WalletApiButton show name="logInNotice">
+                              &nbsp;
+                              <FormattedMessage id="home.buttons.logInBadger" />
+                            </WalletApiButton>
+                          )}
+                          {isWalletAvailable && isWalletLoggedIn && (
                             <WalletApiButton
                               name="sweep"
-                              show={walletAvailable}
+                              show={isWalletAvailable}
                               onClick={this.handleLinkAddress}
                             >
                               &nbsp;
@@ -2526,7 +2544,6 @@ class GiftsPortal extends React.Component {
                           type="submit"
                           form="userRefundAddressFormOnImport"
                           design="primary"
-                          onClick={this.handleSweepAllTipsButton}
                           action="submit"
                         >
                           <FormattedMessage id="home.buttons.sweepAll" />
@@ -2633,7 +2650,6 @@ class GiftsPortal extends React.Component {
                     type="submit"
                     form="confirmSeed"
                     design="primary"
-                    onClick={this.handleConfirmSeedButton}
                     action="submit"
                   >
                     <FormattedMessage id="home.buttons.confirm" />
@@ -2733,10 +2749,16 @@ class GiftsPortal extends React.Component {
                       <InputWrapper show>
                         <InputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />
-                          {walletAvailable && (
+                          {isWalletAvailable && !isWalletLoggedIn && (
+                            <WalletApiButton show name="logInNotice">
+                              &nbsp;
+                              <FormattedMessage id="home.buttons.logInBadger" />
+                            </WalletApiButton>
+                          )}
+                          {isWalletAvailable && isWalletLoggedIn && (
                             <WalletApiButton
                               name="new"
-                              show={walletAvailable}
+                              show={isWalletAvailable}
                               onClick={this.handleLinkAddress}
                             >
                               &nbsp;
@@ -3270,10 +3292,16 @@ class GiftsPortal extends React.Component {
                       <AddressInputLabel>
                         <FormattedMessage id="home.labels.refundAddress" />{' '}
                         <Red>*</Red>
-                        {walletAvailable && (
+                        {isWalletAvailable && !isWalletLoggedIn && (
+                          <WalletApiButton show name="logInNotice">
+                            &nbsp;
+                            <FormattedMessage id="home.buttons.logInBadger" />
+                          </WalletApiButton>
+                        )}
+                        {isWalletAvailable && isWalletLoggedIn && (
                           <WalletApiButton
                             name="sweep"
-                            show={walletAvailable}
+                            show={isWalletAvailable}
                             onClick={this.handleLinkAddress}
                           >
                             &nbsp;
@@ -3313,7 +3341,6 @@ class GiftsPortal extends React.Component {
                         type="submit"
                         form="userRefundAddressForm"
                         design="primary"
-                        onClick={this.handleSweepAllTipsButton}
                         action="submit"
                       >
                         <FormattedMessage id="home.buttons.sweepAll" />
@@ -3355,6 +3382,7 @@ class GiftsPortal extends React.Component {
 }
 
 GiftsPortal.propTypes = {
+  // Plan to use locale when translations are available
   // eslint-disable-next-line react/no-unused-prop-types
   locale: PropTypes.string.isRequired,
   intl: PropTypes.shape({

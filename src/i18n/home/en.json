@@ -115,7 +115,8 @@
     "repost": "Repost",
     "retry": "Retry",
     "makePdf": "Generate PDF",
-    "getAddr": "(Import from {walletType})"
+    "getAddr": "(Import from {walletType})",
+    "logInBadger": "(Log in to Badger to paste address)"
   },
   "placeholders": {
     "tipCount": "Enter desired number of gifts",
