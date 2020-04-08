@@ -96,7 +96,7 @@ module.exports = {
         ],
       },
     },
-    {
+    /*     {
       resolve: 'gatsby-plugin-netlify-cms',
       options: {
         htmlTitle: `Bitcoin.com | Content Manager`,
@@ -104,7 +104,7 @@ module.exports = {
         manualInit: true,
         modulePath: `${__dirname}/src/cms/cms.js`,
       },
-    },
+    }, */
     {
       resolve: 'gatsby-plugin-web-font-loader',
       options: {

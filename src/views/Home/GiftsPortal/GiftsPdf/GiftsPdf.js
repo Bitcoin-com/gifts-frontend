@@ -9,15 +9,16 @@ import {
   TopSpace,
 } from './styled';
 
-function TipPdf(props) {
+function GiftsPdf(props) {
   const { images } = props;
   // console.log(images[0]);
   const giftPngs = [];
 
-  images.forEach(image => {
+  images.forEach((image, index) => {
     giftPngs.push(
-      <GiftWrapper>
-        <Gift src={image}></Gift>
+      // eslint-disable-next-line react/no-array-index-key
+      <GiftWrapper key={index}>
+        <Gift src={image} />
       </GiftWrapper>,
     );
   });
@@ -25,7 +26,7 @@ function TipPdf(props) {
   return (
     <GiftsDoc>
       <GiftsPage size="A4">
-        <TopSpace></TopSpace>
+        <TopSpace />
         {/* <TipLabel>{test}</TipLabel> */}
         <GiftsRow>{giftPngs}</GiftsRow>
       </GiftsPage>
@@ -33,8 +34,8 @@ function TipPdf(props) {
   );
 }
 
-TipPdf.propTypes = {
+GiftsPdf.propTypes = {
   images: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default TipPdf;
+export default GiftsPdf;

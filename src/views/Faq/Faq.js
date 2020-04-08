@@ -1,77 +1,88 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, FormattedHTMLMessage, injectIntl } from 'react-intl';
-import { Nav, Footer } from 'bitcoincom-universal';
+import { Nav, Footer } from '@bitcoin-portal/bitcoincom-universal';
+import {
+  ContentBlock,
+  Link,
+  Paragraph,
+} from '@bitcoin-portal/bitcoincom-pkg-components';
 import {
   Wrapper,
   HeadSection,
-  CustomContentBlock,
-  CustomCollapse,
+  FaqSection,
+  FaqAccordion,
   FaqTitle,
-  FaqLink,
 } from './styled';
 import SEO from './SEO';
 
-const Faq = ({ locale }) => {
-  return (
-    <React.Fragment>
-      <SEO />
-      <Wrapper>
-        <HeadSection>
-          {/* <Nav locale={locale} contrast languages={['en', 'zh']} /> */}
-          <Nav locale={locale} contrast />
-        </HeadSection>
-        <CustomContentBlock>
-          <FaqTitle>FAQ</FaqTitle>
-          <CustomCollapse
-            opened
-            list={[
+const Faq = ({ locale, intl: { messages } }) => (
+  <>
+    <SEO />
+    <Wrapper>
+      <HeadSection>
+        <Nav locale={locale} contrast />
+      </HeadSection>
+      <FaqSection>
+        <ContentBlock>
+          <FaqTitle>
+            <FormattedMessage id="faq.header.title" />
+          </FaqTitle>
+          <Paragraph>
+            <Link href="/">
+              <FormattedMessage id="faq.links.home" />
+            </Link>
+            / <FormattedMessage id="faq.header.title" />
+          </Paragraph>
+          <FaqAccordion
+            singleOpen
+            items={[
               {
                 title: <FormattedMessage id="faq.questions.whatsThis" />,
-                text: <FormattedMessage id="faq.answers.whatsThis" />,
+                content: <FormattedMessage id="faq.answers.whatsThis" />,
               },
               {
                 title: <FormattedMessage id="faq.questions.nonCustodial" />,
-                text: <FormattedMessage id="faq.answers.nonCustodial" />,
+                content: <FormattedMessage id="faq.answers.nonCustodial" />,
               },
               {
                 title: (
                   <FormattedMessage id="faq.questions.reallyNonCustodial" />
                 ),
-                text: <FormattedMessage id="faq.answers.reallyNonCustodial" />,
+                content: (
+                  <FormattedMessage id="faq.answers.reallyNonCustodial" />
+                ),
               },
               {
                 title: <FormattedMessage id="faq.questions.infoShared" />,
-                text: <FormattedMessage id="faq.answers.infoShared" />,
+                content: <FormattedMessage id="faq.answers.infoShared" />,
               },
               {
                 title: <FormattedMessage id="faq.questions.openSource" />,
-                text: <FormattedHTMLMessage id="faq.answers.openSource" />,
+                content: <FormattedHTMLMessage id="faq.answers.openSource" />,
               },
               {
                 title: <FormattedMessage id="faq.questions.loseKey" />,
-                text: <FormattedMessage id="faq.answers.loseKey" />,
+                content: <FormattedMessage id="faq.answers.loseKey" />,
               },
             ]}
-          ></CustomCollapse>
+          />
+
           {/* TODO
 Add link to open source repo
 more faq questions
 deploy to staging and master */}
-          <FaqLink href="/">Gifts Home</FaqLink>
-        </CustomContentBlock>
-        <Footer locale={locale} />
-      </Wrapper>
-    </React.Fragment>
-  );
-};
+        </ContentBlock>
+      </FaqSection>
+      <Footer locale={locale} />
+    </Wrapper>
+  </>
+);
 
 Faq.propTypes = {
   locale: PropTypes.string.isRequired,
   intl: PropTypes.shape({
-    formatMessage: PropTypes.func,
     messages: PropTypes.object,
   }).isRequired,
 };
-
 export default injectIntl(Faq);

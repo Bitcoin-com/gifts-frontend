@@ -1,14 +1,47 @@
 import styled from 'styled-components';
 import Popup from 'reactjs-popup';
-import { theme, media, Paragraph } from 'bitcoincom-storybook';
-import appIcon from '../../../../static/images/uploads/appLogoDot.png';
-import gearIcon from '../../../../static/images/uploads/gear3x.png';
-import sweepIcon from '../../../../static/images/uploads/sweep3x.png';
-import appIconOG from '../../../../static/images/uploads/applogogrey.png';
-import gearIconOG from '../../../../static/images/uploads/ic_settings_active_orange.svg';
-import sweepIconOG from '../../../../static/images/uploads/ic_receive_orange.svg';
-import downloadIcon from '../../../../static/images/uploads/download.png';
-import pdfIcon from '../../../../static/images/uploads/pdf.png';
+import { Paragraph } from '@bitcoin-portal/bitcoincom-pkg-components';
+import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
+import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
+import gearIcon from '../../../../../static/images/uploads/gear3x.png';
+import sweepIcon from '../../../../../static/images/uploads/sweep3x.png';
+import appIconOG from '../../../../../static/images/uploads/applogogrey.png';
+import gearIconOG from '../../../../../static/images/uploads/ic_settings_active_orange.svg';
+import sweepIconOG from '../../../../../static/images/uploads/ic_receive_orange.svg';
+import downloadIcon from '../../../../../static/images/uploads/download.png';
+import pdfIcon from '../../../../../static/images/uploads/pdf.png';
+
+const gifts = {
+  background: colors.solid.zircon,
+  palette: {
+    text: {
+      default: colors.solid.vulcan,
+      secondary: colors.solid.vulcanLightest,
+      tertiary: colors.solid.ghostLight,
+      alert: colors.solid.cinnabar,
+      link: colors.solid.caribbeanGreen,
+      uxalert: '#d8000c',
+    },
+    background: {
+      default: colors.solid.zircon,
+      secondary: colors.solid.zirconDarkest,
+      tertiary: colors.solid.white,
+      alternate: colors.solid.vulcan,
+      contrast: colors.solid.vulcanLight,
+      alert: colors.gradient.cinnabar,
+      uxalert: '#ffbaba',
+    },
+    border: {
+      default: colors.solid.ghostLight,
+      secondary: colors.solid.mystic,
+      tertiary: colors.solid.alto,
+      contrast: colors.solid.vulcanLightest,
+      alert: colors.solid.cinnabar,
+      uxalert: '#d8000c',
+    },
+  },
+  spacing: { unit: 8 },
+};
 
 export const ShareMenu = styled(Popup)`
   width: 130px;
@@ -95,6 +128,7 @@ export const ShareMenuListItem = styled.div`
 `;
 export const SnapshotHolder = styled.div`
   background-color: #fff;
+  text-align: center;
 `;
 
 export const ShareButton = styled.div`
@@ -239,11 +273,17 @@ export const StatusTd = styled.td`
   text-align: left;
   color: ${({ funded = false }) => (funded === true ? '#0fcb97;' : '#000')};
   font-weight: ${({ funded = false }) => (funded === true ? 'bold;' : 'none')};
+  & > a {
+    color: ${colors.solid.caribbeanGreen};
+  }
 `;
 export const StatusTdOldschool = styled.td`
   text-align: left;
-  color: ${({ funded = false }) => (funded === true ? '#F59332 ;' : '#000')};
+  color: ${({ funded = false }) => (funded === true ? '#F59332;' : '#000')};
   font-weight: ${({ funded = false }) => (funded === true ? 'bold;' : 'none')};
+  & > a {
+    color: #f59332;
+  }
 `;
 export const ShareIcon = styled.img`
   padding: 3px 3px 0px 5px;
@@ -303,8 +343,8 @@ export const FiatAmount = styled.div`
 
 export const Content = styled.div`
   text-align: center;
-  margin-bottom: ${theme.spacing.unit * 8}px;
-  margin-top: ${theme.spacing.unit * 8}px;
+  margin-bottom: ${gifts.spacing.unit * 8}px;
+  margin-top: ${gifts.spacing.unit * 8}px;
   z-index: 2;
 
   ${media.md`
@@ -406,10 +446,10 @@ export const DotComImg = styled.img`
 `;
 
 export const Text = styled(Paragraph)`
-  margin-top: ${theme.spacing.unit * 2}px;
-  margin-bottom: ${theme.spacing.unit * 4}px;
+  margin-top: ${gifts.spacing.unit * 2}px;
+  margin-bottom: ${gifts.spacing.unit * 4}px;
 
   ${media.md`
-    margin-top: ${theme.spacing.unit * 3}px;
+    margin-top: ${gifts.spacing.unit * 3}px;
   `}
 `;

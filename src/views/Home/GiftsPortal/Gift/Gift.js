@@ -44,19 +44,19 @@ import {
   LoadingButton,
   ShareMenuButton,
   LogoFooter,
-  ShareMenuButtonLink,
+  // ShareMenuButtonLink,
 } from './styled';
-import bchLogo from '../../../../static/images/uploads/bch-square-green.png';
-import bchLogoOldSchool from '../../../../static/images/uploads/bch-logo-oldschool.png';
-import bchLogoEZ from '../../../../static/images/uploads/bch-logo-grey.png';
-import tipsLogo from '../../../../static/images/uploads/logo-min.png';
-import oldSchoolGiftsLogo from '../../../../static/images/uploads/bitcoin-cash-logo-horizontal-small.png';
-import ezPrintGiftsLogo from '../../../../static/images/uploads/bitcoin-cash-logo-horizontal-grey.png';
-import dotComLogo from '../../../../static/images/uploads/logo_black.png';
-import dotComLogoGrey from '../../../../static/images/uploads/logo_bw.png';
-import shareIcon from '../../../../static/images/uploads/share-24px.svg';
+import bchLogo from '../../../../../static/images/uploads/bch-square-green.png';
+import bchLogoOldSchool from '../../../../../static/images/uploads/bch-logo-oldschool.png';
+import bchLogoEZ from '../../../../../static/images/uploads/bch-logo-grey.png';
+import tipsLogo from '../../../../../static/images/uploads/logo-min.png';
+import oldSchoolGiftsLogo from '../../../../../static/images/uploads/bitcoin-cash-logo-horizontal-small.png';
+import ezPrintGiftsLogo from '../../../../../static/images/uploads/bitcoin-cash-logo-horizontal-grey.png';
+import dotComLogo from '../../../../../static/images/uploads/logo_black.png';
+import dotComLogoGrey from '../../../../../static/images/uploads/logo_bw.png';
+import shareIcon from '../../../../../static/images/uploads/share-24px.svg';
 
-const Tip = ({
+const Gift = ({
   tipWallet,
   fiatAmount,
   fiatCurrency,
@@ -74,7 +74,7 @@ const Tip = ({
   >
     <TipBorder>
       {design === 'default' && (
-        <React.Fragment>
+        <>
           <SnapshotHolder id={tipWallet.addr.substr(12)}>
             <TipHeader>
               <img src={tipsLogo} alt="Bitcoin Cash Tips" />
@@ -91,11 +91,11 @@ const Tip = ({
                   (fiatCurrency === 'CAD' && '$') ||
                   (fiatCurrency === 'AUD' && '$')}
                 {tipWallet.sats !== 0 ? (
-                  <React.Fragment>
+                  <>
                     {fiatAmount} {fiatCurrency}
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>0 {fiatCurrency}</React.Fragment>
+                  <>0 {fiatCurrency}</>
                 )}
               </FiatAmount>
               <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
@@ -103,7 +103,7 @@ const Tip = ({
             {dateStr !== null && (
               <TipExchangeRate>
                 {tipWallet.sats !== 0 ? (
-                  <React.Fragment>
+                  <>
                     1 BCH ~{fiatCurrency === 'JPY' && '¥'}
                     {fiatCurrency === 'GBP' && '£'}
                     {fiatCurrency === 'EUR' && '€'}
@@ -113,9 +113,9 @@ const Tip = ({
                     {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
                     {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
                     {dateStr}
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>&nbsp;</React.Fragment>
+                  <>&nbsp;</>
                 )}
               </TipExchangeRate>
             )}
@@ -171,10 +171,10 @@ const Tip = ({
               </TipExchangeRate>
             )}
           </SnapshotHolder>
-        </React.Fragment>
+        </>
       )}
       {design === 'throwback' && (
-        <React.Fragment>
+        <>
           <SnapshotHolder id={tipWallet.addr.substr(12)}>
             <TipHeader>
               <img src={oldSchoolGiftsLogo} alt="Bitcoin Cash Tips" />
@@ -191,11 +191,11 @@ const Tip = ({
                   (fiatCurrency === 'CAD' && '$') ||
                   (fiatCurrency === 'AUD' && '$')}
                 {tipWallet.sats !== 0 ? (
-                  <React.Fragment>
+                  <>
                     {fiatAmount} {fiatCurrency}
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>0 {fiatCurrency}</React.Fragment>
+                  <>0 {fiatCurrency}</>
                 )}
               </FiatAmount>
               <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
@@ -203,7 +203,7 @@ const Tip = ({
             {dateStr !== null && (
               <TipExchangeRateThrowback>
                 {tipWallet.sats !== 0 ? (
-                  <React.Fragment>
+                  <>
                     1 BCH ~{fiatCurrency === 'JPY' && '¥'}
                     {fiatCurrency === 'GBP' && '£'}
                     {fiatCurrency === 'EUR' && '€'}
@@ -213,9 +213,9 @@ const Tip = ({
                     {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
                     {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
                     {dateStr}
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>&nbsp;</React.Fragment>
+                  <>&nbsp;</>
                 )}
               </TipExchangeRateThrowback>
             )}
@@ -268,11 +268,11 @@ const Tip = ({
               </TipExchangeRateThrowback>
             )}
           </SnapshotHolder>
-        </React.Fragment>
+        </>
       )}
 
       {design === 'ezprint' && (
-        <React.Fragment>
+        <>
           <SnapshotHolder id={tipWallet.addr.substr(12)}>
             <TipHeader>
               <img src={ezPrintGiftsLogo} alt="Bitcoin Cash Tips" />
@@ -289,11 +289,11 @@ const Tip = ({
                   (fiatCurrency === 'CAD' && '$') ||
                   (fiatCurrency === 'AUD' && '$')}
                 {tipWallet.sats !== 0 ? (
-                  <React.Fragment>
+                  <>
                     {fiatAmount} {fiatCurrency}
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>0 {fiatCurrency}</React.Fragment>
+                  <>0 {fiatCurrency}</>
                 )}
               </FiatAmount>
               <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
@@ -301,7 +301,7 @@ const Tip = ({
             {dateStr !== null && (
               <TipExchangeRateEZ>
                 {tipWallet.sats !== 0 ? (
-                  <React.Fragment>
+                  <>
                     1 BCH ~{fiatCurrency === 'JPY' && '¥'}
                     {fiatCurrency === 'GBP' && '£'}
                     {fiatCurrency === 'EUR' && '€'}
@@ -311,9 +311,9 @@ const Tip = ({
                     {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
                     {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
                     {dateStr}
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>&nbsp;</React.Fragment>
+                  <>&nbsp;</>
                 )}
               </TipExchangeRateEZ>
             )}
@@ -369,7 +369,7 @@ const Tip = ({
               </TipExchangeRateEZ>
             )}
           </SnapshotHolder>
-        </React.Fragment>
+        </>
       )}
     </TipBorder>
     <StatusWrap className="printHide">
@@ -384,7 +384,7 @@ const Tip = ({
                 {tipWallet.status === 'unclaimed' ? (
                   'Unclaimed'
                 ) : (
-                  <React.Fragment>
+                  <>
                     {tipWallet.claimedTxid !== undefined &&
                     tipWallet.claimedTxid !== '' ? (
                       <a
@@ -397,7 +397,7 @@ const Tip = ({
                     ) : (
                       `[${tipWallet.status}]`
                     )}
-                  </React.Fragment>
+                  </>
                 )}
               </StatusTdOldschool>
             ) : (
@@ -405,7 +405,7 @@ const Tip = ({
                 {tipWallet.status === 'unclaimed' ? (
                   'Unclaimed'
                 ) : (
-                  <React.Fragment>
+                  <>
                     {tipWallet.claimedTxid !== undefined &&
                     tipWallet.claimedTxid !== '' ? (
                       <a
@@ -418,7 +418,7 @@ const Tip = ({
                     ) : (
                       `${tipWallet.status}`
                     )}
-                  </React.Fragment>
+                  </>
                 )}
               </StatusTd>
             )}
@@ -477,7 +477,7 @@ const Tip = ({
   </TipWrapper>
 );
 
-Tip.propTypes = {
+Gift.propTypes = {
   fiatAmount: PropTypes.number.isRequired,
   fiatCurrency: PropTypes.string.isRequired,
   dateStr: PropTypes.string,
@@ -498,9 +498,9 @@ Tip.propTypes = {
   design: PropTypes.string.isRequired,
 };
 
-Tip.defaultProps = {
+Gift.defaultProps = {
   dateStr: null,
   expirationDate: null,
 };
 
-export default Tip;
+export default Gift;

@@ -1,39 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IntlProvider } from 'react-intl';
-import merge from 'lodash/merge';
 import Layout from '../components/Layout';
 import Home from '../views/Home';
-import { DEFAULT_LOCALE } from '../i18n';
 
-const IndexPage = ({ pageContext, location }) => {
-  const messages = merge(
-    {},
-    pageContext.locales[DEFAULT_LOCALE],
-    pageContext.locales[pageContext.locale],
-  );
+const IndexPage = props => {
+  const {
+    pageContext,
+    location: { pathname },
+  } = props;
+  const { locale } = pageContext;
   return (
-    <IntlProvider
-      locale={pageContext.locale}
-      defaultLocale={DEFAULT_LOCALE}
-      messages={messages}
-    >
-      <Layout location={location}>
-        <Home locale={pageContext.locale} />
-      </Layout>
-    </IntlProvider>
+    <Layout locale={locale} localeDir={pathname}>
+      <Home locale={locale} />
+    </Layout>
   );
 };
 
 IndexPage.propTypes = {
+  location: PropTypes.shape({ pathname: PropTypes.string }).isRequired,
   pageContext: PropTypes.shape({
     locale: PropTypes.string,
-    locales: PropTypes.shape({
-      [PropTypes.string]: PropTypes.string,
-    }),
-  }).isRequired,
-  location: PropTypes.shape({
-    pathname: PropTypes.string,
   }).isRequired,
 };
 

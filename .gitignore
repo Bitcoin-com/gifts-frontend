@@ -76,3 +76,6 @@ static/images/compressed2x
 static/images/compressed4x
 static/images/compressed8x
 static/images/compressed16x
+
+# Dev tool stubs
+src/views/Home/Stub/

@@ -20,7 +20,7 @@
   border-radius: 5px !important;
 }
 .react-datepicker-popper {
-  z-index: 2 !important;
+  z-index: 5 !important;
 }
 @page {
   margin: 6.5mm 15mm !important;

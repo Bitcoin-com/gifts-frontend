@@ -1,8 +1,11 @@
 node_modules
 bitcoincom-storybook
 bitcoincom-universal
+/node_modules/bitcoincom-pkg-components/.eslintrc
+/node_modules/bitcoincom-pkg-theme
 public
 .cache
 .vscode
 static
-src/assets
+
+/bitcoincom-pkg-components/.eslintrc

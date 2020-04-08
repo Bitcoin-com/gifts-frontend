@@ -24,20 +24,44 @@
     "title": "Bitcoin.com Gifts",
     "description": "Create and manage Bitcoin Cash (BCH) Gifts. Unredeemed Gifts are automatically returned!"
   },
-  "cardTitles": {
-    "sweepTitle": "Want your money back?",
-    "manageGifts": "Manage Gifts",
-    "customize": "Customize",
-    "makeNew": "Make New Gifts"
+  "cards": {
+    "sweep": {
+      "title": "Want your money back?",
+      "instructions": "You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+    },
+    "manage": {
+      "title": "Manage Gifts",
+      "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed"
+    },
+    "customize": { "title": "Customize" },
+    "new": { "title": "Make New Gifts" },
+    "seed": {
+      "title": "Save Your Recovery Seed",
+      "reminder": "Save this 12-word seed to access your gifts in the future",
+      "warning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!"
+    },
+    "build": { "title": "Build Your Gifts" },
+    "confirm": { "title": "Confirm Your Recovery Seed" },
+    "apiPostFailed": {
+      "title": "API Post Failed",
+      "desc": {
+        "one": "Failed to post your gift expiration claim transactions to the server. Your gifts will not automatically be returned to your refund address after their expiration date!",
+        "two": "Make sure to save your 12-word backup seed above. You can still access your gifts with this phrase.",
+        "three": "Please try to repost your gift information. If the issue persists, contact tips-support@bitcoin.com"
+      }
+    },
+    "reclaimTxsFailed": {
+      "title": "Generating Reclaim Transactions Failed",
+      "desc": {
+        "one": "API error while creating your auto-reclaim transactions. Your gifts will not be automatically returned on their expiration date!",
+        "two": "Make sure you have written down your 12-word backup seed. You can still access your gifts with this phrase.",
+        "three": "Please try again with the button below. If the issue persists, contact tips-support@bitcoin.com"
+      }
+    }
   },
+  "links": { "faq": "FAQ" },
   "strings": {
-    "faq": "FAQ",
-    "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed",
-    "seedReminderAbove": "Save this 12-word seed to access your gifts in the future",
-    "seedReminderBelow": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
-    "seedWarning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
-    "inputExtra": "If no refund address is provided, unclaimed tips will be donated to Bitcoin.com to help promote peer to peer electronic cash.",
-    "sweepInstructions": "You can send all the BCH from your unclaimed gifts to a single address in one transaction."
+    "inputExtra": "If no refund address is provided, unclaimed tips will be donated to Bitcoin.com to help promote peer to peer electronic cash."
   },
   "gift": {
     "downloading": "Processing...",
@@ -75,7 +99,7 @@
   "buttons": {
     "createTips": "Go",
     "goBack": "Back",
-    "copyUri": "Copy Invoice URL",
+    "copyUri": "Copy URI",
     "copySeed": "Copy",
     "sweepAll": "Sweep All",
     "newTips": "New Gifts",
@@ -120,6 +144,7 @@
     "tipCountNum": "Gift count must be a number",
     "fiatTipAmountNum": "Gift amount in local currency must be a number",
     "fiatTipAmountRequired": "Desired gift in local currency is required",
+    "fiatGiftAmountIsNaN": "Desired gift amount in local currency must be a number",
     "noMnemonic": "To import a mnemonic, you must enter a 12-word seed",
     "invalidMnemonic": "Please enter a valid 12-word mnemonic",
     "noTipsAtMnemonic": "No gifts found for this mnemonic",
@@ -133,6 +158,7 @@
     "invalidEmail": "Please enter a valid email address (or none at all)",
     "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
     "priceApiError": "Error obtaining BCH price in selected currency from price API.",
-    "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!"
+    "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!",
+    "bitbox": "Error querying Bitbox to create sweep transaction."
   }
 }
