@@ -161,9 +161,6 @@ export const TipWrapper = styled.div`
 `;
 export const TipBorder = styled.div`
   border: 1px solid black;
-  @media print {
-    border-right: 0;
-  }
 `;
 export const StatusWrap = styled.div`
   width: 100%;
@@ -190,7 +187,7 @@ export const ClaimedBlock = styled.div`
     status === 'unclaimed' ? '#fff;' : '#0fcb97;'};
   border-radius: 5px;
   margin: 24px;
-  padding: 39px 0px;
+  padding: 41px 0px;
   -webkit-transition: background-color 3s ease-out;
   -moz-transition: background-color 3s ease-out;
   -o-transition: background-color 3s ease-out;
