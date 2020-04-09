@@ -161,9 +161,6 @@ export const TipWrapper = styled.div`
 `;
 export const TipBorder = styled.div`
   border: 1px solid black;
-  @media print {
-    border-right: 0;
-  }
 `;
 export const StatusWrap = styled.div`
   width: 100%;

@@ -515,12 +515,6 @@ export const TipContainer = styled.div`
     grid-template-columns: repeat(5, 0fr) !important;
     grid-column-gap: 0in !important;
     grid-row-gap: 0in !important;
-    & > div:nth-child(5n) > div {
-      border-right: 1px solid black;
-    }
-    & > div:last-child > div {
-      border-right: 1px solid black;
-    }
   }
 
   @media only screen and (max-width: 657px) {
