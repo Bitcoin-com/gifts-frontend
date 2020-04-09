@@ -110,19 +110,20 @@ export const ShowFlexContainerTwoCols = styled(FlexContainer)`
     }
   }
   @media print {
-    display: none;
+    display: none !important;
   }
 `;
 export const ShowFlexContainer = styled(FlexContainer)`
   display: ${({ show = false }) =>
     show === true ? 'flex' : 'none !important'};
   @media print {
-    display: none;
+    display: none !important;
   }
 `;
 
 export const ShowCard = styled(Card)`
-  display: ${({ show = false }) => (show === true ? 'flex' : 'none')};
+  display: ${({ show = false }) =>
+    show === true ? 'flex' : 'none !important'};
 `;
 
 export const ShowButton = styled(Button)`
