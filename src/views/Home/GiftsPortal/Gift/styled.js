@@ -187,7 +187,7 @@ export const ClaimedBlock = styled.div`
     status === 'unclaimed' ? '#fff;' : '#0fcb97;'};
   border-radius: 5px;
   margin: 24px;
-  padding: 41px 0px;
+  padding: 31px 0px;
   -webkit-transition: background-color 3s ease-out;
   -moz-transition: background-color 3s ease-out;
   -o-transition: background-color 3s ease-out;
@@ -206,7 +206,7 @@ export const ClaimedBlockOG = styled.div`
     status === 'unclaimed' ? '#fff;' : '#f59332;'};
   border-radius: 5px;
   margin: 24px;
-  padding: 39px 0px;
+  padding: 31px 0px;
   -webkit-transition: background-color 3s ease-out;
   -moz-transition: background-color 3s ease-out;
   -o-transition: background-color 3s ease-out;
@@ -225,7 +225,7 @@ export const ClaimedBlockEZ = styled.div`
     status === 'unclaimed' ? '#fff;' : 'grey;'};
   border-radius: 5px;
   margin: 24px;
-  padding: 39px 0px;
+  padding: 31px 0px;
   -webkit-transition: background-color 3s ease-out;
   -moz-transition: background-color 3s ease-out;
   -o-transition: background-color 3s ease-out;

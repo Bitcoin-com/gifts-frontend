@@ -3,7 +3,7 @@ import throttle from 'lodash.throttle';
 import { injectIntl, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BITBOX } from 'bitbox-sdk';
-import { BadgerButton } from 'badger-components-react';
+import { Invoice } from 'bitcoin-invoice-components';
 import bitcoincomLink from 'bitcoincom-link';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
@@ -38,7 +38,6 @@ import {
   StackedButtons,
   ShowButton,
   MobileShowButton,
-  ShowCopyToClipboard,
   ShowFlexContainer,
   ShowFlexContainerTwoCols,
   CloseIcon,
@@ -55,9 +54,6 @@ import {
   TipTh,
   MobileTipTh,
   BadgerWrap,
-  MobileBadgerCover,
-  DesktopBadgerCover,
-  MobileBadgerUriOpener,
   ButtonHider,
   TipContainerWrapper,
   Buttons,
@@ -1236,33 +1232,43 @@ class GiftsPortal extends React.Component {
     // might be best to do this step in the txbuilder loop
   }
 
-  invoiceSuccess() {
+  // eslint-disable-next-line consistent-return
+  invoiceSuccess(e = 'default') {
     const { tipWallets } = this.state;
-    // console.log(`Invoice paid successfully`);
-    // build the output object for the tip claiming expiration here
-    // get txid of invoice funding transaction
-    bitbox.Address.details(tipWallets[0].addr).then(
-      res => {
-        // console.log(res);
-        let invoiceTxid = null;
-        if (res.transactions.length > 0) {
-          // eslint-disable-next-line prefer-destructuring
-          invoiceTxid = res.transactions[0];
-        }
-        return this.setState(
-          { invoiceTxid, tipsFunded: true },
-          this.createExpirationTxs,
-        );
-      },
-      err => {
-        console.log(`Error in fetching txid of invoice payment transaction`);
-        console.log(err);
-        return this.setState(
-          { invoiceTxid: null, tipsFunded: true },
-          this.createExpirationTxs,
-        );
-      },
-    );
+    let invoiceTxid = '';
+    if (e.length === 64) {
+      invoiceTxid = e;
+      return this.setState(
+        { invoiceTxid, tipsFunded: true },
+        this.createExpirationTxs,
+      );
+    }
+
+    // Get invoiceTxid manually if don't have it
+    if (invoiceTxid === '') {
+      bitbox.Address.details(tipWallets[0].addr).then(
+        res => {
+          // console.log(res);
+          invoiceTxid = null;
+          if (res.transactions.length > 0) {
+            // eslint-disable-next-line prefer-destructuring
+            invoiceTxid = res.transactions[0];
+          }
+          return this.setState(
+            { invoiceTxid, tipsFunded: true },
+            this.createExpirationTxs,
+          );
+        },
+        err => {
+          console.log(`Error in fetching txid of invoice payment transaction`);
+          console.log(err);
+          return this.setState(
+            { invoiceTxid: null, tipsFunded: true },
+            this.createExpirationTxs,
+          );
+        },
+      );
+    }
   }
 
   handleConfirmedMnemonic(e) {
@@ -2936,18 +2942,13 @@ class GiftsPortal extends React.Component {
                     )}
 
                     <BadgerWrap>
-                      <MobileBadgerCover>
-                        <a href={invoiceUri}>
-                          <MobileBadgerUriOpener />
-                        </a>
-                      </MobileBadgerCover>
-                      <DesktopBadgerCover />
-                      <BadgerButton
+                      <Invoice
                         text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}
-                        currency={selectedCurrency}
+                        sizeQR={250}
+                        copyUri
                         paymentRequestUrl={invoiceUrl}
                         isRepeatable={false}
-                        successFn={this.invoiceSuccessThrottled}
+                        successFn={this.invoiceSuccess}
                       />
                     </BadgerWrap>
                     {!tipsFunded && (
@@ -2963,16 +2964,6 @@ class GiftsPortal extends React.Component {
                           >
                             <FormattedMessage id="home.buttons.mobilePay" />
                           </MobileShowButton>
-
-                          <ShowCopyToClipboard
-                            show={!tipsFunded}
-                            text={invoiceUri}
-                            onCopy={() => this.handleUriCopied()}
-                          >
-                            <Button>
-                              <FormattedMessage id="home.buttons.copyUri" />
-                            </Button>
-                          </ShowCopyToClipboard>
 
                           <ShowButton
                             show={!tipsFunded}
@@ -3370,7 +3361,7 @@ class GiftsPortal extends React.Component {
               <CustomSelect
                 onChange={this.handleSelectedCurrencyChangeFromSelect}
                 options={currencies}
-                defaultValue={currencies[40]}
+                defaultValue={currencies[144]}
                 isSearchable
               />
             </InputWrapper>
