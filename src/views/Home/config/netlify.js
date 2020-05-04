@@ -45,6 +45,7 @@ const homeConfig = {
       fields: [
         { name: 'title', label: 'title', widget: 'string' },
         { name: 'description', label: 'description', widget: 'string' },
+        { name: 'count', label: 'count', widget: 'string' },
       ],
     },
     {
