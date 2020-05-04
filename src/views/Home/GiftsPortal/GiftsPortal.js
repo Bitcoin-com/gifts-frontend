@@ -93,11 +93,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -2438,7 +2438,7 @@ class GiftsPortal extends React.Component {
               <Paragraph>
                 <FormattedMessage id="home.header.description" />
               </Paragraph>
-              {giftsCreated !== 0 && (
+              {giftsCreated !== 0 && giftsBch !== 0 && (
                 <Paragraph>
                   <FormattedHTMLMessage
                     id="home.header.count"
