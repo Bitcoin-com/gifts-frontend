@@ -22,7 +22,8 @@
   },
   "header": {
     "title": "Bitcoin.com Gifts",
-    "description": "Create and manage Bitcoin Cash (BCH) Gifts. Unredeemed Gifts are automatically returned!"
+    "description": "Create and manage Bitcoin Cash (BCH) Gifts. Unredeemed Gifts are automatically returned!",
+    "count": "<b>{giftsCreated}</b> gifts worth <b>{giftsBch} BCH</b> created so far!"
   },
   "cards": {
     "sweep": {

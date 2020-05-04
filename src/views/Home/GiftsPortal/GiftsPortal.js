@@ -93,11 +93,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -239,6 +239,7 @@ class GiftsPortal extends React.Component {
     this.toggleQrLogo = this.toggleQrLogo.bind(this);
     this.handleLinkAddress = this.handleLinkAddress.bind(this);
     this.getWalletLinkStatus = this.getWalletLinkStatus.bind(this);
+    this.getGiftsStats = this.getGiftsStats.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -292,16 +293,41 @@ class GiftsPortal extends React.Component {
       isWalletLoggedIn: false,
       walletType: '',
       badgerLoginCheckInterval: null,
+      stats: {},
     };
   }
 
   componentDidMount() {
     this.initializeWebsocket();
     this.getWalletLinkStatus();
+    this.getGiftsStats();
   }
 
   componentWillUnmount() {
     this.invoiceSuccessThrottled.cancel();
+  }
+
+  getGiftsStats() {
+    // fetch from api
+    // set state for totalBch
+    // get price in USD and print that
+    fetch(`${giftsBackendBase}/count`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(
+        res => {
+          // console.log(res);
+          this.setState({ stats: res.quantity });
+        },
+        err => {
+          console.log(err);
+        },
+      );
   }
 
   setClaimedFromWebsocket(wsTx) {
@@ -1543,6 +1569,7 @@ class GiftsPortal extends React.Component {
       isWalletLoggedIn: false,
       walletType: '',
       badgerLoginCheckInterval: null,
+      stats: {},
     });
   }
 
@@ -2240,7 +2267,20 @@ class GiftsPortal extends React.Component {
       isWalletAvailable,
       isWalletLoggedIn,
       walletType,
+      stats,
     } = this.state;
+
+    // Stats
+    let giftsCreated = 0;
+    let giftsBch = 0;
+    if (stats !== {}) {
+      try {
+        giftsCreated = stats.created;
+        giftsBch = stats.totalBch.toFixed(2);
+      } catch (err) {
+        // do nothing
+      }
+    }
 
     // Parse tip amount fiat to be a 2-decimal place float
     const tipAmountFiat = parseFloat(
@@ -2398,6 +2438,17 @@ class GiftsPortal extends React.Component {
               <Paragraph>
                 <FormattedMessage id="home.header.description" />
               </Paragraph>
+              {giftsCreated !== 0 && (
+                <Paragraph>
+                  <FormattedHTMLMessage
+                    id="home.header.count"
+                    values={{
+                      giftsCreated,
+                      giftsBch,
+                    }}
+                  />
+                </Paragraph>
+              )}
               <Link href="/faq">
                 <FormattedMessage id="home.links.faq" />
               </Link>
