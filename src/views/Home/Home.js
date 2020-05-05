@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
-import { Nav, Footer } from '@bitcoin-portal/bitcoincom-universal';
+import Navbar from '@bitcoin-portal/navbar';
+import Footer from '@bitcoin-portal/footer';
 import { Wrapper, HeadSection } from './styled';
 import SEO from './SEO';
 import GiftsPortal from './GiftsPortal';
@@ -13,7 +14,7 @@ const Home = ({ locale, intl: { formatMessage } }) => {
       <SEO />
       <Wrapper className="print">
         <HeadSection className="noPrint">
-          <Nav locale={locale} contrast />
+          <Navbar locale={locale} contrast />
         </HeadSection>
         <GiftsPortal locale={locale} />
         <Footer locale={locale} />
