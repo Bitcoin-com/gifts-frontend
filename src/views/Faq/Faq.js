@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, FormattedHTMLMessage, injectIntl } from 'react-intl';
-import { Nav, Footer } from '@bitcoin-portal/bitcoincom-universal';
+import Navbar from '@bitcoin-portal/navbar';
+import Footer from '@bitcoin-portal/footer';
 import {
   ContentBlock,
   Link,
@@ -21,7 +22,7 @@ const Faq = ({ locale, intl: { messages } }) => (
     <SEO />
     <Wrapper>
       <HeadSection>
-        <Nav locale={locale} contrast />
+        <Navbar locale={locale} contrast />
       </HeadSection>
       <FaqSection>
         <ContentBlock>

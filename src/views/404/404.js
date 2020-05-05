@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { Nav, Footer } from '@bitcoin-portal/bitcoincom-universal';
+import Navbar from '@bitcoin-portal/navbar';
+import Footer from '@bitcoin-portal/footer';
 import {
   H1,
   Paragraph,
@@ -15,7 +16,7 @@ const ErrorPage = ({ locale, intl: { messages } }) => (
   <>
     <SEO />
     <Wrapper>
-      <Nav locale={locale} showLang={false} />
+      <Navbar locale={locale} showLang={false} />
       <ContentBlock
         image={messages['404.content.image']}
         imageAlt={messages['404.content.image-alt']}
