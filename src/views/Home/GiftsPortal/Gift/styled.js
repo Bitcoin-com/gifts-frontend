@@ -1,9 +1,6 @@
 import styled from 'styled-components';
 import Popup from 'reactjs-popup';
-import {
-  Paragraph,
-  CopyRegular,
-} from '@bitcoin-portal/bitcoincom-pkg-components';
+import { Paragraph } from '@bitcoin-portal/bitcoincom-pkg-components';
 import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../../static/images/uploads/gear3x.png';
@@ -46,7 +43,6 @@ const gifts = {
   },
   spacing: { unit: 8 },
 };
-export const CopyIcon = styled(CopyRegular)``;
 export const ShareMenu = styled(Popup)`
   width: 130px;
 `;
