@@ -161,7 +161,8 @@ const homeConfig = {
       name: 'gift',
       fields: [
         { name: 'downloading', label: 'downloading', widget: 'string' },
-        { name: 'jpg', label: 'jpg', widget: 'string' },
+        { name: 'jpg', label: 'JPG', widget: 'string' },
+        { name: 'wif', label: 'WIF', widget: 'string' },
         { name: 'youGot', label: 'youGot', widget: 'string' },
         { name: 'on', label: 'on', widget: 'string' },
         { name: 'claimBy', label: 'claimBy', widget: 'string' },
@@ -208,6 +209,7 @@ const homeConfig = {
       name: 'notifications',
       fields: [
         { name: 'seedCopied', label: 'seedCopied', widget: 'string' },
+        { name: 'uriCopied', label: 'uriCopied', widget: 'string' },
         { name: 'giftsSwept', label: 'giftsSwept', widget: 'string' },
       ],
     },
