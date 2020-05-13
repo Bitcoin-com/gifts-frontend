@@ -95,9 +95,9 @@ const defaultRefundAddress =
 // Prod
 // const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
-const giftsBackendBase = 'http://localhost:3001';
+// const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -194,6 +194,7 @@ class GiftsPortal extends React.Component {
     this.handleConfirmedMnemonic = this.handleConfirmedMnemonic.bind(this);
     this.handleSeedCopied = this.handleSeedCopied.bind(this);
     this.handleUriCopied = this.handleUriCopied.bind(this);
+    this.handleWifCopied = this.handleWifCopied.bind(this);
     this.handleSeedSavedConfirmed = this.handleSeedSavedConfirmed.bind(this);
     this.goBackOneStep = this.goBackOneStep.bind(this);
     this.sweepAllTips = this.sweepAllTips.bind(this);
@@ -1343,11 +1344,29 @@ class GiftsPortal extends React.Component {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   handleUriCopied() {
-    toast.notify('Invoice URI copied to clipboard', {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+
+    const uriCopied = formatMessage({ id: 'home.notifications.uriCopied' });
+
+    toast.notify(uriCopied, {
       position: 'bottom-right',
       duration: 1500,
+    });
+  }
+
+  handleWifCopied() {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+
+    const wifCopied = formatMessage({ id: 'home.notifications.wifCopied' });
+
+    toast.notify(wifCopied, {
+      position: 'bottom-right',
+      duration: 3000,
     });
   }
 
@@ -2376,6 +2395,7 @@ class GiftsPortal extends React.Component {
             expirationDate={expirationDate}
             status={tipWallet.status}
             share={this.shareTip}
+            wifCopied={this.handleWifCopied}
             showGiftNames={showGiftNames}
             qrDots={qrDots}
             qrLogo={qrLogo}

@@ -63,6 +63,7 @@ const Gift = ({
   dateStr,
   expirationDate,
   share,
+  wifCopied,
   showGiftNames,
   design,
   qrDots,
@@ -484,11 +485,10 @@ const Gift = ({
               <FormattedMessage id="home.gift.jpg" />
             </ShareMenuButton>
           )}
-          <CopyToClipboard
-            text={tipWallet.wif}
-            onCopy={() => console.log('Seed copied')}
-          >
-            <ShareMenuButtonCopy type="button">Link</ShareMenuButtonCopy>
+          <CopyToClipboard text={tipWallet.wif} onCopy={wifCopied}>
+            <ShareMenuButtonCopy type="button">
+              <FormattedMessage id="home.gift.wif" />
+            </ShareMenuButtonCopy>
           </CopyToClipboard>
           {/* <ShareMenuButtonPDF
             type="button"
@@ -519,6 +519,7 @@ Gift.propTypes = {
     claimedTxid: PropTypes.string,
   }).isRequired,
   share: PropTypes.func.isRequired,
+  wifCopied: PropTypes.func.isRequired,
   showGiftNames: PropTypes.bool.isRequired,
   qrDots: PropTypes.bool.isRequired,
   qrLogo: PropTypes.bool.isRequired,
