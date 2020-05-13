@@ -2,6 +2,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import QRCode from 'qrcode.react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import {
   TipWrapper,
   TipBorder,
@@ -41,6 +42,7 @@ import {
   ShareMenuList,
   LoadingButton,
   ShareMenuButton,
+  ShareMenuButtonCopy,
   LogoFooter,
   // ShareMenuButtonLink,
 } from './styled';
@@ -482,6 +484,12 @@ const Gift = ({
               <FormattedMessage id="home.gift.jpg" />
             </ShareMenuButton>
           )}
+          <CopyToClipboard
+            text={tipWallet.wif}
+            onCopy={() => console.log('Seed copied')}
+          >
+            <ShareMenuButtonCopy type="button">Link</ShareMenuButtonCopy>
+          </CopyToClipboard>
           {/* <ShareMenuButtonPDF
             type="button"
             data-id={tipWallet.addr.substr(12)}

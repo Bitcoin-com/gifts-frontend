@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 import Popup from 'reactjs-popup';
-import { Paragraph } from '@bitcoin-portal/bitcoincom-pkg-components';
+import {
+  Paragraph,
+  CopyRegular,
+} from '@bitcoin-portal/bitcoincom-pkg-components';
 import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../../static/images/uploads/gear3x.png';
@@ -10,6 +13,7 @@ import gearIconOG from '../../../../../static/images/uploads/ic_settings_active_
 import sweepIconOG from '../../../../../static/images/uploads/ic_receive_orange.svg';
 import downloadIcon from '../../../../../static/images/uploads/download.png';
 import pdfIcon from '../../../../../static/images/uploads/pdf.png';
+import copypaste from '../../../../../static/images/uploads/copypaste.svg';
 
 const gifts = {
   background: colors.solid.zircon,
@@ -42,7 +46,7 @@ const gifts = {
   },
   spacing: { unit: 8 },
 };
-
+export const CopyIcon = styled(CopyRegular)``;
 export const ShareMenu = styled(Popup)`
   width: 130px;
 `;
@@ -103,6 +107,21 @@ export const ShareMenuButtonPDF = styled.button`
   cursor: pointer;
   background-color: transparent;
   background: url(${pdfIcon}) no-repeat 12px center;
+  border: none;
+  height: 100%;
+  & :hover {
+    background-color: #fff;
+    color: #000;
+  }
+`;
+export const ShareMenuButtonCopy = styled.button`
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  color: #4d4d4d;
+  cursor: pointer;
+  background-color: transparent;
+  background: url(${copypaste}) no-repeat 12px center;
   border: none;
   height: 100%;
   & :hover {
