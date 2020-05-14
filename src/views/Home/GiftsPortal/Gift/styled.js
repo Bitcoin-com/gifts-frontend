@@ -127,7 +127,6 @@ export const ShareMenuButtonCopy = styled.button`
 `;
 export const ShareMenuList = styled.div`
   width: 130px;
-
   display: flex;
   flex-direction: column;
   background: #f5f5f5;

@@ -36,6 +36,7 @@
     },
     "customize": { "title": "Customize" },
     "new": { "title": "Make New Gifts" },
+    "stats": { "title": "Stats" },
     "seed": {
       "title": "Save Your Recovery Seed",
       "reminder": "Save this 12-word seed to access your gifts in the future",
@@ -94,6 +95,7 @@
     "tableCurrency": "Currency",
     "tableExpiration": "Expiration"
   },
+  "chart": { "created": "created so far!", "gifts": "gifts", "worth": "worth" },
   "notifications": {
     "seedCopied": "Recovery seed copied to clipboard",
     "uriCopied": "Invoice URI copied to clipboard",
