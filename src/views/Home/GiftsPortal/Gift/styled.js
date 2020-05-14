@@ -45,7 +45,6 @@ const gifts = {
 };
 export const ShareMenu = styled(Popup)`
   width: 130px;
-  z-index: 12;
 `;
 export const ShareMenuButton = styled.button`
   width: 100%;
