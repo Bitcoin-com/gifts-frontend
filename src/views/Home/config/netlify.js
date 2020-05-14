@@ -84,6 +84,12 @@ const homeConfig = {
           fields: [{ name: 'title', label: 'title', widget: 'string' }],
         },
         {
+          name: 'stats',
+          label: 'Stats',
+          widget: 'object',
+          fields: [{ name: 'title', label: 'title', widget: 'string' }],
+        },
+        {
           name: 'seed',
           label: 'seed',
           widget: 'object',
@@ -201,6 +207,16 @@ const homeConfig = {
         { name: 'tableValue', label: 'tableValue', widget: 'string' },
         { name: 'tableCurrency', label: 'tableCurrency', widget: 'string' },
         { name: 'tableExpiration', label: 'tableExpiration', widget: 'string' },
+      ],
+    },
+    {
+      label: 'Chart',
+      widget: 'object',
+      name: 'chart',
+      fields: [
+        { name: 'created', label: 'Created', widget: 'string' },
+        { name: 'gifts', label: 'Gifts', widget: 'string' },
+        { name: 'worth', label: 'Worth', widget: 'string' },
       ],
     },
     {

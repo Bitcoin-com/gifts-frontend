@@ -9,7 +9,7 @@ import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
 import {
-  H1,
+  H2,
   H3,
   H5,
   Card,
@@ -20,6 +20,7 @@ import {
   ContentBlock,
   Button,
   Input,
+  PieChart,
 } from '@bitcoin-portal/bitcoincom-pkg-components';
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
@@ -93,9 +94,9 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
-// const giftsBackendBase = 'http://localhost:3001';
+const giftsBackendBase = 'http://localhost:3001';
 // Staging
 // const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
@@ -241,6 +242,7 @@ class GiftsPortal extends React.Component {
     this.handleLinkAddress = this.handleLinkAddress.bind(this);
     this.getWalletLinkStatus = this.getWalletLinkStatus.bind(this);
     this.getGiftsStats = this.getGiftsStats.bind(this);
+    this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -295,6 +297,7 @@ class GiftsPortal extends React.Component {
       walletType: '',
       badgerLoginCheckInterval: null,
       stats: {},
+      windowWidth: 0,
     };
   }
 
@@ -302,10 +305,13 @@ class GiftsPortal extends React.Component {
     this.initializeWebsocket();
     this.getWalletLinkStatus();
     this.getGiftsStats();
+    this.updateWindowDimensions();
+    window.addEventListener('resize', this.updateWindowDimensions);
   }
 
   componentWillUnmount() {
     this.invoiceSuccessThrottled.cancel();
+    window.removeEventListener('resize', this.updateWindowDimensions);
   }
 
   getGiftsStats() {
@@ -654,6 +660,12 @@ class GiftsPortal extends React.Component {
     }
     return field;
   };
+
+  updateWindowDimensions() {
+    this.setState({
+      windowWidth: window.innerWidth,
+    });
+  }
 
   handleTipAmountFiatChange(e) {
     const { value, name } = e.target;
@@ -1588,7 +1600,7 @@ class GiftsPortal extends React.Component {
       isWalletLoggedIn: false,
       walletType: '',
       badgerLoginCheckInterval: null,
-      stats: {},
+      // stats: {}, do not reset stats
     });
   }
 
@@ -2287,15 +2299,22 @@ class GiftsPortal extends React.Component {
       isWalletLoggedIn,
       walletType,
       stats,
+      windowWidth,
     } = this.state;
 
     // Stats
     let giftsCreated = 0;
     let giftsBch = 0;
+    let giftsClaimed = 0;
+    let giftsExpired = 0;
+    let giftsUnclaimed = 0;
     if (stats !== {}) {
       try {
         giftsCreated = stats.created;
         giftsBch = stats.totalBch.toFixed(2);
+        giftsClaimed = stats.claimed;
+        giftsExpired = stats.expired;
+        giftsUnclaimed = stats.unclaimed;
       } catch (err) {
         // do nothing
       }
@@ -2452,23 +2471,12 @@ class GiftsPortal extends React.Component {
         {appState === appStates.initial && !importedMnemonic && (
           <HeaderSection>
             <ContentBlock>
-              <H1>
+              <H2>
                 <FormattedMessage id="home.header.title" />
-              </H1>
+              </H2>
               <Paragraph>
                 <FormattedMessage id="home.header.description" />
               </Paragraph>
-              {giftsCreated !== 0 && giftsBch !== 0 && (
-                <Paragraph>
-                  <FormattedHTMLMessage
-                    id="home.header.count"
-                    values={{
-                      giftsCreated,
-                      giftsBch,
-                    }}
-                  />
-                </Paragraph>
-              )}
               <Link href="/faq">
                 <FormattedMessage id="home.links.faq" />
               </Link>
@@ -2654,6 +2662,151 @@ class GiftsPortal extends React.Component {
                 )}
               </Card>
             </ShowFlexContainerTwoCols>
+            <ShowFlexContainer
+              columns={1}
+              show={
+                appState < appStates.seedGenerated &&
+                !importedMnemonic &&
+                giftsCreated !== 0
+              }
+            >
+              <Card centered padded>
+                {giftsCreated !== 0 && giftsBch !== 0 ? (
+                  <PieChart
+                    style={{ maxWidth: '100%' }}
+                    data={[
+                      {
+                        color: '#0ac18e',
+                        name:
+                          windowWidth < 420
+                            ? `claimed`
+                            : `${giftsClaimed} claimed`,
+                        value: giftsClaimed,
+                      },
+                      {
+                        color: '#49505f',
+                        name:
+                          windowWidth < 420
+                            ? `expired`
+                            : `${giftsExpired} expired`,
+                        value: giftsExpired,
+                      },
+                      {
+                        color: '#2fa9ee',
+                        name:
+                          windowWidth < 420
+                            ? `unclaimed`
+                            : `${giftsUnclaimed} unclaimed`,
+                        value: giftsUnclaimed,
+                      },
+                    ]}
+                    label={
+                      <>
+                        {windowWidth > 485 ? (
+                          <>
+                            <div
+                              style={{
+                                fontSize: '1.4rem',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: '1.4rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {giftsCreated}
+                              </span>{' '}
+                              <span
+                                style={{
+                                  fontSize: '1.0rem',
+                                }}
+                              >
+                                <FormattedMessage id="home.chart.gifts" />
+                              </span>
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '1.0rem',
+                                marginBottom: '4px',
+                              }}
+                            />
+                            <div
+                              style={{
+                                marginBottom: '4px',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: '1.0rem',
+                                }}
+                              >
+                                <FormattedMessage id="home.chart.worth" />
+                              </span>{' '}
+                              <span
+                                style={{
+                                  fontSize: '1.4rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {giftsBch} BCH
+                              </span>{' '}
+                            </div>
+                            <div style={{ fontSize: '1.0rem' }}>
+                              <FormattedMessage id="home.chart.created" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div
+                              style={{
+                                marginBottom: '2px',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: '1.0rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {giftsCreated}
+                              </span>{' '}
+                              <span
+                                style={{
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                <FormattedMessage id="home.chart.gifts" />
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                marginBottom: '2px',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: '1.0rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {giftsBch} BCH
+                              </span>{' '}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    }
+                    size={windowWidth < 769 ? windowWidth / 2.8 : 300}
+                    legend
+                  />
+                ) : (
+                  <Loader style={{ margin: 'auto' }} />
+                )}
+              </Card>
+            </ShowFlexContainer>
             <ShowFlexContainer
               columns={1}
               show={
@@ -3299,6 +3452,7 @@ class GiftsPortal extends React.Component {
                     className="noPrint"
                     design="primary"
                     onClick={this.makePdf}
+                    style={{ marginTop: '24px' }}
                   >
                     <FormattedMessage id="home.buttons.makePdf" />
                   </Button>
