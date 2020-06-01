@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 import Popup from 'reactjs-popup';
-import { Paragraph } from '@bitcoin-portal/bitcoincom-pkg-components';
+import {
+  Paragraph,
+  TimesSolidThick,
+} from '@bitcoin-portal/bitcoincom-pkg-components';
 import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../../static/images/uploads/gear3x.png';
@@ -192,13 +195,47 @@ export const TipWrapper = styled.div`
 export const TipBorder = styled.div`
   border: 1px solid black;
 `;
+export const EmailError = styled.div`
+  position: absolute;
+  margin: auto;
+  padding: 24px;
+  bottom: 55px;
+  height: 221px;
+  width: 188px;
+  margin-top: 4px;
+  z-index: 5;
+  background: ${gifts.palette.background.uxalert};
+  & > p {
+    color: ${gifts.palette.text.uxalert};
+  }
+  color: ${gifts.palette.text.uxalert};
+  border: 2px solid ${gifts.palette.border.uxalert};
+`;
 export const EmailWrap = styled.form`
-  width: 100%;
+  position: absolute;
+  bottom: 55px;
   margin-top: 4px;
   border: 1px solid black;
   padding: 0px;
   background-color: #f5f5f5;
-  overflow: auto;
+`;
+export const EmailCloseButton = styled.button`
+  position: absolute;
+  text-align: center;
+  right: 9px;
+  top: 9px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid black;
+  color: black;
+  background-color: grey;
+  opacity: 75%;
+  cursor: pointer;
+`;
+export const CloseIcon = styled(TimesSolidThick)`
+  margin-left: -6px;
+  margin-top: 1px;
 `;
 export const InputError = styled.div`
   color: red;

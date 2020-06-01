@@ -77,7 +77,8 @@
     "stepThree": "Select 'Sweep Paper Wallet'",
     "giftName": "Gift Name",
     "status": "Status",
-    "label": "Label"
+    "label": "Label",
+    "email": "Email"
   },
   "labels": {
     "tipCount": "Number of gifts",
@@ -94,7 +95,7 @@
     "tableValue": "Value per gift",
     "tableCurrency": "Currency",
     "tableExpiration": "Expiration",
-    "giftFrom": "From",
+    "giftFrom": "Message",
     "giftTo": "Email"
   },
   "chart": { "created": "created so far!", "gifts": "gifts", "worth": "worth" },
@@ -125,7 +126,9 @@
     "makePdf": "Generate PDF",
     "getAddr": "(Import from {walletType})",
     "logInBadger": "(Log in to Badger to paste address)",
-    "send": "Send"
+    "send": "Send",
+    "emailSuccess": "Email Sent!",
+    "dismiss": "Dismiss"
   },
   "placeholders": {
     "tipCount": "Enter desired number of gifts",
@@ -136,7 +139,7 @@
     "userRefundAddressOnCreate": "Unclaimed gifts return to this address",
     "emailAddress": "Enter your email address",
     "giftEmail": "email",
-    "from": "from"
+    "from": "your note here"
   },
   "alerts": {
     "warning": "Warning!",
@@ -162,10 +165,11 @@
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
     "invalidEmail": "Please enter a valid email address (or none at all)",
     "invalidGiftEmail": "Invalid email",
-    "invalidGiftFrom": "Max 64 characters",
+    "invalidGiftFrom": "Max 144 characters",
     "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
     "priceApiError": "Error obtaining BCH price in selected currency from price API.",
     "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!",
-    "bitbox": "Error querying Bitbox to create sweep transaction."
+    "bitbox": "Error querying Bitbox to create sweep transaction.",
+    "emailApiError": "Error sending email. Please try again later."
   }
 }

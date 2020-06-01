@@ -178,6 +178,7 @@ const homeConfig = {
         { name: 'giftName', label: 'giftName', widget: 'string' },
         { name: 'status', label: 'status', widget: 'string' },
         { name: 'label', label: 'label', widget: 'string' },
+        { name: 'email', label: 'email', widget: 'string' },
       ],
     },
     {
@@ -257,6 +258,8 @@ const homeConfig = {
         { name: 'getAddr', label: 'getAddr', widget: 'string' },
         { name: 'logInBadger', label: 'logInBadger', widget: 'string' },
         { name: 'send', label: 'Send', widget: 'string' },
+        { name: 'emailSuccess', label: 'emailSuccess', widget: 'string' },
+        { name: 'dismiss', label: 'dismiss', widget: 'string' },
       ],
     },
     {
@@ -400,6 +403,11 @@ const homeConfig = {
         {
           name: 'bitbox',
           label: 'bitbox',
+          widget: 'string',
+        },
+        {
+          name: 'emailApiError',
+          label: 'emailApiError',
           widget: 'string',
         },
       ],
