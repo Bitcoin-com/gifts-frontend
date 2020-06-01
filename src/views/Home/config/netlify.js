@@ -178,6 +178,7 @@ const homeConfig = {
         { name: 'giftName', label: 'giftName', widget: 'string' },
         { name: 'status', label: 'status', widget: 'string' },
         { name: 'label', label: 'label', widget: 'string' },
+        { name: 'email', label: 'email', widget: 'string' },
       ],
     },
     {
@@ -207,6 +208,8 @@ const homeConfig = {
         { name: 'tableValue', label: 'tableValue', widget: 'string' },
         { name: 'tableCurrency', label: 'tableCurrency', widget: 'string' },
         { name: 'tableExpiration', label: 'tableExpiration', widget: 'string' },
+        { name: 'giftFrom', label: 'giftFrom', widget: 'string' },
+        { name: 'giftTo', label: 'giftTo', widget: 'string' },
       ],
     },
     {
@@ -254,6 +257,9 @@ const homeConfig = {
         { name: 'makePdf', label: 'makePdf', widget: 'string' },
         { name: 'getAddr', label: 'getAddr', widget: 'string' },
         { name: 'logInBadger', label: 'logInBadger', widget: 'string' },
+        { name: 'send', label: 'Send', widget: 'string' },
+        { name: 'emailSuccess', label: 'emailSuccess', widget: 'string' },
+        { name: 'dismiss', label: 'dismiss', widget: 'string' },
       ],
     },
     {
@@ -280,6 +286,8 @@ const homeConfig = {
           widget: 'string',
         },
         { name: 'emailAddress', label: 'emailAddress', widget: 'string' },
+        { name: 'giftEmail', label: 'giftEmail', widget: 'string' },
+        { name: 'from', label: 'from', widget: 'string' },
       ],
     },
     {
@@ -368,6 +376,16 @@ const homeConfig = {
           widget: 'string',
         },
         {
+          name: 'invalidGiftEmail',
+          label: 'invalidGiftEmail',
+          widget: 'string',
+        },
+        {
+          name: 'invalidGiftFrom',
+          label: 'invalidGiftFrom',
+          widget: 'string',
+        },
+        {
           name: 'expirationMustBeFuture',
           label: 'expirationMustBeFuture',
           widget: 'string',
@@ -385,6 +403,11 @@ const homeConfig = {
         {
           name: 'bitbox',
           label: 'bitbox',
+          widget: 'string',
+        },
+        {
+          name: 'emailApiError',
+          label: 'emailApiError',
           widget: 'string',
         },
       ],

@@ -102,6 +102,7 @@ const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
+const emailQuery = `${giftsBackendBase}/emailpng`;
 
 const appStates = {
   initial: 0,
@@ -2415,11 +2416,13 @@ class GiftsPortal extends React.Component {
             status={tipWallet.status}
             share={this.shareTip}
             wifCopied={this.handleWifCopied}
+            emailApi={emailQuery}
             showGiftNames={showGiftNames}
             qrDots={qrDots}
             qrLogo={qrLogo}
             design={selectedGiftDesign}
             pngLoading={pngLoading}
+            formatMessage={formatMessage}
           />,
         );
       });
@@ -3168,7 +3171,7 @@ class GiftsPortal extends React.Component {
                     <BadgerWrap>
                       <Invoice
                         text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}
-                        sizeQR={250}
+                        sizeQR={windowWidth > 500 ? 250 : windowWidth / 3.2}
                         copyUri
                         paymentRequestUrl={invoiceUrl}
                         isRepeatable={false}

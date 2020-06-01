@@ -965,17 +965,6 @@
   resolved "https://npm.pkg.github.com/download/@bitcoin-portal/bitcoincom-pkg-theme/1.2.0/3eb9b186c86e9d68a60045c41b104559d8f830b1c3e863f1b1ff827acec12c12#29c1e4054c31b4dc3132dad65915328be42e0366"
   integrity sha512-krDlnhD0uY0gNVctgITHHB3x9c1GuKKVFn6rDv1J39PELG5KIBpRB2bkbahN7Yt6o5Q4BwV6HkSrb6Wnkop9zA==
 
-"@bitcoin-portal/bitcoincom-universal@^1.5.1-beta9":
-  version "1.5.1-beta9"
-  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/bitcoincom-universal/1.5.1-beta9/00b1c7d6537f424a2ee70758bd8f34c4f5b007e42ccbba3d18c22ffc5497ffc0#d207f6467dfbefd1086ecf6a08190eed467a4c35"
-  integrity sha512-44CTrH13ugwg7rTKapu3/67vAlayp/sysszxhOf5MMyvmqEYY7MSbULgD9kAyXxMkFsGVN/BHNLetJLpNxyZ+Q==
-  dependencies:
-    "@moonpay/browser" "^1.0.3"
-    bitcoincom-link "^0.1.10"
-    global "^4.4.0"
-    libphonenumber-js "^1.7.49"
-    react-stickynode "^2.1.1"
-
 "@bitcoin-portal/footer@^2.1.1":
   version "2.1.1"
   resolved "https://npm.pkg.github.com/download/@bitcoin-portal/footer/2.1.1/554d27a70e0ce55d7c85aa4bbbbd8279e0f1cd04d230492df7a6a863e91c47d9#2b00855dd5095cef675f6feb68f935d23ba09a13"
@@ -1283,11 +1272,6 @@
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/@mikaelkristiansson/domready/-/domready-1.0.10.tgz#f6d69866c0857664e70690d7a0bfedb72143adb5"
   integrity sha512-6cDuZeKSCSJ1KvfEQ25Y8OXUjqDJZ+HgUs6dhASWbAX8fxVraTfPsSeRe2bN+4QJDsgUaXaMWBYfRomCr04GGg==
-
-"@moonpay/browser@^1.0.3":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@moonpay/browser/-/browser-1.0.5.tgz#1b99bfd8588f3f29f8d97741847e5c78257ef361"
-  integrity sha512-q4ojdCCjXVRTiZbHbpGnqGcbI/fE45P4NhbSob0XA0QxRfwpbl/3qzQQwyT7vgicWvUO4d5rRB8Ct56M6fjErA==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -3023,10 +3007,10 @@ bitbox-sdk@^8.11.2:
     socket.io-client "^2.2.0"
     wif "^2.0.6"
 
-bitcoin-invoice-components@^0.19.0-beta:
-  version "0.19.0-beta"
-  resolved "https://registry.yarnpkg.com/bitcoin-invoice-components/-/bitcoin-invoice-components-0.19.0-beta.tgz#17363015d2f4d0393750264a73050709ae025590"
-  integrity sha512-xZSXZcfUJfhOUZ5auDVIfhzOaPUvaFN3INZi7KS3dZqrp4VcIw1ZGllnC0hJGeCosbsPPeZ/FcaMZa8LNZ55YQ==
+bitcoin-invoice-components@^0.21.0-beta:
+  version "0.21.0-beta"
+  resolved "https://registry.yarnpkg.com/bitcoin-invoice-components/-/bitcoin-invoice-components-0.21.0-beta.tgz#9d959e0c3701bfcc778b12c63277e06579c5120f"
+  integrity sha512-lO4HJYE7i8CHdzOu52J7yQDoU+9bmbSRRKEVwcGyZyCdtkeF53RuTJXctue8PAi26GkOpv0aqObA5KsTdRiU0w==
   dependencies:
     bignumber.js "^9.0.0"
     bitcoincom-link "^0.1.10"
@@ -7280,7 +7264,7 @@ global-prefix@^3.0.0:
     kind-of "^6.0.2"
     which "^1.3.1"
 
-global@^4.3.0, global@^4.4.0:
+global@^4.3.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/global/-/global-4.4.0.tgz#3e7b105179006a323ed71aafca3e9c57a5cc6406"
   integrity sha512-wv/LAoHdRE3BeTGz53FAamhGlPLhlssK45usmGFThIi4XqnBmjKQ16u+RNbP7WvigRZDxUsM0J3gcQ5yicaL0w==
@@ -9381,14 +9365,6 @@ levn@^0.3.0, levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
-
-libphonenumber-js@^1.7.49:
-  version "1.7.51"
-  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.7.51.tgz#e84901179a154c8074f9c01214dd80b859598d74"
-  integrity sha512-YrmFi5rLnSMKp2tM0FkjIHGAlHyUo8pRP8u4DeMseX+gXDY96q7sgfy/Ty54nv0BqObYKzPJBUq4LMMNESjfBA==
-  dependencies:
-    minimist "^1.2.5"
-    xml2js "^0.4.17"
 
 lie@3.1.1:
   version "3.1.1"
@@ -16614,25 +16590,12 @@ xml2js@0.4.17:
     sax ">=0.6.0"
     xmlbuilder "^4.1.0"
 
-xml2js@^0.4.17:
-  version "0.4.23"
-  resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.23.tgz#a0c69516752421eb2ac758ee4d4ccf58843eac66"
-  integrity sha512-ySPiMjM0+pLDftHgXY4By0uswI3SPKLDw/i3UXbnO8M/p28zqexCUoPmQFrYD+/1BzhGJSs2i1ERWKJAtiLrug==
-  dependencies:
-    sax ">=0.6.0"
-    xmlbuilder "~11.0.0"
-
 xmlbuilder@^4.1.0:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-4.2.1.tgz#aa58a3041a066f90eaa16c2f5389ff19f3f461a5"
   integrity sha1-qlijBBoGb5DqoWwvU4n/GfP0YaU=
   dependencies:
     lodash "^4.0.0"
-
-xmlbuilder@~11.0.0:
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-11.0.1.tgz#be9bae1c8a046e76b31127726347d0ad7002beb3"
-  integrity sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==
 
 xmlhttprequest-ssl@~1.5.4:
   version "1.5.5"

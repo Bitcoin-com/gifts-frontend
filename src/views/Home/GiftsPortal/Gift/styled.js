@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 import Popup from 'reactjs-popup';
-import { Paragraph } from '@bitcoin-portal/bitcoincom-pkg-components';
+import {
+  Paragraph,
+  TimesSolidThick,
+} from '@bitcoin-portal/bitcoincom-pkg-components';
 import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
 import gearIcon from '../../../../../static/images/uploads/gear3x.png';
@@ -11,6 +14,7 @@ import sweepIconOG from '../../../../../static/images/uploads/ic_receive_orange.
 import downloadIcon from '../../../../../static/images/uploads/download.png';
 import pdfIcon from '../../../../../static/images/uploads/pdf.png';
 import copypaste from '../../../../../static/images/uploads/copypaste.svg';
+import emailIcon from '../../../../../static/images/uploads/email.svg';
 
 const gifts = {
   background: colors.solid.zircon,
@@ -125,6 +129,21 @@ export const ShareMenuButtonCopy = styled.button`
     color: #000;
   }
 `;
+export const ShareMenuButtonEmail = styled.button`
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  color: #4d4d4d;
+  cursor: pointer;
+  background-color: transparent;
+  background: url(${emailIcon}) no-repeat 12px center;
+  border: none;
+  height: 100%;
+  & :hover {
+    background-color: #fff;
+    color: #000;
+  }
+`;
 export const ShareMenuList = styled.div`
   width: 130px;
   display: flex;
@@ -176,6 +195,68 @@ export const TipWrapper = styled.div`
 export const TipBorder = styled.div`
   border: 1px solid black;
 `;
+export const EmailError = styled.div`
+  position: absolute;
+  margin: auto;
+  padding: 24px;
+  bottom: 55px;
+  height: 221px;
+  width: 188px;
+  margin-top: 4px;
+  z-index: 5;
+  background: ${gifts.palette.background.uxalert};
+  & > p {
+    color: ${gifts.palette.text.uxalert};
+  }
+  color: ${gifts.palette.text.uxalert};
+  border: 2px solid ${gifts.palette.border.uxalert};
+`;
+export const EmailWrap = styled.form`
+  position: absolute;
+  bottom: 55px;
+  margin-top: 4px;
+  border: 1px solid black;
+  padding: 0px;
+  background-color: #f5f5f5;
+`;
+export const EmailCloseButton = styled.button`
+  position: absolute;
+  text-align: center;
+  right: 9px;
+  top: 9px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid black;
+  color: black;
+  background-color: grey;
+  opacity: 75%;
+  cursor: pointer;
+`;
+export const CloseIcon = styled(TimesSolidThick)`
+  margin-left: -6px;
+  margin-top: 1px;
+`;
+export const InputError = styled.div`
+  color: red;
+  font-size: 0.6rem;
+  margin-top: 0;
+  padding-top: 0;
+`;
+export const EmailInputWrap = styled.div`
+  padding: 4px 12px;
+`;
+export const InputLabel = styled.div`
+  text-align: left;
+  margin-bottom: 8px;
+  color: ${gifts.palette.text.secondary};
+  font-weight: 600;
+  font-size: 0.9rem;
+`;
+export const Red = styled.span`
+  color: #f44336;
+`;
+export const SendEmailButton = styled.button``;
 export const StatusWrap = styled.div`
   width: 100%;
   border-bottom-left-radius: 12px;
