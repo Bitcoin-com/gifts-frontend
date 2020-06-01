@@ -93,7 +93,9 @@
     "tableQty": "Quantity",
     "tableValue": "Value per gift",
     "tableCurrency": "Currency",
-    "tableExpiration": "Expiration"
+    "tableExpiration": "Expiration",
+    "giftFrom": "From",
+    "giftTo": "Email"
   },
   "chart": { "created": "created so far!", "gifts": "gifts", "worth": "worth" },
   "notifications": {
@@ -122,7 +124,8 @@
     "retry": "Retry",
     "makePdf": "Generate PDF",
     "getAddr": "(Import from {walletType})",
-    "logInBadger": "(Log in to Badger to paste address)"
+    "logInBadger": "(Log in to Badger to paste address)",
+    "send": "Send"
   },
   "placeholders": {
     "tipCount": "Enter desired number of gifts",
@@ -131,7 +134,9 @@
     "userConfirmedMnemonic": "Enter your 12-word seed",
     "userRefundAddress": "All swept gifts will be returned to this address.",
     "userRefundAddressOnCreate": "Unclaimed gifts return to this address",
-    "emailAddress": "Enter your email address"
+    "emailAddress": "Enter your email address",
+    "giftEmail": "email",
+    "from": "from"
   },
   "alerts": {
     "warning": "Warning!",
@@ -156,6 +161,8 @@
     "networkError": "Network error, the API at rest.bitcoin.com did not respond.",
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
     "invalidEmail": "Please enter a valid email address (or none at all)",
+    "invalidGiftEmail": "Invalid email",
+    "invalidGiftFrom": "Max 64 characters",
     "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
     "priceApiError": "Error obtaining BCH price in selected currency from price API.",
     "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!",

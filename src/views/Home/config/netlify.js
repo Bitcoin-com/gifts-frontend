@@ -207,6 +207,8 @@ const homeConfig = {
         { name: 'tableValue', label: 'tableValue', widget: 'string' },
         { name: 'tableCurrency', label: 'tableCurrency', widget: 'string' },
         { name: 'tableExpiration', label: 'tableExpiration', widget: 'string' },
+        { name: 'giftFrom', label: 'giftFrom', widget: 'string' },
+        { name: 'giftTo', label: 'giftTo', widget: 'string' },
       ],
     },
     {
@@ -254,6 +256,7 @@ const homeConfig = {
         { name: 'makePdf', label: 'makePdf', widget: 'string' },
         { name: 'getAddr', label: 'getAddr', widget: 'string' },
         { name: 'logInBadger', label: 'logInBadger', widget: 'string' },
+        { name: 'send', label: 'Send', widget: 'string' },
       ],
     },
     {
@@ -280,6 +283,8 @@ const homeConfig = {
           widget: 'string',
         },
         { name: 'emailAddress', label: 'emailAddress', widget: 'string' },
+        { name: 'giftEmail', label: 'giftEmail', widget: 'string' },
+        { name: 'from', label: 'from', widget: 'string' },
       ],
     },
     {
@@ -365,6 +370,16 @@ const homeConfig = {
         {
           name: 'invalidEmail',
           label: 'invalidEmail',
+          widget: 'string',
+        },
+        {
+          name: 'invalidGiftEmail',
+          label: 'invalidGiftEmail',
+          widget: 'string',
+        },
+        {
+          name: 'invalidGiftFrom',
+          label: 'invalidGiftFrom',
           widget: 'string',
         },
         {

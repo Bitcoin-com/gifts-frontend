@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Nav, Footer } from '@bitcoin-portal/bitcoincom-universal';
+import Navbar from '@bitcoin-portal/navbar';
+import Footer from '@bitcoin-portal/footer';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import themes from '@bitcoin-portal/bitcoincom-pkg-theme';
 import Intl from '../../i18n/hoc';
@@ -18,7 +19,7 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     color: ${({ theme }) => theme.palette.text.default};
-    
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: auto;
@@ -49,7 +50,7 @@ const Layout = props => {
 
   return (
     <Intl locale={locale} localeDir={localeDir}>
-      {showNav && <Nav locale={locale} />}
+      {showNav && <Navbar locale={locale} />}
       <ThemeProvider theme={providerTheme}>
         {/* <SEO /> */}
         <GlobalStyle />

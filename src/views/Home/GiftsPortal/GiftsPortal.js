@@ -96,12 +96,13 @@ const defaultRefundAddress =
 // Prod
 // const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
-// const giftsBackendBase = 'http://localhost:3001';
+const giftsBackendBase = 'http://localhost:3001';
 // Staging
-const giftsBackendBase = 'https://cashtips-api.btctest.net';
+// const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
+const emailQuery = `${giftsBackendBase}/emailpng`;
 
 const appStates = {
   initial: 0,
@@ -230,6 +231,7 @@ class GiftsPortal extends React.Component {
     this.processRetryPostReturnTxInfos = this.processRetryPostReturnTxInfos.bind(
       this,
     );
+    this.emailGift = this.emailGift.bind(this);
     this.shareTip = this.shareTip.bind(this);
     this.makePdf = this.makePdf.bind(this);
     this.handleSelectedExpirationDateChange = this.handleSelectedExpirationDateChange.bind(
@@ -961,6 +963,12 @@ class GiftsPortal extends React.Component {
         });
       },
     );
+  }
+
+  emailGift(e) {
+    e.preventDefault();
+    console.log(e);
+    console.log(e.target);
   }
 
   shareTip(e) {
@@ -2415,11 +2423,14 @@ class GiftsPortal extends React.Component {
             status={tipWallet.status}
             share={this.shareTip}
             wifCopied={this.handleWifCopied}
+            email={this.emailGift}
+            emailApi={emailQuery}
             showGiftNames={showGiftNames}
             qrDots={qrDots}
             qrLogo={qrLogo}
             design={selectedGiftDesign}
             pngLoading={pngLoading}
+            formatMessage={formatMessage}
           />,
         );
       });
@@ -3168,7 +3179,7 @@ class GiftsPortal extends React.Component {
                     <BadgerWrap>
                       <Invoice
                         text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}
-                        sizeQR={250}
+                        sizeQR={windowWidth > 500 ? 250 : windowWidth / 3.2}
                         copyUri
                         paymentRequestUrl={invoiceUrl}
                         isRepeatable={false}
