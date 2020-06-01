@@ -8,8 +8,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Bitcoin.com`,
-        short_name: `Bitcoin.com`,
+        name: `gifts.bitcoin.com`,
+        short_name: `Gifts`,
         start_url: `/`,
         display: `fullscreen`,
         background_color: `#fdfdfd`,
