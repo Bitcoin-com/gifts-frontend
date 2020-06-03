@@ -94,9 +94,9 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
-// const giftsBackendBase = 'http://localhost:3001';
+const giftsBackendBase = 'http://localhost:3001';
 // Staging
 // const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
@@ -3455,7 +3455,7 @@ class GiftsPortal extends React.Component {
                     className="noPrint"
                     design="primary"
                     onClick={this.makePdf}
-                    style={{ marginTop: '24px' }}
+                    style={{ marginTop: '105px' }}
                   >
                     <FormattedMessage id="home.buttons.makePdf" />
                   </Button>

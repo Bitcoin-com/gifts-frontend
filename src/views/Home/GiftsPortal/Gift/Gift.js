@@ -115,6 +115,9 @@ const Gift = ({
   // eslint-disable-next-line consistent-return
   async function postEmail(e) {
     e.preventDefault();
+    if (emailSuccess) {
+      return;
+    }
     setLoading(true);
     const { from, email } = data;
     // console.log(`from: ${from}, email: ${email}`);
@@ -126,7 +129,7 @@ const Gift = ({
 
     let isValidFrom = false;
 
-    if (from.length <= 144) {
+    if (from.length <= 64) {
       isValidFrom = true;
     }
     if (isValidEmail && isValidFrom) {
@@ -146,6 +149,9 @@ const Gift = ({
     emailPayload.append('giftWif', tipWallet.wif);
     emailPayload.append('sharedEmail', data.email);
     emailPayload.append('sharedBy', data.from);
+    emailPayload.append('fiatAmount', fiatAmount);
+    emailPayload.append('fiatCurrency', fiatCurrency);
+    emailPayload.append('expirationDate', expirationDate);
     emailPayload.append('giftImage', file);
 
     let postEmailResponse;
@@ -563,7 +569,7 @@ const Gift = ({
               })}
             />
             <InputError>
-              {data.from && data.from.length > 144 && (
+              {data.from && data.from.length > 64 && (
                 <FormattedMessage id="home.errors.invalidGiftFrom" />
               )}
             </InputError>
@@ -653,7 +659,7 @@ const Gift = ({
               </ShareButton>
             }
             position="bottom right"
-            on="hover"
+            on="click"
             closeOnDocumentClick
             mouseLeaveDelay={300}
             mouseEnterDelay={0}
