@@ -3455,7 +3455,7 @@ class GiftsPortal extends React.Component {
                     className="noPrint"
                     design="primary"
                     onClick={this.makePdf}
-                    style={{ marginTop: '24px' }}
+                    style={{ marginTop: '105px' }}
                   >
                     <FormattedMessage id="home.buttons.makePdf" />
                   </Button>

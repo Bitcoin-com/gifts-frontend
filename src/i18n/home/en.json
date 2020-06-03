@@ -95,7 +95,7 @@
     "tableValue": "Value per gift",
     "tableCurrency": "Currency",
     "tableExpiration": "Expiration",
-    "giftFrom": "Message",
+    "giftFrom": "From",
     "giftTo": "Email"
   },
   "chart": { "created": "created so far!", "gifts": "gifts", "worth": "worth" },
@@ -139,7 +139,7 @@
     "userRefundAddressOnCreate": "Unclaimed gifts return to this address",
     "emailAddress": "Enter your email address",
     "giftEmail": "email",
-    "from": "your note here"
+    "from": "your name"
   },
   "alerts": {
     "warning": "Warning!",
@@ -165,7 +165,7 @@
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
     "invalidEmail": "Please enter a valid email address (or none at all)",
     "invalidGiftEmail": "Invalid email",
-    "invalidGiftFrom": "Max 144 characters",
+    "invalidGiftFrom": "Max 64 characters",
     "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
     "priceApiError": "Error obtaining BCH price in selected currency from price API.",
     "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!",

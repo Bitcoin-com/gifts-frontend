@@ -116,6 +116,7 @@ export const ShareMenuButtonPDF = styled.button`
 `;
 export const ShareMenuButtonCopy = styled.button`
   width: 100%;
+  z-index: 10;
   outline: none;
   padding: 12px;
   color: #4d4d4d;
@@ -131,6 +132,7 @@ export const ShareMenuButtonCopy = styled.button`
 `;
 export const ShareMenuButtonEmail = styled.button`
   width: 100%;
+  z-index: 10;
   outline: none;
   padding: 12px;
   color: #4d4d4d;
@@ -378,7 +380,7 @@ export const StatusTdOldschool = styled.td`
   }
 `;
 export const ShareIcon = styled.img`
-  padding: 3px 3px 0px 5px;
+  padding: 6px 6px 0px 7px;
 `;
 export const ClaimedSpan = styled.div`
   padding: 65px 20px;
