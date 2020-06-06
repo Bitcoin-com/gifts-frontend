@@ -151,6 +151,7 @@ const Gift = ({
     emailPayload.append('giftAddress', tipWallet.addr);
     emailPayload.append('giftWif', tipWallet.wif);
     emailPayload.append('sharedEmail', email);
+    emailPayload.append('creatorEmail', '');
     emailPayload.append('sharedBy', from);
     emailPayload.append('memo', memo);
     emailPayload.append('fiatAmount', fiatAmount);

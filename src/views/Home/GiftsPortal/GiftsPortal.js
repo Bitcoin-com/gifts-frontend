@@ -1246,7 +1246,7 @@ class GiftsPortal extends React.Component {
           returnTxInfo.fiatCode = selectedCurrency;
           returnTxInfo.fiatAmount = fiatAmount;
           returnTxInfo.fiatRate = fiatRate;
-
+          returnTxInfo.source = 'gifts';
           returnTxInfo.email = formData.emailAddress.value;
           returnTxInfo.rawTx = returnRawTxs[i];
           returnTxInfo.expirationStamp = expirationStamp;
