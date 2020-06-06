@@ -182,7 +182,14 @@ export const CustomSelect = styled(Select)`
   min-width: 185px;
 `;
 
-export const ApiErrorPopup = styled(Popup)``;
+export const ApiErrorPopup = styled(Popup)`
+  &-content {
+    padding: 0px !important;
+    border: 0px !important;
+    max-width: 600px !important;
+    border-radius: 5px !important;
+  }
+`;
 export const CloseIcon = styled(TimesSolidThick)``;
 export const ApiErrorPopupCloser = styled.div`
   position: absolute;

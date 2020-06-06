@@ -2489,30 +2489,34 @@ class GiftsPortal extends React.Component {
         <PrintableSection>
           <ContentBlock>
             <ApiErrorPopup open={apiPostFailed}>
-              <ApiErrorPopupCloser>
-                <CloseIcon size={24} />
-              </ApiErrorPopupCloser>
-              <ApiErrorPopupMsg>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.alerts.warning" />
-                </ApiErrorWarning>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.alerts.giftDidNotPost" />
-                </ApiErrorWarning>
-              </ApiErrorPopupMsg>
+              <>
+                <ApiErrorPopupCloser>
+                  <CloseIcon size={24} />
+                </ApiErrorPopupCloser>
+                <ApiErrorPopupMsg>
+                  <ApiErrorWarning>
+                    <FormattedMessage id="home.alerts.warning" />
+                  </ApiErrorWarning>
+                  <ApiErrorWarning>
+                    <FormattedMessage id="home.alerts.giftDidNotPost" />
+                  </ApiErrorWarning>
+                </ApiErrorPopupMsg>
+              </>
             </ApiErrorPopup>
             <ApiErrorPopup open={createExpirationTxsFailed}>
-              <ApiErrorPopupCloser>
-                <CloseIcon size={24} />
-              </ApiErrorPopupCloser>
-              <ApiErrorPopupMsg>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.alerts.warning" />
-                </ApiErrorWarning>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.alerts.reclaim" />
-                </ApiErrorWarning>
-              </ApiErrorPopupMsg>
+              <>
+                <ApiErrorPopupCloser>
+                  <CloseIcon size={24} />
+                </ApiErrorPopupCloser>
+                <ApiErrorPopupMsg>
+                  <ApiErrorWarning>
+                    <FormattedMessage id="home.alerts.warning" />
+                  </ApiErrorWarning>
+                  <ApiErrorWarning>
+                    <FormattedMessage id="home.alerts.reclaim" />
+                  </ApiErrorWarning>
+                </ApiErrorPopupMsg>
+              </>
             </ApiErrorPopup>
             <ShowFlexContainerTwoCols
               show={fundingAddress === '' || importedMnemonic}

@@ -213,32 +213,12 @@ export const EmailError = styled.div`
   color: ${gifts.palette.text.uxalert};
   border: 2px solid ${gifts.palette.border.uxalert};
 `;
-export const EmailWrap = styled.form`
-  position: absolute;
-  bottom: 55px;
-  margin-top: 4px;
-  border: 1px solid black;
-  padding: 0px;
+
+export const PopupEmailForm = styled.form`
+  padding: 24px;
   background-color: #f5f5f5;
 `;
-export const EmailCloseButton = styled.button`
-  position: absolute;
-  text-align: center;
-  right: 9px;
-  top: 9px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid black;
-  color: black;
-  background-color: grey;
-  opacity: 75%;
-  cursor: pointer;
-`;
-export const CloseIcon = styled(TimesSolidThick)`
-  margin-left: -6px;
-  margin-top: 1px;
-`;
+
 export const InputError = styled.div`
   color: red;
   font-size: 0.6rem;
@@ -546,4 +526,31 @@ export const Text = styled(Paragraph)`
   ${media.md`
     margin-top: ${gifts.spacing.unit * 3}px;
   `}
+`;
+
+export const EmailPopup = styled(Popup)`
+  &-content {
+    width: 75% !important;
+    padding: 0px !important;
+    max-width: 600px !important;
+    border-radius: 5px !important;
+  }
+`;
+export const EmailCloseIcon = styled(TimesSolidThick)``;
+export const EmailPopupCloser = styled.div`
+  position: absolute;
+  right: -18px;
+  top: -18px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid black;
+  color: black;
+  background-color: grey;
+  opacity: 75%;
+  pointer-events: none;
+  & > h5 {
+    margin: auto;
+    padding-bottom: 0;
+  }
 `;

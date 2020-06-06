@@ -21,12 +21,9 @@ import {
   TipExchangeRate,
   TipExchangeRateThrowback,
   TipExchangeRateEZ,
-  EmailWrap,
   EmailError,
   EmailInputWrap,
-  EmailCloseButton,
   InputLabel,
-  CloseIcon,
   Red,
   StatusWrap,
   ClaimedBlock,
@@ -59,6 +56,10 @@ import {
   ShareMenuButtonEmail,
   LogoFooter,
   InputError,
+  EmailPopup,
+  EmailCloseIcon,
+  EmailPopupCloser,
+  PopupEmailForm,
   // ShareMenuButtonLink,
 } from './styled';
 import bchLogo from '../../../../../static/images/uploads/bch-icon-qrcode.png';
@@ -90,6 +91,7 @@ const Gift = ({
   const [data, setData] = React.useState({
     email: '',
     from: '',
+    memo: '',
   });
 
   const [loading, setLoading] = React.useState(false);
@@ -119,7 +121,7 @@ const Gift = ({
       return;
     }
     setLoading(true);
-    const { from, email } = data;
+    const { from, email, memo } = data;
     // console.log(`from: ${from}, email: ${email}`);
 
     // test email
@@ -136,6 +138,7 @@ const Gift = ({
       // console.log(`Good data. Creating API request.`);
     } else {
       setLoading(false);
+      // eslint-disable-next-line consistent-return
       return console.log(`Bad data. Exiting function.`);
     }
     // Get image
@@ -147,11 +150,13 @@ const Gift = ({
     const emailPayload = new FormData();
     emailPayload.append('giftAddress', tipWallet.addr);
     emailPayload.append('giftWif', tipWallet.wif);
-    emailPayload.append('sharedEmail', data.email);
-    emailPayload.append('sharedBy', data.from);
+    emailPayload.append('sharedEmail', email);
+    emailPayload.append('sharedBy', from);
+    emailPayload.append('memo', memo);
     emailPayload.append('fiatAmount', fiatAmount);
     emailPayload.append('fiatCurrency', fiatCurrency);
     emailPayload.append('expirationDate', expirationDate);
+    emailPayload.append('source', 'gifts');
     emailPayload.append('giftImage', file);
 
     let postEmailResponse;
@@ -192,6 +197,95 @@ const Gift = ({
       className={tipWallet.status === 'unclaimed' ? 'print' : 'printHide'}
     >
       <TipBorder>
+        <EmailPopup open={showEmail} onClose={toggleEmail}>
+          <>
+            <EmailPopupCloser>
+              <EmailCloseIcon size={24} />
+            </EmailPopupCloser>
+            <PopupEmailForm className="printHide">
+              <EmailInputWrap>
+                <InputLabel style={{ paddingTop: '8px' }}>
+                  <FormattedMessage id="home.labels.giftTo" /> <Red>*</Red>
+                </InputLabel>
+                <Input
+                  style={{ marginTop: '0px' }}
+                  disabled={emailSuccess}
+                  type="text"
+                  name="email"
+                  onChange={e => handleChange(e)}
+                  placeholder={formatMessage({
+                    id: 'home.placeholders.giftEmail',
+                  })}
+                />
+                <InputError>
+                  {/* eslint-disable-next-line no-useless-escape */}
+                  {!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+                    String(data.email).toLowerCase(),
+                  ) &&
+                    data.email !== '' && (
+                      <FormattedMessage id="home.errors.invalidGiftEmail" />
+                    )}
+                </InputError>
+              </EmailInputWrap>
+              <EmailInputWrap>
+                <InputLabel>
+                  <FormattedMessage id="home.labels.giftFrom" /> <Red>*</Red>
+                </InputLabel>
+                <Input
+                  style={{ marginTop: '0px' }}
+                  type="text"
+                  name="from"
+                  disabled={emailSuccess}
+                  onChange={e => handleChange(e)}
+                  placeholder={formatMessage({
+                    id: 'home.placeholders.from',
+                  })}
+                />
+                <InputError>
+                  {data.from && data.from.length > 64 && (
+                    <FormattedMessage id="home.errors.invalidGiftFrom" />
+                  )}
+                </InputError>
+              </EmailInputWrap>
+              <EmailInputWrap>
+                <InputLabel>
+                  <FormattedMessage id="home.labels.giftMemo" /> <Red>*</Red>
+                </InputLabel>
+                <Input
+                  style={{ marginTop: '0px' }}
+                  type="text"
+                  name="memo"
+                  disabled={emailSuccess}
+                  onChange={e => handleChange(e)}
+                  placeholder={formatMessage({
+                    id: 'home.placeholders.memo',
+                  })}
+                />
+                <InputError>
+                  {data.memo && data.memo.length > 144 && (
+                    <FormattedMessage id="home.errors.invalidGiftMemo" />
+                  )}
+                </InputError>
+              </EmailInputWrap>
+              {loading ? (
+                <Loader style={{ margin: 'auto', display: 'block' }} />
+              ) : (
+                <Button
+                  design="primary"
+                  style={{ margin: 'auto', display: 'block' }}
+                  onClick={postEmail}
+                  disabled={emailSuccess}
+                >
+                  {emailSuccess ? (
+                    <FormattedMessage id="home.buttons.emailSuccess" />
+                  ) : (
+                    <FormattedMessage id="home.buttons.send" />
+                  )}
+                </Button>
+              )}
+            </PopupEmailForm>
+          </>
+        </EmailPopup>
         {design === 'default' && (
           <>
             <SnapshotHolder id={tipWallet.addr.substr(12)}>
@@ -525,72 +619,6 @@ const Gift = ({
           </Button>
         </EmailError>
       )}
-      {showEmail && (
-        <EmailWrap className="printHide">
-          <EmailCloseButton onClick={toggleEmail}>
-            <CloseIcon size={16} />
-          </EmailCloseButton>
-          <EmailInputWrap>
-            <InputLabel style={{ paddingTop: '8px' }}>
-              <FormattedMessage id="home.labels.giftTo" /> <Red>*</Red>
-            </InputLabel>
-            <Input
-              style={{ marginTop: '0px' }}
-              disabled={emailSuccess}
-              type="text"
-              name="email"
-              onChange={e => handleChange(e)}
-              placeholder={formatMessage({
-                id: 'home.placeholders.giftEmail',
-              })}
-            />
-            <InputError>
-              {/* eslint-disable-next-line no-useless-escape */}
-              {!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-                String(data.email).toLowerCase(),
-              ) &&
-                data.email !== '' && (
-                  <FormattedMessage id="home.errors.invalidGiftEmail" />
-                )}
-            </InputError>
-          </EmailInputWrap>
-          <EmailInputWrap>
-            <InputLabel>
-              <FormattedMessage id="home.labels.giftFrom" /> <Red>*</Red>
-            </InputLabel>
-            <Input
-              style={{ marginTop: '0px' }}
-              type="text"
-              name="from"
-              disabled={emailSuccess}
-              onChange={e => handleChange(e)}
-              placeholder={formatMessage({
-                id: 'home.placeholders.from',
-              })}
-            />
-            <InputError>
-              {data.from && data.from.length > 64 && (
-                <FormattedMessage id="home.errors.invalidGiftFrom" />
-              )}
-            </InputError>
-            {loading ? (
-              <Loader style={{ margin: 'auto', display: 'block' }} />
-            ) : (
-              <Button
-                design="primary"
-                onClick={postEmail}
-                disabled={emailSuccess}
-              >
-                {emailSuccess ? (
-                  <FormattedMessage id="home.buttons.emailSuccess" />
-                ) : (
-                  <FormattedMessage id="home.buttons.send" />
-                )}
-              </Button>
-            )}
-          </EmailInputWrap>
-        </EmailWrap>
-      )}
 
       <StatusWrap className="printHide">
         <StatusTable>
@@ -647,7 +675,7 @@ const Gift = ({
               <LabelTd>
                 <FormattedMessage id="home.gift.label" />:
               </LabelTd>
-              <StatusTd>{tipWallet.callsign}</StatusTd>
+              <StatusTd>{tipWallet.callsign.substr(0, 23)}</StatusTd>
             </tr>
           </tbody>
         </StatusTable>

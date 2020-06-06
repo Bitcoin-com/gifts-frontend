@@ -210,6 +210,7 @@ const homeConfig = {
         { name: 'tableExpiration', label: 'tableExpiration', widget: 'string' },
         { name: 'giftFrom', label: 'giftFrom', widget: 'string' },
         { name: 'giftTo', label: 'giftTo', widget: 'string' },
+        { name: 'giftMemo', label: 'giftMemo', widget: 'string' },
       ],
     },
     {
@@ -288,6 +289,7 @@ const homeConfig = {
         { name: 'emailAddress', label: 'emailAddress', widget: 'string' },
         { name: 'giftEmail', label: 'giftEmail', widget: 'string' },
         { name: 'from', label: 'from', widget: 'string' },
+        { name: 'memo', label: 'Memo', widget: 'string' },
       ],
     },
     {
@@ -383,6 +385,11 @@ const homeConfig = {
         {
           name: 'invalidGiftFrom',
           label: 'invalidGiftFrom',
+          widget: 'string',
+        },
+        {
+          name: 'invalidGiftMemo',
+          label: 'invalidGiftMemo',
           widget: 'string',
         },
         {
