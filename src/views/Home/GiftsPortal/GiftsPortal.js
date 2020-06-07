@@ -94,11 +94,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -1274,7 +1274,12 @@ class GiftsPortal extends React.Component {
 
   // eslint-disable-next-line consistent-return
   invoiceSuccess(e = 'default') {
-    const { tipWallets } = this.state;
+    const { tipWallets, tipsFunded } = this.state;
+    if (tipsFunded) {
+      return console.log(
+        `Taking no action from invoiceSuccess(), function already executed`,
+      );
+    }
     let invoiceTxid = '';
     if (e.length === 64) {
       invoiceTxid = e;
@@ -1395,6 +1400,9 @@ class GiftsPortal extends React.Component {
     // Build this for the case of "you just made the tips" first; simpler than the import case
     const { formData, tipWallets } = this.state;
     const refundAddress = formData.userRefundAddress.value;
+    if (formData.userRefundAddress.state !== 1) {
+      return this.setState({ sweepingGifts: false });
+    }
     // Scan through tip wallets by wif, see if there is money to sweep, and output a new object
     // of what you need to build your sweeping tx
     const sweepBuilder = [];
@@ -1554,6 +1562,7 @@ class GiftsPortal extends React.Component {
   }
 
   appStateInitial() {
+    window.scrollTo(0, 0);
     this.setState({
       formData: merge({}, this.initialFormData),
       walletInfo: {
