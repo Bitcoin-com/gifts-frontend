@@ -39,7 +39,7 @@ export const currencies = [
   {
     value: 'ANG',
     label: 'ANG - Netherlands Antillean Guilder',
-    image: <Flag country="an" width={16} />,
+    image: <Flag country="nl" width={16} />,
   },
   {
     value: 'AOA',
@@ -774,32 +774,32 @@ export const currencies = [
   {
     value: 'XAF',
     label: 'XAF - CFA Franc BEAC',
-    image: <Flag country="xa" width={16} />,
+    image: <Flag country="cm" width={16} />,
   },
   {
     value: 'XAG',
     label: 'XAG - Silver (troy ounce)',
-    image: <Flag country="xa" width={16} />,
+    image: <Flag country="ch" width={16} />,
   },
   {
     value: 'XAU',
     label: 'XAU - Gold (troy ounce)',
-    image: <Flag country="xa" width={16} />,
+    image: <Flag country="ch" width={16} />,
   },
   {
     value: 'XCD',
     label: 'XCD - East Caribbean Dollar',
-    image: <Flag country="xc" width={16} />,
+    image: <Flag country="kn" width={16} />,
   },
   {
     value: 'XOF',
     label: 'XOF - CFA Franc BCEAO',
-    image: <Flag country="xo" width={16} />,
+    image: <Flag country="bj" width={16} />,
   },
   {
     value: 'XPF',
     label: 'XPF - CFP Franc',
-    image: <Flag country="xp" width={16} />,
+    image: <Flag country="fr" width={16} />,
   },
   {
     value: 'YER',

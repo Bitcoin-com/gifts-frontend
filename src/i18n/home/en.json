@@ -168,11 +168,13 @@
     "invalidEmail": "Please enter a valid email address (or none at all)",
     "invalidGiftEmail": "Invalid email",
     "invalidGiftFrom": "Max 64 characters",
-    "invalidGiftMemo": "Max 144 characters",
+    "invalidGiftMemo": "Max 500 characters",
     "expirationMustBeFuture": "Expiration date must be more than one hour from now.",
     "priceApiError": "Error obtaining BCH price in selected currency from price API.",
     "cannotSweep": "Error: Cannot sweep tips, all gifts have already been claimed!",
     "bitbox": "Error querying Bitbox to create sweep transaction.",
-    "emailApiError": "Error sending email. Please try again later."
+    "emailApiError": "Error sending email. Please try again later.",
+    "remaining": "characters remaining",
+    "over": "characters over"
   }
 }

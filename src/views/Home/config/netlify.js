@@ -417,6 +417,16 @@ const homeConfig = {
           label: 'emailApiError',
           widget: 'string',
         },
+        {
+          name: 'remaining',
+          label: 'remaining',
+          widget: 'string',
+        },
+        {
+          name: 'over',
+          label: 'over',
+          widget: 'string',
+        },
       ],
     },
     fieldNewsletter,

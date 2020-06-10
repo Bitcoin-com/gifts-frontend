@@ -262,8 +262,20 @@ const Gift = ({
                     id: 'home.placeholders.memo',
                   })}
                 />
+                {data.memo.length > 0 && data.memo.length <= 500 && (
+                  <InputError style={{ color: 'black' }}>
+                    {500 - data.memo.length}{' '}
+                    <FormattedMessage id="home.errors.remaining" />
+                  </InputError>
+                )}
+                {data.memo.length > 500 && (
+                  <InputError>
+                    {data.memo.length - 500}{' '}
+                    <FormattedMessage id="home.errors.over" />
+                  </InputError>
+                )}
                 <InputError>
-                  {data.memo && data.memo.length > 144 && (
+                  {data.memo && data.memo.length > 500 && (
                     <FormattedMessage id="home.errors.invalidGiftMemo" />
                   )}
                 </InputError>
