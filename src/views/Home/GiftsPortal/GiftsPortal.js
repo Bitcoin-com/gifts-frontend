@@ -94,11 +94,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -186,6 +186,9 @@ class GiftsPortal extends React.Component {
     this.importMnemonic = this.importMnemonic.bind(this);
     this.handleCancelInvoice = this.handleCancelInvoice.bind(this);
     this.invoiceSuccess = this.invoiceSuccess.bind(this);
+    this.invoiceSuccesInThreeSeconds = this.invoiceSuccesInThreeSeconds.bind(
+      this,
+    );
 
     this.handleUserConfirmedMnemonicChange = this.handleUserConfirmedMnemonicChange.bind(
       this,
@@ -808,7 +811,10 @@ class GiftsPortal extends React.Component {
           // stop watching the interval
           clearInterval(invoiceInterval);
           // return invoiceSuccess
-          this.setState({ invoiceInterval: null }, this.invoiceSuccess());
+          this.setState(
+            { invoiceInterval: null },
+            this.invoiceSuccess('default', 'tx-watcher'),
+          );
         }
       },
       err => {
@@ -1272,8 +1278,19 @@ class GiftsPortal extends React.Component {
     // might be best to do this step in the txbuilder loop
   }
 
+  // if invoiceSuccess is called from invoice method, wait 5 seconds
+  invoiceSuccesInThreeSeconds() {
+    // Wait 3s as this is long enough to know if tipsFunded has been updated already
+    // console.log(`Invoice payment registered from invoice at ${Date.now()}`);
+    // console.log(`Firing invoiceSuccess in 3s`);
+
+    setTimeout(this.invoiceSuccess, 3000);
+  }
+
   // eslint-disable-next-line consistent-return
-  invoiceSuccess(e = 'default') {
+  invoiceSuccess(e = 'default', source = 'bitcoin-invoice-components') {
+    // console.log(`invoiceSuccess executed from ${source} at ${Date.now()}`);
+
     const { tipWallets, tipsFunded } = this.state;
     if (tipsFunded) {
       return console.log(
@@ -3188,7 +3205,8 @@ class GiftsPortal extends React.Component {
                         copyUri
                         paymentRequestUrl={invoiceUrl}
                         isRepeatable={false}
-                        successFn={this.invoiceSuccess}
+                        successFn={this.invoiceSuccesInThreeSeconds}
+                        currency={selectedCurrency}
                       />
                     </BadgerWrap>
                     {!tipsFunded && (
