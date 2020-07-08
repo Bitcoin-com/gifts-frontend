@@ -94,11 +94,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -3203,6 +3203,7 @@ class GiftsPortal extends React.Component {
                         text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}
                         sizeQR={windowWidth > 500 ? 250 : windowWidth / 3.2}
                         copyUri
+                        linkAvailable={isWalletAvailable}
                         paymentRequestUrl={invoiceUrl}
                         isRepeatable={false}
                         successFn={this.invoiceSuccesInThreeSeconds}
@@ -3212,17 +3213,6 @@ class GiftsPortal extends React.Component {
                     {!tipsFunded && (
                       <>
                         <StackedButtons>
-                          <MobileShowButton
-                            show={!tipsFunded}
-                            design="primary"
-                            href={invoiceUri}
-                            style={{
-                              marginBottom: '12px',
-                            }}
-                          >
-                            <FormattedMessage id="home.buttons.mobilePay" />
-                          </MobileShowButton>
-
                           <ShowButton
                             show={!tipsFunded}
                             design="dark"
