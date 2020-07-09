@@ -42,6 +42,7 @@
     "@bitcoin-portal/bitcoincom-pkg-theme": "^1.2.0",
     "@bitcoin-portal/footer": "^2.1.1",
     "@bitcoin-portal/navbar": "^2.1.0-RC4",
+    "@bitcoin-portal/wallet-link-internal-api": "^0.0.1-gamma17",
     "@react-pdf/renderer": "^1.6.8",
     "@react-pdf/styled-components": "^1.4.0",
     "babel-plugin-styled-components": "^1.10.7",

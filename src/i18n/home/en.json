@@ -22,6 +22,7 @@
   },
   "header": {
     "title": "Bitcoin.com Gifts",
+    "importingSeed": "Mnemonic found. Importing...",
     "description": "Create and manage Bitcoin Cash (BCH) Gifts. Unredeemed Gifts are automatically returned!",
     "count": "<b>{giftsCreated}</b> gifts worth <b>{giftsBch} BCH</b> created so far!"
   },
@@ -40,7 +41,8 @@
     "seed": {
       "title": "Save Your Recovery Seed",
       "reminder": "Save this 12-word seed to access your gifts in the future",
-      "warning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!"
+      "warning": "Bitcoin.com never has access to your seed and we cannot help you if you lose it!",
+      "mobileWarning": "We have sent a message to your Wallet Inbox 🔔 with this recovery seed."
     },
     "build": { "title": "Build Your Gifts" },
     "confirm": { "title": "Confirm Your Recovery Seed" },

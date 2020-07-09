@@ -980,6 +980,11 @@
   dependencies:
     react-stickynode "^2.1.1"
 
+"@bitcoin-portal/wallet-link-internal-api@^0.0.1-gamma17":
+  version "0.0.1-gamma17"
+  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/wallet-link-internal-api/0.0.1-gamma17/500fc48e35e2e5aa7126cc1536364c4a271328176a7f54eb9e48f4a8cdd913d5#124a36d73b1d7422ddc1e008849c940e24c85a78"
+  integrity sha512-oOL+5cH8ai0lxOaYP3GP7V/xiDcyTxpem7atDoZN1j8BuRmX7ffzGAAHqtqJnpNtYx6hTYrEuhFyQ1MYa+QuVA==
+
 "@emotion/babel-utils@^0.6.4":
   version "0.6.10"
   resolved "https://registry.yarnpkg.com/@emotion/babel-utils/-/babel-utils-0.6.10.tgz#83dbf3dfa933fae9fc566e54fbb45f14674c6ccc"

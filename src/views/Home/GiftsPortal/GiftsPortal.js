@@ -4,6 +4,7 @@ import { injectIntl, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BITBOX } from 'bitbox-sdk';
 import { Invoice } from 'bitcoin-invoice-components';
+import * as internal from '@bitcoin-portal/wallet-link-internal-api';
 import bitcoincomLink from 'bitcoincom-link';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
@@ -94,11 +95,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-// const giftsBackendBase = 'https://cashtips-api.btctest.net';
+const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -247,6 +248,7 @@ class GiftsPortal extends React.Component {
     this.getWalletLinkStatus = this.getWalletLinkStatus.bind(this);
     this.getGiftsStats = this.getGiftsStats.bind(this);
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    this.checkForMnemonic = this.checkForMnemonic.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -302,6 +304,7 @@ class GiftsPortal extends React.Component {
       badgerLoginCheckInterval: null,
       stats: {},
       windowWidth: 0,
+      checkingUrlParams: false,
     };
   }
 
@@ -310,6 +313,7 @@ class GiftsPortal extends React.Component {
     this.getWalletLinkStatus();
     this.getGiftsStats();
     this.updateWindowDimensions();
+    this.checkForMnemonic();
     window.addEventListener('resize', this.updateWindowDimensions);
   }
 
@@ -664,6 +668,35 @@ class GiftsPortal extends React.Component {
     }
     return field;
   };
+
+  // eslint-disable-next-line consistent-return
+  checkForMnemonic() {
+    const url = window.location.href;
+    const urlObj = new URL(url);
+    // console.log(urlObj);
+    const mnemonicFromUrl = urlObj.searchParams.get('mnemonic');
+    if (mnemonicFromUrl === null) {
+      return this.setState({ checkingUrlParams: false });
+    }
+    // console.log(`mnemonicFromUrl: ${mnemonicFromUrl}`);
+    // parse it
+    const parsedMnemonic = mnemonicFromUrl.split(',').join(' ');
+
+    // test it
+    // console.log(bitbox.Mnemonic.validate(parsedMnemonic) === 'Valid mnemonic');
+    // Response if word is wrong
+    // test1 is not in wordlist, did you mean test?
+    if (bitbox.Mnemonic.validate(parsedMnemonic) === 'Valid mnemonic') {
+      this.setState({ checkingUrlParams: true });
+      // console.log('Mnemonic is valid');
+      // run importmnemonic right here
+      this.importMnemonic(parsedMnemonic);
+    } else {
+      // console.log(`Mnemonic is not valid!`);
+      // console.log(bitbox.Mnemonic.validate(parsedMnemonic));
+      this.setState({ checkingUrlParams: false });
+    }
+  }
 
   updateWindowDimensions() {
     this.setState({
@@ -1627,6 +1660,7 @@ class GiftsPortal extends React.Component {
       isWalletLoggedIn: false,
       walletType: '',
       badgerLoginCheckInterval: null,
+      checkingUrlParams: false,
       // stats: {}, do not reset stats
     });
   }
@@ -1702,7 +1736,7 @@ class GiftsPortal extends React.Component {
 
   generateNewWallet() {
     this.setDefaultExpirationDate();
-    const { walletInfo } = this.state;
+    const { walletInfo, isWalletAvailable, walletType } = this.state;
     const entropy = bitbox.Crypto.randomBytes(16);
 
     // turn entropy to 12 word mnemonic
@@ -1727,15 +1761,40 @@ class GiftsPortal extends React.Component {
     walletInfo.mnemonic = mnemonic;
     walletInfo.masterHDNode = masterHDNode;
 
-    this.setState({
-      walletInfo,
-      fundingAddress,
-      appState: appStates.seedGenerated,
-    });
+    // If android or ios link environment, skip the mnemonic step
+    if (isWalletAvailable) {
+      if (
+        walletType === 'android' ||
+        walletType === 'ios'
+        // For dev purposes, get badger in this gate
+        // || walletType === 'badger'
+      ) {
+        this.setState({
+          walletInfo,
+          fundingAddress,
+          appState: appStates.seedConfirmed,
+        });
+      } else {
+        // If it's just badger, ask for mnemonic confirmation
+        this.setState({
+          walletInfo,
+          fundingAddress,
+          appState: appStates.seedGenerated,
+        });
+      }
+      // skip mnemonic step
+    } else {
+      // If you don't have badger or anything, also ask for mnemonic confirmation
+      this.setState({
+        walletInfo,
+        fundingAddress,
+        appState: appStates.seedGenerated,
+      });
+    }
   }
 
   // eslint-disable-next-line consistent-return
-  async importMnemonic() {
+  async importMnemonic(paramSeed = '') {
     const {
       intl: { formatMessage },
     } = this.props;
@@ -1760,9 +1819,12 @@ class GiftsPortal extends React.Component {
 
     // reset to 0 in case the user is importing with tips already on the page
 
-    if (formData.importedMnemonic.state !== 1) {
+    if (formData.importedMnemonic.state !== 1 && paramSeed === '') {
       // console.log(`Invalid Mnemonic, kicked out of function`);
-      return this.setState({ importingMnemonic: false });
+      return this.setState({
+        importingMnemonic: false,
+        checkingUrlParams: false,
+      });
     }
 
     // If user has already swept tips, remove that notice on refresh
@@ -1776,7 +1838,11 @@ class GiftsPortal extends React.Component {
       this.setState({ showSweepForm: false });
     }
     // Use already-validated user mnemonic
-    const mnemonic = formData.importedMnemonic.value;
+    let mnemonic = formData.importedMnemonic.value;
+
+    if (paramSeed !== '') {
+      mnemonic = paramSeed;
+    }
 
     // console.log(mnemonic);
 
@@ -1989,7 +2055,10 @@ class GiftsPortal extends React.Component {
         } catch (err) {
           console.log(`Error in bitbox.Address.details[potentialTipDetails]`);
           console.log(err);
-          return this.setState({ importingMnemonic: false });
+          return this.setState({
+            importingMnemonic: false,
+            checkingUrlParams: false,
+          });
         }
       } else {
         // there is no tx history at the first address
@@ -2008,6 +2077,7 @@ class GiftsPortal extends React.Component {
             importedMnemonic: noTipsAtMnemonic,
           },
           importingMnemonic: false,
+          checkingUrlParams: false,
         });
       }
     } catch (err) {
@@ -2018,6 +2088,7 @@ class GiftsPortal extends React.Component {
           id: 'home.errors.networkError',
         }),
         importingMnemonic: false,
+        checkingUrlParams: false,
       });
     }
 
@@ -2038,6 +2109,7 @@ class GiftsPortal extends React.Component {
           id: 'home.errors.priceApiError',
         }),
         importingMnemonic: false,
+        checkingUrlParams: false,
       });
     }
 
@@ -2053,6 +2125,7 @@ class GiftsPortal extends React.Component {
           id: 'home.errors.priceApiError',
         }),
         importingMnemonic: false,
+        checkingUrlParams: false,
       });
     }
 
@@ -2082,6 +2155,7 @@ class GiftsPortal extends React.Component {
         tipsClaimedCount: claimedTipCount,
         tipsAlreadySweptError: allTipsSwept,
         importingMnemonic: false,
+        checkingUrlParams: false,
       },
       this.subscribeToGifts(tipWallets),
     );
@@ -2113,9 +2187,53 @@ class GiftsPortal extends React.Component {
     const {
       intl: { formatMessage },
     } = this.props;
-    const { formData, walletInfo, selectedCurrency } = this.state;
+    const {
+      formData,
+      walletInfo,
+      selectedCurrency,
+      isWalletAvailable,
+      walletType,
+    } = this.state;
     const { masterHDNode, derivePath } = walletInfo;
     this.setState({ generatingInvoice: true });
+
+    // If mobile wallet, save mnemonic to inbox
+    if (isWalletAvailable) {
+      if (
+        walletType === 'android' ||
+        walletType === 'ios' ||
+        walletType === 'badger'
+      ) {
+        // Determine URL for importing this seed
+        const autoImportUrl = `${
+          window.location.href
+        }?mnemonic=${walletInfo.mnemonic.split(' ').join(',')}`;
+        console.log(`autoImportUrl: ${autoImportUrl}`);
+        // Save mnemonic to inbox
+        const inboxMessage = {
+          url: autoImportUrl,
+          title: `Your Gifts Mnemonic`,
+          description: `${walletInfo.mnemonic}`,
+          image:
+            'https://dashboard-images.cloud.bitcoin.com/a16000c53c60ca2e8060c67ab27bf237.png',
+          data: {
+            mnemonic: walletInfo.mnemonic,
+          },
+        };
+        internal
+          .saveInbox(inboxMessage)
+          .then(result => {
+            console.log(result);
+            console.log(`Successfully saved inbox message:`);
+            console.log(inboxMessage);
+          })
+          .catch(error => {
+            console.log(error);
+            console.log(`Error saving inbox message:`);
+            console.log(inboxMessage);
+          });
+      }
+    }
 
     if (formData.tipAmountFiat.value === '') {
       return this.setState({ generatingInvoice: false });
@@ -2310,6 +2428,7 @@ class GiftsPortal extends React.Component {
       // invoiceTxid,
       generatingInvoice,
       importingMnemonic,
+      checkingUrlParams,
       apiPostFailed,
       createExpirationTxsFailed,
       customExpirationDate,
@@ -2497,951 +2616,1067 @@ class GiftsPortal extends React.Component {
 
     return (
       <>
-        {appState === appStates.initial && !importedMnemonic && (
-          <HeaderSection>
-            <ContentBlock>
-              <H2>
-                <FormattedMessage id="home.header.title" />
-              </H2>
-              <Paragraph>
-                <FormattedMessage id="home.header.description" />
-              </Paragraph>
-              <Link href="/faq">
-                <FormattedMessage id="home.links.faq" />
-              </Link>
-            </ContentBlock>
-          </HeaderSection>
-        )}
-        <PrintableSection>
-          <ContentBlock>
-            <ApiErrorPopup open={apiPostFailed}>
-              <>
-                <ApiErrorPopupCloser>
-                  <CloseIcon size={24} />
-                </ApiErrorPopupCloser>
-                <ApiErrorPopupMsg>
-                  <ApiErrorWarning>
-                    <FormattedMessage id="home.alerts.warning" />
-                  </ApiErrorWarning>
-                  <ApiErrorWarning>
-                    <FormattedMessage id="home.alerts.giftDidNotPost" />
-                  </ApiErrorWarning>
-                </ApiErrorPopupMsg>
-              </>
-            </ApiErrorPopup>
-            <ApiErrorPopup open={createExpirationTxsFailed}>
-              <>
-                <ApiErrorPopupCloser>
-                  <CloseIcon size={24} />
-                </ApiErrorPopupCloser>
-                <ApiErrorPopupMsg>
-                  <ApiErrorWarning>
-                    <FormattedMessage id="home.alerts.warning" />
-                  </ApiErrorWarning>
-                  <ApiErrorWarning>
-                    <FormattedMessage id="home.alerts.reclaim" />
-                  </ApiErrorWarning>
-                </ApiErrorPopupMsg>
-              </>
-            </ApiErrorPopup>
-            <ShowFlexContainerTwoCols
-              show={fundingAddress === '' || importedMnemonic}
-              columns={!importedMnemonic ? 2 : 1}
-            >
-              <ShowCard centered padded show={!importedMnemonic}>
-                <H3>
-                  <FormattedMessage id="home.cards.new.title" />
+        {checkingUrlParams ? (
+          <>
+            <HeaderSection key="first">
+              <ContentBlock>
+                <H3 style={{ textAlign: 'center' }}>
+                  <FormattedMessage id="home.header.importingSeed" />
                 </H3>
-                <Button design="primary" onClick={this.generateNewWallet}>
-                  <FormattedMessage id="home.buttons.createTips" />
-                </Button>
-              </ShowCard>
-              <Card padded centered>
-                <H3>
-                  <FormattedMessage id="home.cards.manage.title" />
-                </H3>
-                <InputWrapper show>
-                  <Input
-                    name="importedMnemonic"
-                    type="text"
-                    value={formData.importedMnemonic.value}
-                    onChange={this.handleImportedMnemonicChange}
-                    placeholder={formatMessage({
-                      id: 'home.placeholders.importMnemonic',
-                    })}
-                    required
-                  />
-                  <InputError>{formData.importedMnemonic.error}</InputError>
-                  {networkError !== '' && (
-                    <InputError>{networkError}</InputError>
-                  )}
-                </InputWrapper>
-                <Buttons show={!showSweepForm || sweptTxid !== null}>
-                  {!importingMnemonic ? (
-                    <Button onClick={this.importMnemonic}>
-                      <FormattedMessage id="home.buttons.loadTips" />
-                    </Button>
-                  ) : (
-                    <Loader />
-                  )}
-
-                  {sweptTxid === null &&
-                    importedMnemonic &&
-                    !importingMnemonic &&
-                    !tipsAlreadySweptError && (
-                      <Button design="primary" onClick={this.toggleSweepForm}>
-                        <FormattedMessage id="home.buttons.sweepAll" />
-                      </Button>
-                    )}
-                  {sweptTxid !== null ||
-                    (tipsAlreadySweptError && (
-                      <Button design="primary" onClick={this.appStateInitial}>
-                        <FormattedMessage id="home.buttons.newTips" />
-                      </Button>
-                    ))}
-                </Buttons>
-                {showSweepForm && (
+                <Loader
+                  style={{
+                    margin: 'auto',
+                    display: 'block',
+                    paddingBottom: '64px',
+                  }}
+                />
+              </ContentBlock>
+            </HeaderSection>
+          </>
+        ) : (
+          <>
+            {appState === appStates.initial && !importedMnemonic && (
+              <HeaderSection>
+                <ContentBlock>
+                  <H2>
+                    <FormattedMessage id="home.header.title" />
+                  </H2>
+                  <Paragraph>
+                    <FormattedMessage id="home.header.description" />
+                  </Paragraph>
+                  <Link href="/faq">
+                    <FormattedMessage id="home.links.faq" />
+                  </Link>
+                </ContentBlock>
+              </HeaderSection>
+            )}
+            <PrintableSection>
+              <ContentBlock>
+                <ApiErrorPopup open={apiPostFailed}>
                   <>
-                    <AddressForm
-                      id="userRefundAddressFormOnImport"
-                      onSubmit={this.sweepAllTips}
-                      show={sweptTxid === null && !tipsAlreadySweptError}
-                    >
-                      <AddressInputWrapper show>
-                        <AddressInputLabel>
-                          <FormattedMessage id="home.labels.refundAddress" />{' '}
-                          <Red>*</Red>
-                          {isWalletAvailable && !isWalletLoggedIn && (
-                            <WalletApiButton show name="logInNotice">
-                              &nbsp;
-                              <FormattedMessage id="home.buttons.logInBadger" />
-                            </WalletApiButton>
-                          )}
-                          {isWalletAvailable && isWalletLoggedIn && (
-                            <WalletApiButton
-                              name="sweep"
-                              show={isWalletAvailable}
-                              onClick={this.handleLinkAddress}
-                            >
-                              &nbsp;
-                              <FormattedMessage
-                                id="home.buttons.getAddr"
-                                values={{
-                                  walletType:
-                                    walletType === 'badger'
-                                      ? walletType
-                                      : 'mobile wallet',
-                                }}
-                              />
-                            </WalletApiButton>
-                          )}
-                        </AddressInputLabel>
+                    <ApiErrorPopupCloser>
+                      <CloseIcon size={24} />
+                    </ApiErrorPopupCloser>
+                    <ApiErrorPopupMsg>
+                      <ApiErrorWarning>
+                        <FormattedMessage id="home.alerts.warning" />
+                      </ApiErrorWarning>
+                      <ApiErrorWarning>
+                        <FormattedMessage id="home.alerts.giftDidNotPost" />
+                      </ApiErrorWarning>
+                    </ApiErrorPopupMsg>
+                  </>
+                </ApiErrorPopup>
+                <ApiErrorPopup open={createExpirationTxsFailed}>
+                  <>
+                    <ApiErrorPopupCloser>
+                      <CloseIcon size={24} />
+                    </ApiErrorPopupCloser>
+                    <ApiErrorPopupMsg>
+                      <ApiErrorWarning>
+                        <FormattedMessage id="home.alerts.warning" />
+                      </ApiErrorWarning>
+                      <ApiErrorWarning>
+                        <FormattedMessage id="home.alerts.reclaim" />
+                      </ApiErrorWarning>
+                    </ApiErrorPopupMsg>
+                  </>
+                </ApiErrorPopup>
+                <ShowFlexContainerTwoCols
+                  show={fundingAddress === '' || importedMnemonic}
+                  columns={!importedMnemonic ? 2 : 1}
+                >
+                  <ShowCard centered padded show={!importedMnemonic}>
+                    <H3>
+                      <FormattedMessage id="home.cards.new.title" />
+                    </H3>
+                    <Button design="primary" onClick={this.generateNewWallet}>
+                      <FormattedMessage id="home.buttons.createTips" />
+                    </Button>
+                  </ShowCard>
+                  <Card padded centered>
+                    <H3>
+                      <FormattedMessage id="home.cards.manage.title" />
+                    </H3>
+                    <InputWrapper show>
+                      <Input
+                        name="importedMnemonic"
+                        type="text"
+                        value={formData.importedMnemonic.value}
+                        onChange={this.handleImportedMnemonicChange}
+                        placeholder={formatMessage({
+                          id: 'home.placeholders.importMnemonic',
+                        })}
+                        required
+                      />
+                      <InputError>{formData.importedMnemonic.error}</InputError>
+                      {networkError !== '' && (
+                        <InputError>{networkError}</InputError>
+                      )}
+                    </InputWrapper>
+                    <Buttons show={!showSweepForm || sweptTxid !== null}>
+                      {!importingMnemonic ? (
+                        <Button onClick={this.importMnemonic}>
+                          <FormattedMessage id="home.buttons.loadTips" />
+                        </Button>
+                      ) : (
+                        <Loader />
+                      )}
 
+                      {sweptTxid === null &&
+                        importedMnemonic &&
+                        !importingMnemonic &&
+                        !tipsAlreadySweptError && (
+                          <Button
+                            design="primary"
+                            onClick={this.toggleSweepForm}
+                          >
+                            <FormattedMessage id="home.buttons.sweepAll" />
+                          </Button>
+                        )}
+                      {sweptTxid !== null ||
+                        (tipsAlreadySweptError && (
+                          <Button
+                            design="primary"
+                            onClick={this.appStateInitial}
+                          >
+                            <FormattedMessage id="home.buttons.newTips" />
+                          </Button>
+                        ))}
+                    </Buttons>
+                    {showSweepForm && (
+                      <>
+                        <AddressForm
+                          id="userRefundAddressFormOnImport"
+                          onSubmit={this.sweepAllTips}
+                          show={sweptTxid === null && !tipsAlreadySweptError}
+                        >
+                          <AddressInputWrapper show>
+                            <AddressInputLabel>
+                              <FormattedMessage id="home.labels.refundAddress" />{' '}
+                              <Red>*</Red>
+                              {isWalletAvailable && !isWalletLoggedIn && (
+                                <WalletApiButton show name="logInNotice">
+                                  &nbsp;
+                                  <FormattedMessage id="home.buttons.logInBadger" />
+                                </WalletApiButton>
+                              )}
+                              {isWalletAvailable && isWalletLoggedIn && (
+                                <WalletApiButton
+                                  name="sweep"
+                                  show={isWalletAvailable}
+                                  onClick={this.handleLinkAddress}
+                                >
+                                  &nbsp;
+                                  <FormattedMessage
+                                    id="home.buttons.getAddr"
+                                    values={{
+                                      walletType:
+                                        walletType === 'badger'
+                                          ? walletType
+                                          : 'mobile wallet',
+                                    }}
+                                  />
+                                </WalletApiButton>
+                              )}
+                            </AddressInputLabel>
+
+                            <Input
+                              name="userRefundAddress"
+                              type="text"
+                              value={formData.userRefundAddress.value}
+                              onChange={this.handleUserRefundAddressChange}
+                              placeholder={formatMessage({
+                                id: 'home.placeholders.userRefundAddress',
+                              })}
+                              required
+                            />
+
+                            <InputError>
+                              {formData.userRefundAddress.error}
+                            </InputError>
+                          </AddressInputWrapper>
+                        </AddressForm>
+                        {sweepingGifts && <Loader />}
+                        {!sweepingGifts && (
+                          <Buttons
+                            show={sweptTxid === null && !tipsAlreadySweptError}
+                          >
+                            <Button
+                              type="submit"
+                              form="userRefundAddressFormOnImport"
+                              design="primary"
+                              action="submit"
+                            >
+                              <FormattedMessage id="home.buttons.sweepAll" />
+                            </Button>
+                            <Button
+                              design="dark"
+                              onClick={this.toggleSweepForm}
+                            >
+                              <FormattedMessage id="home.buttons.goBack" />
+                            </Button>
+                          </Buttons>
+                        )}
+                        <ButtonHider show={sweptTxid !== null}>
+                          {sweepNotice}
+                        </ButtonHider>
+                        <ButtonHider show={tipsAlreadySweptError}>
+                          {tipsAlreadySweptNotice}
+                        </ButtonHider>
+                        <ButtonHider show={bitboxSweepTxBuildError}>
+                          {bitboxGiftSweepErrorNotice}
+                        </ButtonHider>
+                      </>
+                    )}
+                    {!importingMnemonic &&
+                      importedMnemonic &&
+                      sweptTxid === null && (
+                        <Paragraph style={{ marginTop: '12px' }}>
+                          <FormattedMessage
+                            id="home.cards.manage.claimedCount"
+                            values={{
+                              tipsClaimedCount,
+                              tipsTotalCount: tipWallets.length,
+                            }}
+                          />
+                        </Paragraph>
+                      )}
+                  </Card>
+                </ShowFlexContainerTwoCols>
+                <ShowFlexContainer
+                  columns={1}
+                  show={
+                    appState < appStates.seedGenerated &&
+                    !importedMnemonic &&
+                    giftsCreated !== 0
+                  }
+                >
+                  <Card centered padded>
+                    {giftsCreated !== 0 && giftsBch !== 0 ? (
+                      <PieChart
+                        style={{ maxWidth: '100%' }}
+                        data={[
+                          {
+                            color: '#0ac18e',
+                            name:
+                              windowWidth < 420
+                                ? `claimed`
+                                : `${giftsClaimed} claimed`,
+                            value: giftsClaimed,
+                          },
+                          {
+                            color: '#49505f',
+                            name:
+                              windowWidth < 420
+                                ? `expired`
+                                : `${giftsExpired} expired`,
+                            value: giftsExpired,
+                          },
+                          {
+                            color: '#2fa9ee',
+                            name:
+                              windowWidth < 420
+                                ? `unclaimed`
+                                : `${giftsUnclaimed} unclaimed`,
+                            value: giftsUnclaimed,
+                          },
+                        ]}
+                        label={
+                          <>
+                            {windowWidth > 485 ? (
+                              <>
+                                <div
+                                  style={{
+                                    fontSize: '1.4rem',
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: '1.4rem',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {giftsCreated}
+                                  </span>{' '}
+                                  <span
+                                    style={{
+                                      fontSize: '1.0rem',
+                                    }}
+                                  >
+                                    <FormattedMessage id="home.chart.gifts" />
+                                  </span>
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '1.0rem',
+                                    marginBottom: '4px',
+                                  }}
+                                />
+                                <div
+                                  style={{
+                                    marginBottom: '4px',
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: '1.0rem',
+                                    }}
+                                  >
+                                    <FormattedMessage id="home.chart.worth" />
+                                  </span>{' '}
+                                  <span
+                                    style={{
+                                      fontSize: '1.4rem',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {giftsBch} BCH
+                                  </span>{' '}
+                                </div>
+                                <div style={{ fontSize: '1.0rem' }}>
+                                  <FormattedMessage id="home.chart.created" />
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div
+                                  style={{
+                                    marginBottom: '2px',
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: '1.0rem',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {giftsCreated}
+                                  </span>{' '}
+                                  <span
+                                    style={{
+                                      fontSize: '0.8rem',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    <FormattedMessage id="home.chart.gifts" />
+                                  </span>
+                                </div>
+
+                                <div
+                                  style={{
+                                    marginBottom: '2px',
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: '1.0rem',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {giftsBch} BCH
+                                  </span>{' '}
+                                </div>
+                              </>
+                            )}
+                          </>
+                        }
+                        size={windowWidth < 769 ? windowWidth / 2.8 : 300}
+                        legend
+                      />
+                    ) : (
+                      <Loader style={{ margin: 'auto' }} />
+                    )}
+                  </Card>
+                </ShowFlexContainer>
+                <ShowFlexContainer
+                  columns={1}
+                  show={
+                    appState === appStates.seedGenerated ||
+                    appState === appStates.seedSaved
+                  }
+                >
+                  <Card padded centered title="Save Your Recovery Seed">
+                    <H3>
+                      <FormattedMessage id="home.cards.seed.title" />
+                    </H3>
+                    <H5>
+                      <FormattedMessage id="home.cards.seed.reminder" />
+                    </H5>
+                    <CopyToClipboard
+                      text={walletInfo.mnemonic}
+                      onCopy={() => this.handleSeedCopied()}
+                    >
+                      <CopySeed>{walletInfo.mnemonic}</CopySeed>
+                    </CopyToClipboard>
+                    <Alert>
+                      <FormattedMessage id="home.cards.seed.warning" />
+                    </Alert>
+                    <Buttons show>
+                      <CopyToClipboard
+                        text={walletInfo.mnemonic}
+                        onCopy={() => this.handleSeedCopied()}
+                      >
+                        <Button design="primary">
+                          <FormattedMessage id="home.buttons.copySeed" />
+                        </Button>
+                      </CopyToClipboard>
+
+                      <ShowButton
+                        show={appState === appStates.seedSaved}
+                        design="dark"
+                        onClick={this.handleSeedSavedConfirmed}
+                      >
+                        <FormattedMessage id="home.buttons.next" />
+                      </ShowButton>
+                    </Buttons>
+                  </Card>
+                </ShowFlexContainer>
+                <ShowFlexContainer
+                  columns={1}
+                  show={appState === appStates.seedSavedConfirmed}
+                >
+                  <Card padded centered>
+                    <H3>
+                      <FormattedMessage id="home.cards.confirm.title" />
+                    </H3>
+                    <Form
+                      id="confirmSeed"
+                      onSubmit={this.handleConfirmedMnemonic}
+                    >
+                      <InputWrapper show>
                         <Input
-                          name="userRefundAddress"
+                          name="userConfirmedMnemonic"
                           type="text"
-                          value={formData.userRefundAddress.value}
-                          onChange={this.handleUserRefundAddressChange}
+                          value={formData.userConfirmedMnemonic.value}
+                          onChange={this.handleUserConfirmedMnemonicChange}
                           placeholder={formatMessage({
-                            id: 'home.placeholders.userRefundAddress',
+                            id: 'home.placeholders.userConfirmedMnemonic',
                           })}
                           required
                         />
-
                         <InputError>
-                          {formData.userRefundAddress.error}
+                          {formData.userConfirmedMnemonic.error}
                         </InputError>
-                      </AddressInputWrapper>
-                    </AddressForm>
-                    {sweepingGifts && <Loader />}
-                    {!sweepingGifts && (
-                      <Buttons
-                        show={sweptTxid === null && !tipsAlreadySweptError}
+                      </InputWrapper>
+                    </Form>
+                    <Buttons show>
+                      <Button
+                        type="submit"
+                        form="confirmSeed"
+                        design="primary"
+                        action="submit"
                       >
-                        <Button
-                          type="submit"
-                          form="userRefundAddressFormOnImport"
-                          design="primary"
-                          action="submit"
-                        >
-                          <FormattedMessage id="home.buttons.sweepAll" />
-                        </Button>
-                        <Button design="dark" onClick={this.toggleSweepForm}>
-                          <FormattedMessage id="home.buttons.goBack" />
-                        </Button>
-                      </Buttons>
+                        <FormattedMessage id="home.buttons.confirm" />
+                      </Button>
+                      <Button onClick={this.goBackOneStep}>
+                        <FormattedMessage id="home.buttons.goBack" />
+                      </Button>
+                    </Buttons>
+                  </Card>
+                </ShowFlexContainer>
+                <ShowFlexContainer
+                  show={appState === appStates.seedConfirmed}
+                  columns={1}
+                >
+                  <Card padded centered>
+                    {!tipsFunded && (
+                      <H3>
+                        <FormattedMessage id="home.cards.build.title" />
+                      </H3>
                     )}
-                    <ButtonHider show={sweptTxid !== null}>
-                      {sweepNotice}
-                    </ButtonHider>
-                    <ButtonHider show={tipsAlreadySweptError}>
-                      {tipsAlreadySweptNotice}
-                    </ButtonHider>
-                    <ButtonHider show={bitboxSweepTxBuildError}>
-                      {bitboxGiftSweepErrorNotice}
-                    </ButtonHider>
-                  </>
-                )}
-                {!importingMnemonic && importedMnemonic && sweptTxid === null && (
-                  <Paragraph style={{ marginTop: '12px' }}>
-                    <FormattedMessage
-                      id="home.cards.manage.claimedCount"
-                      values={{
-                        tipsClaimedCount,
-                        tipsTotalCount: tipWallets.length,
-                      }}
-                    />
-                  </Paragraph>
-                )}
-              </Card>
-            </ShowFlexContainerTwoCols>
-            <ShowFlexContainer
-              columns={1}
-              show={
-                appState < appStates.seedGenerated &&
-                !importedMnemonic &&
-                giftsCreated !== 0
-              }
-            >
-              <Card centered padded>
-                {giftsCreated !== 0 && giftsBch !== 0 ? (
-                  <PieChart
-                    style={{ maxWidth: '100%' }}
-                    data={[
-                      {
-                        color: '#0ac18e',
-                        name:
-                          windowWidth < 420
-                            ? `claimed`
-                            : `${giftsClaimed} claimed`,
-                        value: giftsClaimed,
-                      },
-                      {
-                        color: '#49505f',
-                        name:
-                          windowWidth < 420
-                            ? `expired`
-                            : `${giftsExpired} expired`,
-                        value: giftsExpired,
-                      },
-                      {
-                        color: '#2fa9ee',
-                        name:
-                          windowWidth < 420
-                            ? `unclaimed`
-                            : `${giftsUnclaimed} unclaimed`,
-                        value: giftsUnclaimed,
-                      },
-                    ]}
-                    label={
+                    {invoiceUrl === '' ? (
                       <>
-                        {windowWidth > 485 ? (
-                          <>
-                            <div
-                              style={{
-                                fontSize: '1.4rem',
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: '1.4rem',
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {giftsCreated}
-                              </span>{' '}
-                              <span
-                                style={{
-                                  fontSize: '1.0rem',
-                                }}
-                              >
-                                <FormattedMessage id="home.chart.gifts" />
-                              </span>
-                            </div>
-                            <div
-                              style={{
-                                fontSize: '1.0rem',
-                                marginBottom: '4px',
-                              }}
+                        <Form
+                          id="createTip"
+                          onSubmit={this.handleCreateTipSubmit}
+                        >
+                          <InputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.tipCount" />{' '}
+                              <Red>*</Red>
+                            </InputLabel>
+                            <Input
+                              id="tipCount"
+                              name="tipCount"
+                              type="number"
+                              min="1"
+                              max="20"
+                              step="1"
+                              value={formData.tipCount.value}
+                              onChange={this.handleTipCountChange}
+                              placeholder={formatMessage({
+                                id: 'home.placeholders.tipCount',
+                              })}
+                              required
                             />
-                            <div
-                              style={{
-                                marginBottom: '4px',
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: '1.0rem',
-                                }}
-                              >
-                                <FormattedMessage id="home.chart.worth" />
-                              </span>{' '}
-                              <span
-                                style={{
-                                  fontSize: '1.4rem',
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {giftsBch} BCH
-                              </span>{' '}
-                            </div>
-                            <div style={{ fontSize: '1.0rem' }}>
-                              <FormattedMessage id="home.chart.created" />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div
-                              style={{
-                                marginBottom: '2px',
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: '1.0rem',
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {giftsCreated}
-                              </span>{' '}
-                              <span
-                                style={{
-                                  fontSize: '0.8rem',
-                                  fontWeight: 600,
-                                }}
-                              >
-                                <FormattedMessage id="home.chart.gifts" />
-                              </span>
-                            </div>
+                            <InputError>{formData.tipCount.error}</InputError>
+                          </InputWrapper>
 
-                            <div
-                              style={{
-                                marginBottom: '2px',
+                          <InputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.tipAmountFiat" />{' '}
+                              <Red>*</Red>
+                            </InputLabel>
+                            <Input
+                              id="tipAmountFiat"
+                              name="tipAmountFiat"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.tipAmountFiat.value}
+                              onChange={this.handleTipAmountFiatChange}
+                              placeholder={formatMessage({
+                                id: 'home.placeholders.tipAmountFiat',
+                              })}
+                              required
+                            />
+                            <InputError>
+                              {formData.tipAmountFiat.error}
+                            </InputError>
+                          </InputWrapper>
+
+                          <InputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.selectCurrency" />
+                              <Red>*</Red>
+                            </InputLabel>
+                            <CustomSelect
+                              onChange={this.handleSelectedCurrencyChange}
+                              options={currencies}
+                              defaultValue={currencies[144]}
+                              isSearchable
+                            />
+                          </InputWrapper>
+
+                          <InputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.emailAddress" />
+                            </InputLabel>
+                            <Input
+                              id="emailAddress"
+                              name="emailAddress"
+                              type="text"
+                              value={formData.emailAddress.value}
+                              onChange={this.handleEmailAddressChange}
+                              placeholder={formatMessage({
+                                id: 'home.placeholders.emailAddress',
+                              })}
+                            />
+                            <InputError>
+                              {formData.emailAddress.error}
+                            </InputError>
+                          </InputWrapper>
+
+                          <InputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.refundAddress" />
+                              {isWalletAvailable && !isWalletLoggedIn && (
+                                <WalletApiButton show name="logInNotice">
+                                  &nbsp;
+                                  <FormattedMessage id="home.buttons.logInBadger" />
+                                </WalletApiButton>
+                              )}
+                              {isWalletAvailable && isWalletLoggedIn && (
+                                <WalletApiButton
+                                  name="new"
+                                  show={isWalletAvailable}
+                                  onClick={this.handleLinkAddress}
+                                >
+                                  &nbsp;
+                                  <FormattedMessage
+                                    id="home.buttons.getAddr"
+                                    values={{
+                                      walletType:
+                                        walletType === 'badger'
+                                          ? walletType
+                                          : 'mobile wallet',
+                                    }}
+                                  />
+                                </WalletApiButton>
+                              )}
+                            </InputLabel>
+
+                            <Input
+                              name="userRefundAddressOnCreate"
+                              type="text"
+                              value={formData.userRefundAddressOnCreate.value}
+                              onChange={
+                                this.handleUserRefundAddressOnCreateChange
+                              }
+                              placeholder={formatMessage({
+                                id:
+                                  'home.placeholders.userRefundAddressOnCreate',
+                              })}
+                            />
+                            <InputExtra>
+                              <FormattedMessage id="home.strings.inputExtra" />
+                            </InputExtra>
+                            <InputError>
+                              {formData.userRefundAddressOnCreate.error}
+                            </InputError>
+                          </InputWrapper>
+
+                          <InputWrapper show>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.expirationDateSelect" />{' '}
+                              <Red>*</Red>
+                            </InputLabel>
+                            <CustomSelect
+                              customSettings={{
+                                hideDropdownIndicator: false,
+                                hideIndicatorSeparator: false,
+                                hideIndicatorsContainer: false,
+                                menuItems: {
+                                  label: 'text',
+                                },
+                                menuWidth: undefined,
+                                size: 'default',
+                                valueItems: {
+                                  label: 'text',
+                                },
                               }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: '1.0rem',
-                                  fontWeight: 600,
-                                }}
+                              onChange={this.handleSelectedExpirationDateChange}
+                              options={expirationDateOptions}
+                              defaultValue={expirationDateOptions[3]}
+                            />
+                          </InputWrapper>
+
+                          <InputWrapper show={customExpirationDate}>
+                            <InputLabel>
+                              <FormattedMessage id="home.labels.expirationDate" />{' '}
+                              <Red>*</Red>
+                            </InputLabel>
+                            <CustomDatePicker
+                              selected={formData.expirationDate.value}
+                              onChange={this.handleExpirationDateChange} // only when value has changed
+                              dateFormat="Pp"
+                            />
+                            <InputError>
+                              {formData.expirationDate.error}
+                            </InputError>
+                          </InputWrapper>
+                        </Form>
+                        {generatingInvoice ? (
+                          <Loader />
+                        ) : (
+                          <Button
+                            type="submit"
+                            form="createTip"
+                            design="primary"
+                            style={{
+                              margin: 'auto',
+                              marginBottom: '12px',
+                              zIndex: '1',
+                            }}
+                            onClick={this.handleCreateTipSubmitButton}
+                            action="submit"
+                          >
+                            <FormattedMessage id="home.buttons.createTips" />
+                          </Button>
+                        )}
+
+                        <ErrorNotice>{invoiceGenerationError}</ErrorNotice>
+                      </>
+                    ) : (
+                      <>
+                        <TipTable>
+                          <thead>
+                            <tr>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableQty" />
+                              </TipTh>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableValue" />
+                              </TipTh>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableCurrency" />
+                              </TipTh>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableExpiration" />
+                              </TipTh>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <TipTd>{formData.tipCount.value}</TipTd>
+                              <TipTd>{tipAmountFiat}</TipTd>
+                              <TipTd>{selectedCurrency}</TipTd>
+                              <TipTd>
+                                {moment(formData.expirationDate.value).format(
+                                  'YYYY-MM-DD HH:mm',
+                                )}
+                              </TipTd>
+                            </tr>
+                          </tbody>
+                        </TipTable>
+                        <MobileTipTable>
+                          <tbody>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableQty" />
+                              </MobileTipTh>
+                              <TipTd>{formData.tipCount.value}</TipTd>
+                            </tr>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableValue" />
+                              </MobileTipTh>
+                              <TipTd>{tipAmountFiat}</TipTd>
+                            </tr>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableCurrency" />
+                              </MobileTipTh>
+                              <TipTd>{selectedCurrency}</TipTd>
+                            </tr>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableExpiration" />
+                              </MobileTipTh>
+                              <TipTd>
+                                {moment(formData.expirationDate.value).format(
+                                  'YYYY-MM-DD HH:mm',
+                                )}
+                              </TipTd>
+                            </tr>
+                          </tbody>
+                        </MobileTipTable>
+                        {!tipsFunded && (
+                          <>
+                            {(isWalletAvailable && walletType === 'android') ||
+                            (isWalletAvailable && walletType === 'ios') ? (
+                              <>
+                                <H3>
+                                  <FormattedMessage id="home.cards.seed.title" />
+                                </H3>
+
+                                <H5>
+                                  <FormattedMessage id="home.cards.seed.mobileWarning" />
+                                </H5>
+                                <CopyToClipboard
+                                  text={walletInfo.mnemonic}
+                                  onCopy={() => this.handleSeedCopied()}
+                                >
+                                  <CopySeed>{walletInfo.mnemonic}</CopySeed>
+                                </CopyToClipboard>
+                              </>
+                            ) : (
+                              <>
+                                <H3>
+                                  <FormattedMessage id="home.cards.seed.title" />
+                                </H3>
+                                <H5>
+                                  <FormattedMessage id="home.cards.seed.reminder" />
+                                </H5>
+                                <CopyToClipboard
+                                  text={walletInfo.mnemonic}
+                                  onCopy={() => this.handleSeedCopied()}
+                                >
+                                  <CopySeed>{walletInfo.mnemonic}</CopySeed>
+                                </CopyToClipboard>
+                                <Alert>
+                                  <FormattedMessage id="home.cards.seed.warning" />
+                                </Alert>
+                              </>
+                            )}
+                          </>
+                        )}
+
+                        <BadgerWrap>
+                          <Invoice
+                            text={
+                              tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'
+                            }
+                            sizeQR={windowWidth > 500 ? 250 : windowWidth / 3.2}
+                            copyUri
+                            linkAvailable={isWalletAvailable}
+                            paymentRequestUrl={invoiceUrl}
+                            isRepeatable={false}
+                            successFn={this.invoiceSuccesInThreeSeconds}
+                            currency={selectedCurrency}
+                          />
+                        </BadgerWrap>
+                        {!tipsFunded && (
+                          <>
+                            <StackedButtons>
+                              <ShowButton
+                                show={!tipsFunded}
+                                design="dark"
+                                onClick={this.handleCancelInvoice}
                               >
-                                {giftsBch} BCH
-                              </span>{' '}
-                            </div>
+                                <FormattedMessage id="home.buttons.goBack" />
+                              </ShowButton>
+                            </StackedButtons>
                           </>
                         )}
                       </>
-                    }
-                    size={windowWidth < 769 ? windowWidth / 2.8 : 300}
-                    legend
-                  />
-                ) : (
-                  <Loader style={{ margin: 'auto' }} />
-                )}
-              </Card>
-            </ShowFlexContainer>
-            <ShowFlexContainer
-              columns={1}
-              show={
-                appState === appStates.seedGenerated ||
-                appState === appStates.seedSaved
-              }
-            >
-              <Card padded centered title="Save Your Recovery Seed">
-                <H3>
-                  <FormattedMessage id="home.cards.seed.title" />
-                </H3>
-                <H5>
-                  <FormattedMessage id="home.cards.seed.reminder" />
-                </H5>
-                <CopyToClipboard
-                  text={walletInfo.mnemonic}
-                  onCopy={() => this.handleSeedCopied()}
-                >
-                  <CopySeed>{walletInfo.mnemonic}</CopySeed>
-                </CopyToClipboard>
-                <Alert>
-                  <FormattedMessage id="home.cards.seed.warning" />
-                </Alert>
-                <Buttons show>
-                  <CopyToClipboard
-                    text={walletInfo.mnemonic}
-                    onCopy={() => this.handleSeedCopied()}
-                  >
-                    <Button design="primary">
-                      <FormattedMessage id="home.buttons.copySeed" />
+                    )}
+                  </Card>
+                </ShowFlexContainer>
+                <ShowFlexContainer columns={1} show={apiPostFailed}>
+                  <ApiErrorCard padded centered>
+                    <H3>
+                      <FormattedMessage id="home.cards.apiPostFailed.title" />
+                    </H3>
+                    <ApiErrorWarning>
+                      <FormattedMessage id="home.cards.apiPostFailed.desc.one" />
+                    </ApiErrorWarning>
+                    <ApiErrorWarning>
+                      <FormattedMessage id="home.cards.apiPostFailed.desc.two" />
+                    </ApiErrorWarning>
+                    <ApiErrorWarning>
+                      <FormattedMessage id="home.cards.apiPostFailed.desc.three" />
+                    </ApiErrorWarning>
+                    <Button
+                      design="dark"
+                      style={{
+                        margin: 'auto',
+                        marginTop: '12px',
+                        zIndex: '1',
+                      }}
+                      onClick={this.retryPostReturnTxInfos}
+                    >
+                      <FormattedMessage id="home.buttons.repost" />
                     </Button>
-                  </CopyToClipboard>
-
-                  <ShowButton
-                    show={appState === appStates.seedSaved}
-                    design="dark"
-                    onClick={this.handleSeedSavedConfirmed}
+                  </ApiErrorCard>
+                </ShowFlexContainer>
+                <ShowFlexContainer columns={1} show={createExpirationTxsFailed}>
+                  <ApiErrorCard padded centered>
+                    <H3>
+                      <FormattedMessage id="home.cards.reclaimTxsFailed.title" />
+                    </H3>
+                    <ApiErrorWarning>
+                      <FormattedMessage id="home.cards.reclaimTxsFailed.desc.one" />
+                    </ApiErrorWarning>
+                    <ApiErrorWarning>
+                      <FormattedMessage id="home.cards.reclaimTxsFailed.desc.two" />
+                    </ApiErrorWarning>
+                    <ApiErrorWarning>
+                      <FormattedMessage id="home.cards.reclaimTxsFailed.desc.three" />
+                    </ApiErrorWarning>
+                    <Button
+                      design="dark"
+                      style={{
+                        margin: 'auto',
+                        marginTop: '12px',
+                        zIndex: '1',
+                      }}
+                      onClick={this.retryInvoiceSuccess}
+                    >
+                      <FormattedMessage id="home.buttons.retry" />
+                    </Button>
+                  </ApiErrorCard>
+                </ShowFlexContainer>
+                <ShowFlexContainer
+                  columns={1}
+                  show={tipWallets.length > 0 && tipsFunded}
+                >
+                  <Card
+                    padded
+                    centered
+                    className="noPrint"
+                    show={tipWallets.length > 0 && tipsFunded}
                   >
-                    <FormattedMessage id="home.buttons.next" />
-                  </ShowButton>
-                </Buttons>
-              </Card>
-            </ShowFlexContainer>
-            <ShowFlexContainer
-              columns={1}
-              show={appState === appStates.seedSavedConfirmed}
-            >
-              <Card padded centered>
-                <H3>
-                  <FormattedMessage id="home.cards.confirm.title" />
-                </H3>
-                <Form id="confirmSeed" onSubmit={this.handleConfirmedMnemonic}>
-                  <InputWrapper show>
-                    <Input
-                      name="userConfirmedMnemonic"
-                      type="text"
-                      value={formData.userConfirmedMnemonic.value}
-                      onChange={this.handleUserConfirmedMnemonicChange}
-                      placeholder={formatMessage({
-                        id: 'home.placeholders.userConfirmedMnemonic',
-                      })}
-                      required
-                    />
-                    <InputError>
-                      {formData.userConfirmedMnemonic.error}
-                    </InputError>
-                  </InputWrapper>
-                </Form>
-                <Buttons show>
-                  <Button
-                    type="submit"
-                    form="confirmSeed"
-                    design="primary"
-                    action="submit"
+                    <H3>
+                      <FormattedMessage id="home.cards.seed.title" />
+                    </H3>
+                    <H5>
+                      <FormattedMessage id="home.cards.seed.reminder" />
+                    </H5>
+                    <CopyToClipboard
+                      text={walletInfo.mnemonic}
+                      onCopy={() => this.handleSeedCopied()}
+                    >
+                      <CopySeed>{walletInfo.mnemonic}</CopySeed>
+                    </CopyToClipboard>
+                    <Alert>
+                      <FormattedMessage id="home.cards.seed.warning" />
+                    </Alert>
+                  </Card>
+                  <Card
+                    padded
+                    centered
+                    className="noPrint"
+                    show={tipWallets.length > 0 && tipsFunded}
                   >
-                    <FormattedMessage id="home.buttons.confirm" />
-                  </Button>
-                  <Button onClick={this.goBackOneStep}>
-                    <FormattedMessage id="home.buttons.goBack" />
-                  </Button>
-                </Buttons>
-              </Card>
-            </ShowFlexContainer>
-            <ShowFlexContainer
-              show={appState === appStates.seedConfirmed}
-              columns={1}
-            >
-              <Card padded centered>
-                {!tipsFunded && (
-                  <H3>
-                    <FormattedMessage id="home.cards.build.title" />
-                  </H3>
-                )}
-                {invoiceUrl === '' ? (
-                  <>
-                    <Form id="createTip" onSubmit={this.handleCreateTipSubmit}>
-                      <InputWrapper show>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.tipCount" />{' '}
-                          <Red>*</Red>
-                        </InputLabel>
-                        <Input
-                          id="tipCount"
-                          name="tipCount"
-                          type="number"
-                          min="1"
-                          max="20"
-                          step="1"
-                          value={formData.tipCount.value}
-                          onChange={this.handleTipCountChange}
-                          placeholder={formatMessage({
-                            id: 'home.placeholders.tipCount',
-                          })}
-                          required
-                        />
-                        <InputError>{formData.tipCount.error}</InputError>
-                      </InputWrapper>
+                    <H3>
+                      <FormattedMessage id="home.cards.customize.title" />
+                    </H3>
 
-                      <InputWrapper show>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.tipAmountFiat" />{' '}
-                          <Red>*</Red>
-                        </InputLabel>
-                        <Input
-                          id="tipAmountFiat"
-                          name="tipAmountFiat"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={formData.tipAmountFiat.value}
-                          onChange={this.handleTipAmountFiatChange}
-                          placeholder={formatMessage({
-                            id: 'home.placeholders.tipAmountFiat',
-                          })}
-                          required
-                        />
-                        <InputError>{formData.tipAmountFiat.error}</InputError>
-                      </InputWrapper>
+                    {importedMnemonic && giftInfoSuccess && (
+                      <>
+                        <TipTable>
+                          <thead>
+                            <tr>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableQty" />
+                              </TipTh>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableValue" />
+                              </TipTh>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableCurrency" />
+                              </TipTh>
+                              <TipTh>
+                                <FormattedMessage id="home.labels.tableExpiration" />
+                              </TipTh>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <TipTd>{giftInfoGiftQty}</TipTd>
+                              <TipTd>{giftInfoFiatAmount}</TipTd>
+                              <TipTd>{giftInfoFiatCurrency}</TipTd>
+                              <TipTd>{expirationDate}</TipTd>
+                            </tr>
+                          </tbody>
+                        </TipTable>
+                        <MobileTipTable>
+                          <tbody>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableQty" />
+                              </MobileTipTh>
+                              <TipTd>{giftInfoGiftQty}</TipTd>
+                            </tr>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableValue" />
+                              </MobileTipTh>
+                              <TipTd>{giftInfoFiatAmount}</TipTd>
+                            </tr>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableCurrency" />
+                              </MobileTipTh>
+                              <TipTd>{giftInfoFiatCurrency}</TipTd>
+                            </tr>
+                            <tr>
+                              <MobileTipTh>
+                                <FormattedMessage id="home.labels.tableExpiration" />
+                              </MobileTipTh>
+                              <TipTd>{expirationDate}</TipTd>
+                            </tr>
+                          </tbody>
+                        </MobileTipTable>
+                      </>
+                    )}
 
-                      <InputWrapper show>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.selectCurrency" />
-                          <Red>*</Red>
-                        </InputLabel>
-                        <CustomSelect
-                          onChange={this.handleSelectedCurrencyChange}
-                          options={currencies}
-                          defaultValue={currencies[144]}
-                          isSearchable
-                        />
-                      </InputWrapper>
-
-                      <InputWrapper show>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.emailAddress" />
-                        </InputLabel>
-                        <Input
-                          id="emailAddress"
-                          name="emailAddress"
-                          type="text"
-                          value={formData.emailAddress.value}
-                          onChange={this.handleEmailAddressChange}
-                          placeholder={formatMessage({
-                            id: 'home.placeholders.emailAddress',
-                          })}
-                        />
-                        <InputError>{formData.emailAddress.error}</InputError>
-                      </InputWrapper>
-
-                      <InputWrapper show>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.refundAddress" />
-                          {isWalletAvailable && !isWalletLoggedIn && (
-                            <WalletApiButton show name="logInNotice">
-                              &nbsp;
-                              <FormattedMessage id="home.buttons.logInBadger" />
-                            </WalletApiButton>
-                          )}
-                          {isWalletAvailable && isWalletLoggedIn && (
-                            <WalletApiButton
-                              name="new"
-                              show={isWalletAvailable}
-                              onClick={this.handleLinkAddress}
-                            >
-                              &nbsp;
-                              <FormattedMessage
-                                id="home.buttons.getAddr"
-                                values={{
-                                  walletType:
-                                    walletType === 'badger'
-                                      ? walletType
-                                      : 'mobile wallet',
-                                }}
-                              />
-                            </WalletApiButton>
-                          )}
-                        </InputLabel>
-
-                        <Input
-                          name="userRefundAddressOnCreate"
-                          type="text"
-                          value={formData.userRefundAddressOnCreate.value}
-                          onChange={this.handleUserRefundAddressOnCreateChange}
-                          placeholder={formatMessage({
-                            id: 'home.placeholders.userRefundAddressOnCreate',
-                          })}
-                        />
-                        <InputExtra>
-                          <FormattedMessage id="home.strings.inputExtra" />
-                        </InputExtra>
-                        <InputError>
-                          {formData.userRefundAddressOnCreate.error}
-                        </InputError>
-                      </InputWrapper>
-
-                      <InputWrapper show>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.expirationDateSelect" />{' '}
-                          <Red>*</Red>
-                        </InputLabel>
-                        <CustomSelect
-                          customSettings={{
-                            hideDropdownIndicator: false,
-                            hideIndicatorSeparator: false,
-                            hideIndicatorsContainer: false,
-                            menuItems: {
-                              label: 'text',
-                            },
-                            menuWidth: undefined,
-                            size: 'default',
-                            valueItems: {
-                              label: 'text',
-                            },
-                          }}
-                          onChange={this.handleSelectedExpirationDateChange}
-                          options={expirationDateOptions}
-                          defaultValue={expirationDateOptions[3]}
-                        />
-                      </InputWrapper>
-
-                      <InputWrapper show={customExpirationDate}>
-                        <InputLabel>
-                          <FormattedMessage id="home.labels.expirationDate" />{' '}
-                          <Red>*</Red>
-                        </InputLabel>
-                        <CustomDatePicker
-                          selected={formData.expirationDate.value}
-                          onChange={this.handleExpirationDateChange} // only when value has changed
-                          dateFormat="Pp"
-                        />
-                        <InputError>{formData.expirationDate.error}</InputError>
-                      </InputWrapper>
-                    </Form>
-                    {generatingInvoice ? (
-                      <Loader />
-                    ) : (
-                      <Button
-                        type="submit"
-                        form="createTip"
-                        design="primary"
-                        style={{
-                          margin: 'auto',
-                          marginBottom: '12px',
-                          zIndex: '1',
+                    <InputWrapper>
+                      <Checkbox
+                        name="qrDots"
+                        text="QR Code Dots?"
+                        checked={qrDots}
+                        onChange={this.toggleQrDots}
+                      />
+                    </InputWrapper>
+                    <InputWrapper>
+                      <Checkbox
+                        name="qrLogo"
+                        text="QR Code Logo?"
+                        checked={qrLogo}
+                        onChange={this.toggleQrLogo}
+                      />
+                    </InputWrapper>
+                    <InputWrapper>
+                      <Checkbox
+                        name="showGiftNames"
+                        text="Show gift names?"
+                        checked={showGiftNames}
+                        onChange={this.toggleGiftNames}
+                      />
+                    </InputWrapper>
+                    <InputWrapper show>
+                      <InputLabel>
+                        <FormattedMessage id="home.labels.giftDesignSelect" />
+                        <Red>*</Red>
+                      </InputLabel>
+                      <CustomSelect
+                        customSettings={{
+                          hideDropdownIndicator: false,
+                          hideIndicatorSeparator: false,
+                          hideIndicatorsContainer: false,
+                          menuItems: {
+                            image: 'image',
+                            label: 'text',
+                            value: '',
+                          },
+                          menuWidth: undefined,
+                          size: 'default',
+                          valueItems: {
+                            image: 'image',
+                            label: 'text',
+                            value: '',
+                          },
                         }}
-                        onClick={this.handleCreateTipSubmitButton}
-                        action="submit"
-                      >
-                        <FormattedMessage id="home.buttons.createTips" />
+                        onChange={this.handleGiftDesignChange}
+                        options={giftDesignOptions}
+                        defaultValue={giftDesignOptions[0]}
+                        isSearchable={false}
+                      />
+                    </InputWrapper>
+
+                    {pdfLoading ? (
+                      <Loader style={{ margin: 'auto' }} />
+                    ) : (
+                      <Button design="primary" onClick={this.makePdf}>
+                        <FormattedMessage id="home.buttons.makePdf" />
                       </Button>
                     )}
 
-                    <ErrorNotice>{invoiceGenerationError}</ErrorNotice>
-                  </>
-                ) : (
-                  <>
-                    <TipTable>
-                      <thead>
-                        <tr>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableQty" />
-                          </TipTh>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableValue" />
-                          </TipTh>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableCurrency" />
-                          </TipTh>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableExpiration" />
-                          </TipTh>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <TipTd>{formData.tipCount.value}</TipTd>
-                          <TipTd>{tipAmountFiat}</TipTd>
-                          <TipTd>{selectedCurrency}</TipTd>
-                          <TipTd>
-                            {moment(formData.expirationDate.value).format(
-                              'YYYY-MM-DD HH:mm',
-                            )}
-                          </TipTd>
-                        </tr>
-                      </tbody>
-                    </TipTable>
-                    <MobileTipTable>
-                      <tbody>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableQty" />
-                          </MobileTipTh>
-                          <TipTd>{formData.tipCount.value}</TipTd>
-                        </tr>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableValue" />
-                          </MobileTipTh>
-                          <TipTd>{tipAmountFiat}</TipTd>
-                        </tr>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableCurrency" />
-                          </MobileTipTh>
-                          <TipTd>{selectedCurrency}</TipTd>
-                        </tr>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableExpiration" />
-                          </MobileTipTh>
-                          <TipTd>
-                            {moment(formData.expirationDate.value).format(
-                              'YYYY-MM-DD HH:mm',
-                            )}
-                          </TipTd>
-                        </tr>
-                      </tbody>
-                    </MobileTipTable>
-                    {!tipsFunded && (
+                    {pdfPngs.length > 0 && (
                       <>
-                        <H3>
-                          <FormattedMessage id="home.cards.seed.title" />
-                        </H3>
-                        <H5>
-                          <FormattedMessage id="home.cards.seed.reminder" />
-                        </H5>
-                        <CopyToClipboard
-                          text={walletInfo.mnemonic}
-                          onCopy={() => this.handleSeedCopied()}
+                        <br />
+                        <CustomPdfDownloadLink
+                          document={<GiftsPdf images={pdfPngs} />}
+                          fileName={`${pdfDownloadFiatAmount}${giftInfoFiatCurrency}x${tipWallets.length}_gifts.pdf`}
                         >
-                          <CopySeed>{walletInfo.mnemonic}</CopySeed>
-                        </CopyToClipboard>
-                        <Alert>
-                          <FormattedMessage id="home.cards.seed.warning" />
-                        </Alert>
+                          {({ loading }) =>
+                            loading ? (
+                              <FormattedMessage id="home.buttons.loadingPdf" />
+                            ) : (
+                              <FormattedMessage id="home.buttons.downloadPdf" />
+                            )
+                          }
+                        </CustomPdfDownloadLink>
                       </>
                     )}
+                  </Card>
+                </ShowFlexContainer>
 
-                    <BadgerWrap>
-                      <Invoice
-                        text={tipsFunded ? 'Gifts Funded' : 'Fund Your Gifts'}
-                        sizeQR={windowWidth > 500 ? 250 : windowWidth / 3.2}
-                        copyUri
-                        linkAvailable={isWalletAvailable}
-                        paymentRequestUrl={invoiceUrl}
-                        isRepeatable={false}
-                        successFn={this.invoiceSuccesInThreeSeconds}
-                        currency={selectedCurrency}
-                      />
-                    </BadgerWrap>
-                    {!tipsFunded && (
-                      <>
-                        <StackedButtons>
-                          <ShowButton
-                            show={!tipsFunded}
-                            design="dark"
-                            onClick={this.handleCancelInvoice}
-                          >
-                            <FormattedMessage id="home.buttons.goBack" />
-                          </ShowButton>
-                        </StackedButtons>
-                      </>
+                <TipContainerWrapper maxWidth={displayWidth}>
+                  <TipContainer
+                    show={
+                      tipWallets.length > 0 && tipsFunded && !importingMnemonic
+                    }
+                    columns={4}
+                  >
+                    {tipWallets.length > 0 && printingTips}
+                  </TipContainer>
+                </TipContainerWrapper>
+
+                {tipWallets.length > 0 && tipsFunded && !importingMnemonic && (
+                  <Centered>
+                    {pdfLoading ? (
+                      <Loader className="noPrint" style={{ margin: 'auto' }} />
+                    ) : (
+                      <Button
+                        className="noPrint"
+                        design="primary"
+                        onClick={this.makePdf}
+                        style={{ marginTop: '105px' }}
+                      >
+                        <FormattedMessage id="home.buttons.makePdf" />
+                      </Button>
                     )}
-                  </>
-                )}
-              </Card>
-            </ShowFlexContainer>
-            <ShowFlexContainer columns={1} show={apiPostFailed}>
-              <ApiErrorCard padded centered>
-                <H3>
-                  <FormattedMessage id="home.cards.apiPostFailed.title" />
-                </H3>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.cards.apiPostFailed.desc.one" />
-                </ApiErrorWarning>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.cards.apiPostFailed.desc.two" />
-                </ApiErrorWarning>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.cards.apiPostFailed.desc.three" />
-                </ApiErrorWarning>
-                <Button
-                  design="dark"
-                  style={{
-                    margin: 'auto',
-                    marginTop: '12px',
-                    zIndex: '1',
-                  }}
-                  onClick={this.retryPostReturnTxInfos}
-                >
-                  <FormattedMessage id="home.buttons.repost" />
-                </Button>
-              </ApiErrorCard>
-            </ShowFlexContainer>
-            <ShowFlexContainer columns={1} show={createExpirationTxsFailed}>
-              <ApiErrorCard padded centered>
-                <H3>
-                  <FormattedMessage id="home.cards.reclaimTxsFailed.title" />
-                </H3>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.cards.reclaimTxsFailed.desc.one" />
-                </ApiErrorWarning>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.cards.reclaimTxsFailed.desc.two" />
-                </ApiErrorWarning>
-                <ApiErrorWarning>
-                  <FormattedMessage id="home.cards.reclaimTxsFailed.desc.three" />
-                </ApiErrorWarning>
-                <Button
-                  design="dark"
-                  style={{
-                    margin: 'auto',
-                    marginTop: '12px',
-                    zIndex: '1',
-                  }}
-                  onClick={this.retryInvoiceSuccess}
-                >
-                  <FormattedMessage id="home.buttons.retry" />
-                </Button>
-              </ApiErrorCard>
-            </ShowFlexContainer>
-            <ShowFlexContainer
-              columns={1}
-              show={tipWallets.length > 0 && tipsFunded}
-            >
-              <Card
-                padded
-                centered
-                className="noPrint"
-                show={tipWallets.length > 0 && tipsFunded}
-              >
-                <H3>
-                  <FormattedMessage id="home.cards.seed.title" />
-                </H3>
-                <H5>
-                  <FormattedMessage id="home.cards.seed.reminder" />
-                </H5>
-                <CopyToClipboard
-                  text={walletInfo.mnemonic}
-                  onCopy={() => this.handleSeedCopied()}
-                >
-                  <CopySeed>{walletInfo.mnemonic}</CopySeed>
-                </CopyToClipboard>
-                <Alert>
-                  <FormattedMessage id="home.cards.seed.warning" />
-                </Alert>
-              </Card>
-              <Card
-                padded
-                centered
-                className="noPrint"
-                show={tipWallets.length > 0 && tipsFunded}
-              >
-                <H3>
-                  <FormattedMessage id="home.cards.customize.title" />
-                </H3>
-
-                {importedMnemonic && giftInfoSuccess && (
-                  <>
-                    <TipTable>
-                      <thead>
-                        <tr>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableQty" />
-                          </TipTh>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableValue" />
-                          </TipTh>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableCurrency" />
-                          </TipTh>
-                          <TipTh>
-                            <FormattedMessage id="home.labels.tableExpiration" />
-                          </TipTh>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <TipTd>{giftInfoGiftQty}</TipTd>
-                          <TipTd>{giftInfoFiatAmount}</TipTd>
-                          <TipTd>{giftInfoFiatCurrency}</TipTd>
-                          <TipTd>{expirationDate}</TipTd>
-                        </tr>
-                      </tbody>
-                    </TipTable>
-                    <MobileTipTable>
-                      <tbody>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableQty" />
-                          </MobileTipTh>
-                          <TipTd>{giftInfoGiftQty}</TipTd>
-                        </tr>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableValue" />
-                          </MobileTipTh>
-                          <TipTd>{giftInfoFiatAmount}</TipTd>
-                        </tr>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableCurrency" />
-                          </MobileTipTh>
-                          <TipTd>{giftInfoFiatCurrency}</TipTd>
-                        </tr>
-                        <tr>
-                          <MobileTipTh>
-                            <FormattedMessage id="home.labels.tableExpiration" />
-                          </MobileTipTh>
-                          <TipTd>{expirationDate}</TipTd>
-                        </tr>
-                      </tbody>
-                    </MobileTipTable>
-                  </>
-                )}
-
-                <InputWrapper>
-                  <Checkbox
-                    name="qrDots"
-                    text="QR Code Dots?"
-                    checked={qrDots}
-                    onChange={this.toggleQrDots}
-                  />
-                </InputWrapper>
-                <InputWrapper>
-                  <Checkbox
-                    name="qrLogo"
-                    text="QR Code Logo?"
-                    checked={qrLogo}
-                    onChange={this.toggleQrLogo}
-                  />
-                </InputWrapper>
-                <InputWrapper>
-                  <Checkbox
-                    name="showGiftNames"
-                    text="Show gift names?"
-                    checked={showGiftNames}
-                    onChange={this.toggleGiftNames}
-                  />
-                </InputWrapper>
-                <InputWrapper show>
-                  <InputLabel>
-                    <FormattedMessage id="home.labels.giftDesignSelect" />
-                    <Red>*</Red>
-                  </InputLabel>
-                  <CustomSelect
-                    customSettings={{
-                      hideDropdownIndicator: false,
-                      hideIndicatorSeparator: false,
-                      hideIndicatorsContainer: false,
-                      menuItems: {
-                        image: 'image',
-                        label: 'text',
-                        value: '',
-                      },
-                      menuWidth: undefined,
-                      size: 'default',
-                      valueItems: {
-                        image: 'image',
-                        label: 'text',
-                        value: '',
-                      },
-                    }}
-                    onChange={this.handleGiftDesignChange}
-                    options={giftDesignOptions}
-                    defaultValue={giftDesignOptions[0]}
-                    isSearchable={false}
-                  />
-                </InputWrapper>
-
-                {pdfLoading ? (
-                  <Loader style={{ margin: 'auto' }} />
-                ) : (
-                  <Button design="primary" onClick={this.makePdf}>
-                    <FormattedMessage id="home.buttons.makePdf" />
-                  </Button>
+                  </Centered>
                 )}
 
                 {pdfPngs.length > 0 && (
-                  <>
-                    <br />
+                  <Centered>
                     <CustomPdfDownloadLink
+                      className="noPrint"
                       document={<GiftsPdf images={pdfPngs} />}
                       fileName={`${pdfDownloadFiatAmount}${giftInfoFiatCurrency}x${tipWallets.length}_gifts.pdf`}
                     >
@@ -3453,169 +3688,125 @@ class GiftsPortal extends React.Component {
                         )
                       }
                     </CustomPdfDownloadLink>
-                  </>
+                  </Centered>
                 )}
-              </Card>
-            </ShowFlexContainer>
 
-            <TipContainerWrapper maxWidth={displayWidth}>
-              <TipContainer
-                show={tipWallets.length > 0 && tipsFunded && !importingMnemonic}
-                columns={4}
-              >
-                {tipWallets.length > 0 && printingTips}
-              </TipContainer>
-            </TipContainerWrapper>
-
-            {tipWallets.length > 0 && tipsFunded && !importingMnemonic && (
-              <Centered>
-                {pdfLoading ? (
-                  <Loader className="noPrint" style={{ margin: 'auto' }} />
-                ) : (
-                  <Button
-                    className="noPrint"
-                    design="primary"
-                    onClick={this.makePdf}
-                    style={{ marginTop: '105px' }}
-                  >
-                    <FormattedMessage id="home.buttons.makePdf" />
-                  </Button>
-                )}
-              </Centered>
-            )}
-
-            {pdfPngs.length > 0 && (
-              <Centered>
-                <CustomPdfDownloadLink
+                <ShowCard
+                  padded
+                  centered
                   className="noPrint"
-                  document={<GiftsPdf images={pdfPngs} />}
-                  fileName={`${pdfDownloadFiatAmount}${giftInfoFiatCurrency}x${tipWallets.length}_gifts.pdf`}
+                  show={tipWallets.length > 0 && tipsFunded}
                 >
-                  {({ loading }) =>
-                    loading ? (
-                      <FormattedMessage id="home.buttons.loadingPdf" />
-                    ) : (
-                      <FormattedMessage id="home.buttons.downloadPdf" />
-                    )
-                  }
-                </CustomPdfDownloadLink>
-              </Centered>
-            )}
-
-            <ShowCard
-              padded
-              centered
-              className="noPrint"
-              show={tipWallets.length > 0 && tipsFunded}
-            >
-              <H3>
-                <FormattedMessage id="home.cards.sweep.title" />
-              </H3>
-              <SweepInstructions>
-                <FormattedMessage id="home.cards.sweep.instructions" />
-              </SweepInstructions>
-              <ShowButton
-                show={!showSweepForm}
-                design="primary"
-                onClick={this.toggleSweepForm}
-              >
-                <FormattedMessage id="home.buttons.sweepAll" />
-              </ShowButton>
-              {showSweepForm && (
-                <>
-                  <AddressForm
-                    id="userRefundAddressForm"
-                    onSubmit={this.sweepAllTips}
-                    show={sweptTxid === null && !tipsAlreadySweptError}
+                  <H3>
+                    <FormattedMessage id="home.cards.sweep.title" />
+                  </H3>
+                  <SweepInstructions>
+                    <FormattedMessage id="home.cards.sweep.instructions" />
+                  </SweepInstructions>
+                  <ShowButton
+                    show={!showSweepForm}
+                    design="primary"
+                    onClick={this.toggleSweepForm}
                   >
-                    <AddressInputWrapper show>
-                      <AddressInputLabel>
-                        <FormattedMessage id="home.labels.refundAddress" />{' '}
-                        <Red>*</Red>
-                        {isWalletAvailable && !isWalletLoggedIn && (
-                          <WalletApiButton show name="logInNotice">
-                            &nbsp;
-                            <FormattedMessage id="home.buttons.logInBadger" />
-                          </WalletApiButton>
-                        )}
-                        {isWalletAvailable && isWalletLoggedIn && (
-                          <WalletApiButton
-                            name="sweep"
-                            show={isWalletAvailable}
-                            onClick={this.handleLinkAddress}
-                          >
-                            &nbsp;
-                            <FormattedMessage
-                              id="home.buttons.getAddr"
-                              values={{
-                                walletType:
-                                  walletType === 'badger'
-                                    ? walletType
-                                    : 'mobile wallet',
-                              }}
-                            />
-                          </WalletApiButton>
-                        )}
-                      </AddressInputLabel>
-                      <Input
-                        name="userRefundAddress"
-                        type="text"
-                        value={formData.userRefundAddress.value}
-                        onChange={this.handleUserRefundAddressChange}
-                        placeholder={formatMessage({
-                          id: 'home.placeholders.userRefundAddress',
-                        })}
-                        required
-                      />
-                      <InputError>
-                        {formData.userRefundAddress.error}
-                      </InputError>
-                    </AddressInputWrapper>
-                  </AddressForm>
-                  {sweepingGifts && <Loader />}
-                  {!sweepingGifts && (
-                    <Buttons
-                      show={sweptTxid === null && !tipsAlreadySweptError}
-                    >
-                      <Button
-                        type="submit"
-                        form="userRefundAddressForm"
-                        design="primary"
-                        action="submit"
+                    <FormattedMessage id="home.buttons.sweepAll" />
+                  </ShowButton>
+                  {showSweepForm && (
+                    <>
+                      <AddressForm
+                        id="userRefundAddressForm"
+                        onSubmit={this.sweepAllTips}
+                        show={sweptTxid === null && !tipsAlreadySweptError}
                       >
-                        <FormattedMessage id="home.buttons.sweepAll" />
-                      </Button>
-                      <Button design="dark" onClick={this.toggleSweepForm}>
-                        <FormattedMessage id="home.buttons.goBack" />
-                      </Button>
-                    </Buttons>
+                        <AddressInputWrapper show>
+                          <AddressInputLabel>
+                            <FormattedMessage id="home.labels.refundAddress" />{' '}
+                            <Red>*</Red>
+                            {isWalletAvailable && !isWalletLoggedIn && (
+                              <WalletApiButton show name="logInNotice">
+                                &nbsp;
+                                <FormattedMessage id="home.buttons.logInBadger" />
+                              </WalletApiButton>
+                            )}
+                            {isWalletAvailable && isWalletLoggedIn && (
+                              <WalletApiButton
+                                name="sweep"
+                                show={isWalletAvailable}
+                                onClick={this.handleLinkAddress}
+                              >
+                                &nbsp;
+                                <FormattedMessage
+                                  id="home.buttons.getAddr"
+                                  values={{
+                                    walletType:
+                                      walletType === 'badger'
+                                        ? walletType
+                                        : 'mobile wallet',
+                                  }}
+                                />
+                              </WalletApiButton>
+                            )}
+                          </AddressInputLabel>
+                          <Input
+                            name="userRefundAddress"
+                            type="text"
+                            value={formData.userRefundAddress.value}
+                            onChange={this.handleUserRefundAddressChange}
+                            placeholder={formatMessage({
+                              id: 'home.placeholders.userRefundAddress',
+                            })}
+                            required
+                          />
+                          <InputError>
+                            {formData.userRefundAddress.error}
+                          </InputError>
+                        </AddressInputWrapper>
+                      </AddressForm>
+                      {sweepingGifts && <Loader />}
+                      {!sweepingGifts && (
+                        <Buttons
+                          show={sweptTxid === null && !tipsAlreadySweptError}
+                        >
+                          <Button
+                            type="submit"
+                            form="userRefundAddressForm"
+                            design="primary"
+                            action="submit"
+                          >
+                            <FormattedMessage id="home.buttons.sweepAll" />
+                          </Button>
+                          <Button design="dark" onClick={this.toggleSweepForm}>
+                            <FormattedMessage id="home.buttons.goBack" />
+                          </Button>
+                        </Buttons>
+                      )}
+                      <ButtonHider show={sweptTxid !== null}>
+                        {sweepNotice}
+                      </ButtonHider>
+                      <ButtonHider show={tipsAlreadySweptError}>
+                        {tipsAlreadySweptNotice}
+                      </ButtonHider>
+                    </>
                   )}
-                  <ButtonHider show={sweptTxid !== null}>
-                    {sweepNotice}
-                  </ButtonHider>
-                  <ButtonHider show={tipsAlreadySweptError}>
-                    {tipsAlreadySweptNotice}
-                  </ButtonHider>
-                </>
-              )}
-            </ShowCard>
-            <InputWrapper
-              className="noPrint"
-              show={importedMnemonic && !giftInfoSuccess}
-            >
-              <InputLabel>
-                <FormattedMessage id="home.labels.changeCurrency" />{' '}
-                <Red>*</Red>
-              </InputLabel>
-              <CustomSelect
-                onChange={this.handleSelectedCurrencyChangeFromSelect}
-                options={currencies}
-                defaultValue={currencies[144]}
-                isSearchable
-              />
-            </InputWrapper>
-          </ContentBlock>
-        </PrintableSection>
+                </ShowCard>
+                <InputWrapper
+                  className="noPrint"
+                  show={importedMnemonic && !giftInfoSuccess}
+                >
+                  <InputLabel>
+                    <FormattedMessage id="home.labels.changeCurrency" />{' '}
+                    <Red>*</Red>
+                  </InputLabel>
+                  <CustomSelect
+                    onChange={this.handleSelectedCurrencyChangeFromSelect}
+                    options={currencies}
+                    defaultValue={currencies[144]}
+                    isSearchable
+                  />
+                </InputWrapper>
+              </ContentBlock>
+            </PrintableSection>
+          </>
+        )}
       </>
     );
   }
