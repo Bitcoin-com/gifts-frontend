@@ -44,6 +44,7 @@ const homeConfig = {
       name: 'header',
       fields: [
         { name: 'title', label: 'title', widget: 'string' },
+        { name: 'importingSeed', label: 'importingSeed', widget: 'string' },
         { name: 'description', label: 'description', widget: 'string' },
         { name: 'count', label: 'count', widget: 'string' },
       ],
