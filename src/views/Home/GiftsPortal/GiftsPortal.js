@@ -73,6 +73,7 @@ import {
   CustomPdfDownloadLink,
   InputLabel,
   WalletApiButton,
+  WalletApiDummy,
 } from './styled';
 import Gift from './Gift';
 
@@ -2110,6 +2111,7 @@ class GiftsPortal extends React.Component {
   // eslint-disable-next-line consistent-return
   async handleCreateTipSubmit(e) {
     e.preventDefault();
+    console.log(e.target.id);
     if (e.target.id !== 'createTip') {
       // Do not run function unless called from button
       return;
@@ -2616,10 +2618,10 @@ class GiftsPortal extends React.Component {
                           <FormattedMessage id="home.labels.refundAddress" />{' '}
                           <Red>*</Red>
                           {isWalletAvailable && !isWalletLoggedIn && (
-                            <WalletApiButton show name="logInNotice">
+                            <WalletApiDummy show name="logInNotice">
                               &nbsp;
                               <FormattedMessage id="home.buttons.logInBadger" />
-                            </WalletApiButton>
+                            </WalletApiDummy>
                           )}
                           {isWalletAvailable && isWalletLoggedIn && (
                             <WalletApiButton
@@ -3017,10 +3019,10 @@ class GiftsPortal extends React.Component {
                         <InputLabel>
                           <FormattedMessage id="home.labels.refundAddress" />
                           {isWalletAvailable && !isWalletLoggedIn && (
-                            <WalletApiButton show name="logInNotice">
+                            <WalletApiDummy show name="logInNotice">
                               &nbsp;
                               <FormattedMessage id="home.buttons.logInBadger" />
-                            </WalletApiButton>
+                            </WalletApiDummy>
                           )}
                           {isWalletAvailable && isWalletLoggedIn && (
                             <WalletApiButton
@@ -3537,10 +3539,10 @@ class GiftsPortal extends React.Component {
                         <FormattedMessage id="home.labels.refundAddress" />{' '}
                         <Red>*</Red>
                         {isWalletAvailable && !isWalletLoggedIn && (
-                          <WalletApiButton show name="logInNotice">
+                          <WalletApiDummy show name="logInNotice">
                             &nbsp;
                             <FormattedMessage id="home.buttons.logInBadger" />
-                          </WalletApiButton>
+                          </WalletApiDummy>
                         )}
                         {isWalletAvailable && isWalletLoggedIn && (
                           <WalletApiButton
