@@ -2184,6 +2184,10 @@ class GiftsPortal extends React.Component {
   // eslint-disable-next-line consistent-return
   async handleCreateTipSubmit(e) {
     e.preventDefault();
+    if (e.target.id !== 'createTip') {
+      // Do not run function unless called from button
+      return;
+    }
     const {
       intl: { formatMessage },
     } = this.props;
