@@ -137,6 +137,14 @@ export const WalletApiButton = styled.button`
   cursor: pointer;
   color: ${colors.solid.caribbeanGreen};
 `;
+export const WalletApiDummy = styled.span`
+  padding: 0px;
+  display: ${({ show = false }) => (show === true ? 'inline' : 'none')};
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: ${colors.solid.caribbeanGreen};
+`;
 export const StackedButtons = styled.div`
   width: 100%;
   & > a,
