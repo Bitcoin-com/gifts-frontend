@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -318,7 +319,7 @@ const Gift = ({
                     (fiatCurrency === 'AUD' && '$')}
                   {tipWallet.sats !== 0 ? (
                     <>
-                      {fiatAmount} {fiatCurrency}
+                      {fiatAmount.toLocaleString()} {fiatCurrency}
                     </>
                   ) : (
                     <>0 {fiatCurrency}</>
@@ -336,7 +337,10 @@ const Gift = ({
                       {fiatCurrency === 'USD' ||
                         (fiatCurrency === 'CAD' && '$') ||
                         (fiatCurrency === 'AUD' && '$')}
-                      {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                      {/* eslint-disable-next-line radix */}
+                      {parseInt(
+                        (fiatAmount / (tipWallet.sats / 1e8)).toFixed(0),
+                      ).toLocaleString()}
                       {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
                       {dateStr}
                     </>
@@ -426,7 +430,7 @@ const Gift = ({
                     (fiatCurrency === 'AUD' && '$')}
                   {tipWallet.sats !== 0 ? (
                     <>
-                      {fiatAmount} {fiatCurrency}
+                      {fiatAmount.toLocaleString()} {fiatCurrency}
                     </>
                   ) : (
                     <>0 {fiatCurrency}</>
@@ -444,7 +448,9 @@ const Gift = ({
                       {fiatCurrency === 'USD' ||
                         (fiatCurrency === 'CAD' && '$') ||
                         (fiatCurrency === 'AUD' && '$')}{' '}
-                      {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                      {parseInt(
+                        (fiatAmount / (tipWallet.sats / 1e8)).toFixed(0),
+                      ).toLocaleString()}
                       {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
                       {dateStr}
                     </>
@@ -531,7 +537,7 @@ const Gift = ({
                     (fiatCurrency === 'AUD' && '$')}
                   {tipWallet.sats !== 0 ? (
                     <>
-                      {fiatAmount} {fiatCurrency}
+                      {fiatAmount.toLocaleString()} {fiatCurrency}
                     </>
                   ) : (
                     <>0 {fiatCurrency}</>
@@ -549,7 +555,9 @@ const Gift = ({
                       {fiatCurrency === 'USD' ||
                         (fiatCurrency === 'CAD' && '$') ||
                         (fiatCurrency === 'AUD' && '$')}{' '}
-                      {(fiatAmount / (tipWallet.sats / 1e8)).toFixed(0)}{' '}
+                      {parseInt(
+                        (fiatAmount / (tipWallet.sats / 1e8)).toFixed(0),
+                      ).toLocaleString()}
                       {fiatCurrency} <FormattedMessage id="home.gift.on" />{' '}
                       {dateStr}
                     </>

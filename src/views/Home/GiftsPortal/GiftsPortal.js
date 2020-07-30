@@ -39,7 +39,6 @@ import {
   Centered,
   StackedButtons,
   ShowButton,
-  MobileShowButton,
   ShowFlexContainer,
   ShowFlexContainerTwoCols,
   CloseIcon,
@@ -2241,6 +2240,7 @@ class GiftsPortal extends React.Component {
     }
 
     if (formData.tipAmountFiat.value === '') {
+      // eslint-disable-next-line consistent-return
       return this.setState({ generatingInvoice: false });
     }
     // Date picker form validation doesn't work with onsubmit, catch here
@@ -2250,6 +2250,7 @@ class GiftsPortal extends React.Component {
       formData.tipCount.error !== null ||
       formData.emailAddress.error !== null
     ) {
+      // eslint-disable-next-line consistent-return
       return this.setState({ generatingInvoice: false });
     }
 
@@ -2267,6 +2268,7 @@ class GiftsPortal extends React.Component {
     } catch (err) {
       console.log(`Error fetching price in handleCreateTipSubmit()`);
       console.log(err);
+      // eslint-disable-next-line consistent-return
       return this.setState({
         generatingInvoice: false,
         invoiceGenerationError: formatMessage({
@@ -2282,6 +2284,7 @@ class GiftsPortal extends React.Component {
         `Error converting price api output to JSON in handleCreateTipSubmit()`,
       );
       console.log(err);
+      // eslint-disable-next-line consistent-return
       return this.setState({
         generatingInvoice: false,
         invoiceGenerationError: formatMessage({
@@ -2300,6 +2303,7 @@ class GiftsPortal extends React.Component {
     // console.log(`tipAmountSats: ${tipAmountSats}`);
     if (tipAmountSats < 5000) {
       // error
+      // eslint-disable-next-line consistent-return
       return this.setState({
         generatingInvoice: false,
         invoiceGenerationError: formatMessage({
@@ -2506,7 +2510,8 @@ class GiftsPortal extends React.Component {
     const dateStr = `${monthNames[today.getMonth()]} ${date}, ${year}`;
 
     // Invoice URI
-    const invoiceUri = `bitcoincash:?r=${invoiceUrl}`;
+    // const invoiceUri = `bitcoincash:?r=${invoiceUrl}`;
+    // This is currently handled by the <Invoice> component
 
     let expirationDate;
     let giftInfoSuccess = false;
