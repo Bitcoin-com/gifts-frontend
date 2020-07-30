@@ -337,7 +337,6 @@ const Gift = ({
                       {fiatCurrency === 'USD' ||
                         (fiatCurrency === 'CAD' && '$') ||
                         (fiatCurrency === 'AUD' && '$')}
-                      {/* eslint-disable-next-line radix */}
                       {parseInt(
                         (fiatAmount / (tipWallet.sats / 1e8)).toFixed(0),
                       ).toLocaleString()}
