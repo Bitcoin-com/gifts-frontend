@@ -1580,6 +1580,7 @@ class GiftsPortal extends React.Component {
 
   appStateInitial() {
     window.scrollTo(0, 0);
+    this.initializeWebsocket();
     this.setState({
       formData: merge({}, this.initialFormData),
       walletInfo: {
