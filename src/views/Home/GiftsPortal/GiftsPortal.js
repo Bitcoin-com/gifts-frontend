@@ -38,7 +38,6 @@ import {
   Centered,
   StackedButtons,
   ShowButton,
-  MobileShowButton,
   ShowFlexContainer,
   ShowFlexContainerTwoCols,
   CloseIcon,
@@ -2111,11 +2110,7 @@ class GiftsPortal extends React.Component {
   // eslint-disable-next-line consistent-return
   async handleCreateTipSubmit(e) {
     e.preventDefault();
-    console.log(e.target.id);
-    if (e.target.id !== 'createTip') {
-      // Do not run function unless called from button
-      return;
-    }
+
     const {
       intl: { formatMessage },
     } = this.props;
@@ -2386,9 +2381,6 @@ class GiftsPortal extends React.Component {
       'Dec',
     ];
     const dateStr = `${monthNames[today.getMonth()]} ${date}, ${year}`;
-
-    // Invoice URI
-    const invoiceUri = `bitcoincash:?r=${invoiceUrl}`;
 
     let expirationDate;
     let giftInfoSuccess = false;
