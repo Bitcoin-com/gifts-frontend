@@ -325,9 +325,11 @@ const Gift = ({
                     <>0 {fiatCurrency}</>
                   )}
                 </FiatAmount>
-                <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+                {fiatCurrency !== 'BCH' && (
+                  <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+                )}
               </TipAmount>
-              {dateStr !== null && (
+              {dateStr !== null && fiatCurrency !== 'BCH' && (
                 <TipExchangeRate>
                   {tipWallet.sats !== 0 ? (
                     <>
@@ -435,9 +437,11 @@ const Gift = ({
                     <>0 {fiatCurrency}</>
                   )}
                 </FiatAmount>
-                <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+                {fiatCurrency !== 'BCH' && (
+                  <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+                )}
               </TipAmountThrowback>
-              {dateStr !== null && (
+              {dateStr !== null && fiatCurrency !== 'BCH' && (
                 <TipExchangeRateThrowback>
                   {tipWallet.sats !== 0 ? (
                     <>
@@ -542,9 +546,11 @@ const Gift = ({
                     <>0 {fiatCurrency}</>
                   )}
                 </FiatAmount>
-                <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+                {fiatCurrency !== 'BCH' && (
+                  <CryptoAmount>{tipWallet.sats / 1e8} BCH</CryptoAmount>
+                )}
               </TipAmountEZ>
-              {dateStr !== null && (
+              {dateStr !== null && fiatCurrency !== 'BCH' && (
                 <TipExchangeRateEZ>
                   {tipWallet.sats !== 0 ? (
                     <>
