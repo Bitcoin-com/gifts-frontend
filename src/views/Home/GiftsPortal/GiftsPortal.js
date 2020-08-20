@@ -94,9 +94,9 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
-const giftsBackendBase = 'http://localhost:3001';
+// const giftsBackendBase = 'http://localhost:3001';
 // Staging
 // const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
