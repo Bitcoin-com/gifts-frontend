@@ -1657,7 +1657,10 @@ class GiftsPortal extends React.Component {
       return console.log(err);
     }
 
-    const fiatPrice = priceJson[currency].rate;
+    let fiatPrice = 1;
+    if (currency !== 'BCH') {
+      fiatPrice = priceJson[currency].rate;
+    }
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
     );
@@ -2057,7 +2060,10 @@ class GiftsPortal extends React.Component {
       });
     }
 
-    const fiatPrice = priceJson[selectedCurrency].rate;
+    let fiatPrice = 1;
+    if (selectedCurrency !== 'BCH') {
+      fiatPrice = priceJson[selectedCurrency].rate;
+    }
     // console.log(`fiatPrice: ${fiatPrice}`);
     const calculatedFiatAmount = parseFloat(
       ((tipWallets[0].sats / 1e8) * fiatPrice).toFixed(2),
@@ -2170,7 +2176,11 @@ class GiftsPortal extends React.Component {
     }
 
     // log in with a mnemonic
-    const fiatPrice = priceJson[selectedCurrency].rate;
+    let fiatPrice = 1;
+    if (selectedCurrency !== 'BCH') {
+      fiatPrice = priceJson[selectedCurrency].rate;
+    }
+
     // console.log(`fiatPrice: ${fiatPrice}`);
     // convert this to sats
     // given, 1.0 BCH in local currency
@@ -2986,7 +2996,7 @@ class GiftsPortal extends React.Component {
                         <CustomSelect
                           onChange={this.handleSelectedCurrencyChange}
                           options={currencies}
-                          defaultValue={currencies[144]}
+                          defaultValue={currencies[145]}
                           isSearchable
                         />
                       </InputWrapper>

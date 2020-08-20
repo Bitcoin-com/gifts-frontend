@@ -17,6 +17,11 @@ export const giftDesignOptions = [
 
 export const currencies = [
   {
+    value: 'BCH',
+    label: 'BCH - Bitcoin Cash',
+    image: bchLogo,
+  },
+  {
     value: 'AED',
     label: 'AED - UAE Dirham',
     image: <Flag country="ae" width={16} />,
