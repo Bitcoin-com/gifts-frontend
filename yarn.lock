@@ -3007,10 +3007,10 @@ bitbox-sdk@^8.11.2:
     socket.io-client "^2.2.0"
     wif "^2.0.6"
 
-bitcoin-invoice-components@^0.23.0-alpha:
-  version "0.23.0-alpha"
-  resolved "https://registry.yarnpkg.com/bitcoin-invoice-components/-/bitcoin-invoice-components-0.23.0-alpha.tgz#552103b604b522ec9f03f53cc16f86289cf99cc5"
-  integrity sha512-Zq2IKeSm67KdHTF9C4hmiZSvwC/543ItVkTOpQRWIiJP9BQBYweLlYOU9x1nfAQP99ItwAGWkJoXbPmaS/DgIQ==
+bitcoin-invoice-components@^0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/bitcoin-invoice-components/-/bitcoin-invoice-components-0.23.0.tgz#15d1c53cc37e81e6cbd7cd8f850669a310b05a1f"
+  integrity sha512-TIimC3OT5OhIuk9vrtZ5ma/EGBkTNjGA2+0AFehM/uOjJmaUBtsfEZpcc3/f+5/W6wBGCuLGLUoDDTenncbmSQ==
   dependencies:
     bignumber.js "^9.0.0"
     bitcoincom-link "^0.1.10"
