@@ -2170,7 +2170,11 @@ class GiftsPortal extends React.Component {
     }
 
     // log in with a mnemonic
-    const fiatPrice = priceJson[selectedCurrency].rate;
+    let fiatPrice = 1;
+    if (selectedCurrency !== 'BCH') {
+      fiatPrice = priceJson[selectedCurrency].rate;
+    }
+
     // console.log(`fiatPrice: ${fiatPrice}`);
     // convert this to sats
     // given, 1.0 BCH in local currency
@@ -2986,7 +2990,7 @@ class GiftsPortal extends React.Component {
                         <CustomSelect
                           onChange={this.handleSelectedCurrencyChange}
                           options={currencies}
-                          defaultValue={currencies[144]}
+                          defaultValue={currencies[145]}
                           isSearchable
                         />
                       </InputWrapper>
