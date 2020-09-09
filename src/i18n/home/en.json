@@ -162,7 +162,7 @@
     "invoiceGenerationError": "Invoice server unavailable. Please try again later.",
     "invalidRefundAddress": "Invalid refund address. Please enter a valid BCH address.",
     "youreTooCheap": "Error: Value of gift is too low. Gifts must be at least 0.0005 BCH. Increase your fiat amount per gift.",
-    "tipCountTooManyTips": "Gift creation is currently limited to 1,500.",
+    "tipCountTooManyTips": "Gift creation is currently limited to 1,000.",
     "networkError": "Network error, the API at rest.bitcoin.com did not respond.",
     "invalidExpirationDate": "Expiration date cannot be more than 1 year in the future.",
     "invalidEmail": "Please enter a valid email address (or none at all)",
