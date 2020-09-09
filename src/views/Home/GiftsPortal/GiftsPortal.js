@@ -2153,11 +2153,7 @@ class GiftsPortal extends React.Component {
     const {
       walletInfo,
       formData,
-      selectedCurrency,
-      sweptTxid,
-      tipsAlreadySweptError,
       tipsClaimedCount,
-      showSweepForm,
       tipWallets,
       importedGiftInfo,
     } = this.state;
@@ -2177,64 +2173,82 @@ class GiftsPortal extends React.Component {
       networkError: '',
     });
     const potentialGiftBatchSize = 20;
-    const startPotentialTipScan = tipWallets.length;
-    const endPotentialGiftScan = startPotentialTipScan + potentialGiftBatchSize;
 
     // to start, just add another 20
     const potentialTipWallets = [];
-    const potentialTipAddresses = [];
-    for (let i = startPotentialTipScan; i < endPotentialGiftScan; i += 1) {
-      const potentialTipWallet = {
-        addr: '',
-        wif: '',
-        sats: '',
-        status: '',
-        claimedTxid: '',
-        callsign: '',
-      };
 
-      const potentialChildNode = masterHDNode.derivePath(`${derivePath}${i}`);
-      const potentialTipAddress = bitbox.HDNode.toCashAddress(
-        potentialChildNode,
-      );
-      const potentialTipCallsignPicker = new Chance(
-        `${potentialTipAddress}BCHPLS`,
-      );
+    const batchPromises = [];
+    // note that you do a batch of 400 because Bitbox limits
+    // Can only check 20 addresses at a time, can only do 20 requests of 20 addresses at a time
+    for (let batch = 0; batch < 20; batch += 1) {
+      console.log(`Processing batch ${batch + 1}`);
+      const potentialTipAddresses = [];
+      const startPotentialTipScan =
+        tipWallets.length + batch * potentialGiftBatchSize;
+      const endPotentialGiftScan =
+        startPotentialTipScan + potentialGiftBatchSize;
+      for (let i = startPotentialTipScan; i < endPotentialGiftScan; i += 1) {
+        const potentialTipWallet = {
+          addr: '',
+          wif: '',
+          sats: '',
+          status: '',
+          claimedTxid: '',
+          callsign: '',
+        };
 
-      const potentialTipCallsign =
-        callsigns[
-          Math.floor(potentialTipCallsignPicker.random() * callsigns.length)
-        ];
-      /* let potentialTipCallsign;
-      if (importedGiftInfo.length >= i) {
-        potentialTipCallsign = importedGiftInfo[i].giftNote;
-      } else {
-        potentialTipCallsign =
+        const potentialChildNode = masterHDNode.derivePath(`${derivePath}${i}`);
+        const potentialTipAddress = bitbox.HDNode.toCashAddress(
+          potentialChildNode,
+        );
+        const potentialTipCallsignPicker = new Chance(
+          `${potentialTipAddress}BCHPLS`,
+        );
+
+        const potentialTipCallsign =
           callsigns[
             Math.floor(potentialTipCallsignPicker.random() * callsigns.length)
           ];
+
+        /* let potentialTipCallsign;
+        if (importedGiftInfo.length >= i) {
+          potentialTipCallsign = importedGiftInfo[i].giftNote;
+        } else {
+          potentialTipCallsign =
+            callsigns[
+              Math.floor(potentialTipCallsignPicker.random() * callsigns.length)
+            ];
+        }
+        */
+
+        const potentialTipWif = bitbox.HDNode.toWIF(potentialChildNode);
+        // console.log(`${derivePath}${i}: ${potentialTipAddress}`);
+
+        potentialTipWallet.addr = potentialTipAddress;
+        potentialTipWallet.callsign = potentialTipCallsign;
+        potentialTipWallet.wif = potentialTipWif;
+
+        // Note that using push and not the specific index only works because everything is in HD order
+        potentialTipWallets.push(potentialTipWallet);
+        potentialTipAddresses.push(potentialTipAddress);
       }
-      */
-
-      const potentialTipWif = bitbox.HDNode.toWIF(potentialChildNode);
-      // console.log(`${derivePath}${i}: ${potentialTipAddress}`);
-
-      potentialTipWallet.addr = potentialTipAddress;
-      potentialTipWallet.callsign = potentialTipCallsign;
-      potentialTipWallet.wif = potentialTipWif;
-
-      // Note that using push and not the specific index only works because everything is in HD order
-      potentialTipWallets.push(potentialTipWallet);
-
-      potentialTipAddresses.push(potentialTipAddress);
+      batchPromises.push(bitbox.Address.details(potentialTipAddresses));
     }
+
+    // now promise.all all those batches, then flatten the results
+
     // console.log(potentialTipAddresses);
 
     // get the tx history for those 20
     try {
-      const potentialTipDetails = await bitbox.Address.details(
-        potentialTipAddresses,
-      );
+      const batchedPotentialTipDetails = await Promise.all(batchPromises);
+      // flatten results
+      console.log(`batchedPotentialTipDetails:`);
+      console.log(batchedPotentialTipDetails);
+      const potentialTipDetails = batchedPotentialTipDetails.flat(1);
+      console.log(`flattened potentialTipDetails:`);
+      console.log(potentialTipDetails);
+
       // console.log(potentialTipDetails);
 
       for (let i = 0; i < potentialTipDetails.length; i += 1) {
