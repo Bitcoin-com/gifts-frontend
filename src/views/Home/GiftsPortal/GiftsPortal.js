@@ -94,9 +94,9 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
-// const giftsBackendBase = 'http://localhost:3001';
+const giftsBackendBase = 'http://localhost:3001';
 // Staging
 // const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
@@ -184,6 +184,7 @@ class GiftsPortal extends React.Component {
       this,
     );
     this.importMnemonic = this.importMnemonic.bind(this);
+    this.importMoarMnemonic = this.importMoarMnemonic.bind(this);
     this.handleCancelInvoice = this.handleCancelInvoice.bind(this);
     this.invoiceSuccess = this.invoiceSuccess.bind(this);
     this.invoiceSuccesInThreeSeconds = this.invoiceSuccesInThreeSeconds.bind(
@@ -247,6 +248,8 @@ class GiftsPortal extends React.Component {
     this.getWalletLinkStatus = this.getWalletLinkStatus.bind(this);
     this.getGiftsStats = this.getGiftsStats.bind(this);
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    // Dev
+    this.stopSweepingStatus = this.stopSweepingStatus.bind(this);
     // Do not call invoiceSuccess more than once in a 10s window
     // Should only ever be called once, but Badger can send this signal multiple times
     this.invoiceSuccessThrottled = throttle(this.invoiceSuccess, 10000);
@@ -283,6 +286,7 @@ class GiftsPortal extends React.Component {
       importedGiftInfo: [],
       generatingInvoice: false,
       importingMnemonic: false,
+      importingMoarFromMnemonic: false,
       sweepingGifts: false,
       apiPostFailed: false,
       createExpirationTxsFailed: false,
@@ -478,7 +482,7 @@ class GiftsPortal extends React.Component {
       field.error = formatMessage({
         id: 'home.errors.tipCountNoTips',
       });
-    } else if (parseFloat(value) > 20) {
+    } else if (parseFloat(value) > 2500) {
       field.state = inputState.invalid;
       field.error = formatMessage({
         id: 'home.errors.tipCountTooManyTips',
@@ -845,7 +849,12 @@ class GiftsPortal extends React.Component {
       return console.log(`No websocket connect, cannot subscribe to addresses`);
     }
     // Parse for addresses
-    for (let i = 0; i < tipWallets.length; i += 1) {
+    // update: if more than 20 wallets, only subscribe to first 20
+    let addressesToWatch = tipWallets.length;
+    if (addressesToWatch > 20) {
+      addressesToWatch = 20;
+    }
+    for (let i = 0; i < addressesToWatch; i += 1) {
       // Get address of Gift
       const watchedAddr = bitbox.Address.toLegacyAddress(tipWallets[i].addr);
       // Subscribe to websocket for gift address
@@ -1106,29 +1115,69 @@ class GiftsPortal extends React.Component {
 
   processRetryPostReturnTxInfos() {
     const { returnTxInfos } = this.state;
-    fetch(giftsBackend, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(returnTxInfos),
-    }).then(
-      res => {
-        console.log(`returnTxInfos successully posted to API`);
-        console.log(res);
+    // Multiple requests for larger payloads
+    const returnTxBatchSize = 500;
+    if (returnTxInfos.length > returnTxBatchSize) {
+      const batchPromises = [];
+      const returnTxBatchCount = Math.ceil(
+        returnTxInfos.length / returnTxBatchSize,
+      );
+      for (let i = 0; i < returnTxBatchCount; i += 1) {
+        const startIndex = returnTxBatchSize * i;
+        let endIndex = startIndex + returnTxBatchSize;
+        if (endIndex > returnTxInfos.length) {
+          endIndex = returnTxInfos.length;
+        }
+        const batchPayload = returnTxInfos.slice(startIndex, endIndex);
+        const batchPromise = fetch(giftsBackend, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(batchPayload),
+        });
+        batchPromises.push(batchPromise);
+      }
+      Promise.all(batchPromises).then(
+        result => {
+          console.log(`returnTxInfos successully posted to API as batch post`);
+          console.log(result);
+          // used in debugging
+          // eslint-disable-next-line react/no-unused-state
+          return this.setState({ apiPostFailed: false });
+        },
+        err => {
+          console.log(`Error in processing batch post of returnTxInfos`);
+          console.log(err);
+          return this.setState({ apiPostFailed: true, returnTxInfos });
+        },
+      );
+    } else {
+      fetch(giftsBackend, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(returnTxInfos),
+      }).then(
+        res => {
+          console.log(`returnTxInfos successully posted to API`);
+          console.log(res);
 
-        // used in debugging
-        // eslint-disable-next-line react/no-unused-state
-        return this.setState({ apiPostFailed: false });
-      },
-      err => {
-        console.log(`Error in postReturnTxInfos`);
-        console.log(err);
-        // should try to post it again here, mb email the error to admin
-        return this.setState({ apiPostFailed: true, returnTxInfos });
-      },
-    );
+          // used in debugging
+          // eslint-disable-next-line react/no-unused-state
+          return this.setState({ apiPostFailed: false });
+        },
+        err => {
+          console.log(`Error in postReturnTxInfos`);
+          console.log(err);
+          // should try to post it again here, mb email the error to admin
+          return this.setState({ apiPostFailed: true, returnTxInfos });
+        },
+      );
+    }
   }
 
   retryInvoiceSuccess() {
@@ -1175,102 +1224,237 @@ class GiftsPortal extends React.Component {
       sweepBuilder.push(sweepChunk);
     });
     // TODO can you get batch utxos from more than 20 addresses?
-    // check balances of addresses in one async batch
-    bitbox.Address.utxo(sweepAddresses).then(
-      u => {
-        for (let i = 0; i < u.length; i += 1) {
-          // utxos come back in same order they were sent
-          sweepBuilder[i].utxos = u[i].utxos;
+    // Yes, but you need a new method and error handling / timeout handling
+    // So, for > 20 gifts, you may want to take payment only after refund txns are ready
+    if (tipWallets.length > 20) {
+      // special handling for bitbox limits
+      // making this function async is a pain in react, so will be long function
+      console.log(`More than 20 wallets to be swept`);
+      // parse into arrays of 20 at a time
+      const sweepBuilderBulkHolder = [];
+      const sweepAddressesBulkHolder = [];
+      const batchCount = Math.ceil(tipWallets.length / 20);
+      console.log(`batchCount: ${batchCount}`);
+      for (let i = 0; i < batchCount; i += 1) {
+        const startIndex = 20 * i;
+        let endIndex = 20 * (i + 1);
+        if (endIndex > sweepBuilder.length) {
+          endIndex = sweepBuilder.length;
         }
-        // now make return txs
-        const returnRawTxs = [];
-        for (let i = 0; i < sweepBuilder.length; i += 1) {
-          const transactionBuilder = new bitbox.TransactionBuilder();
-          let originalAmount = 0;
-          // Only 1 utxo, what you just paid
-          const utxo = sweepBuilder[i].utxos[0];
-          originalAmount += utxo.satoshis;
-          transactionBuilder.addInput(utxo.txid, utxo.vout);
-          if (originalAmount < 1) {
-            returnRawTxs[
-              i
-            ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
+        sweepBuilderBulkHolder[i] = sweepBuilder.slice(startIndex, endIndex);
+        sweepAddressesBulkHolder[i] = sweepAddresses.slice(
+          startIndex,
+          endIndex,
+        );
+      }
+      console.log(`sweepBuilderBulkHolder:`);
+      console.log(sweepAddressesBulkHolder);
+      console.log(`sweepAddressesBulkHolder:`);
+      console.log(sweepAddressesBulkHolder);
+      // Make an array of promises to get the utxos then promise.all()
+      const utxoPromises = [];
+      for (let i = 0; i < batchCount; i += 1) {
+        utxoPromises[i] = bitbox.Address.utxo(sweepAddressesBulkHolder[i]);
+      }
+      // check balances of addresses in one async batch
+
+      Promise.all(utxoPromises).then(
+        res => {
+          console.log(`Utxo promises successfully fetched`);
+          console.log(res);
+          const u = res.flat(1);
+          console.log(`Merged utxos`);
+          console.log(u);
+          // make the txs here
+          for (let i = 0; i < u.length; i += 1) {
+            // utxos come back in same order they were sent
+            sweepBuilder[i].utxos = u[i].utxos;
           }
-          // Calc fee for 1 input 1 output
-          const byteCount = bitbox.BitcoinCash.getByteCount(
-            { P2PKH: 1 },
-            { P2PKH: 1 },
-          );
-          // Make fee 2 sat/byte to make sure even smallest tips get swept
-          const fee = Math.ceil(2 * byteCount);
-          // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
-          const sendAmount = originalAmount - fee;
+          // now make return txs
+          const returnRawTxs = [];
+          for (let i = 0; i < sweepBuilder.length; i += 1) {
+            const transactionBuilder = new bitbox.TransactionBuilder();
+            let originalAmount = 0;
+            // Only 1 utxo, what you just paid
+            const utxo = sweepBuilder[i].utxos[0];
+            originalAmount += utxo.satoshis;
+            transactionBuilder.addInput(utxo.txid, utxo.vout);
+            if (originalAmount < 1) {
+              returnRawTxs[
+                i
+              ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
+            }
+            // Calc fee for 1 input 1 output
+            const byteCount = bitbox.BitcoinCash.getByteCount(
+              { P2PKH: 1 },
+              { P2PKH: 1 },
+            );
+            // Make fee 2 sat/byte to make sure even smallest tips get swept
+            const fee = Math.ceil(2 * byteCount);
+            // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+            const sendAmount = originalAmount - fee;
 
-          // add output w/ address and amount to send
-          transactionBuilder.addOutput(refundAddress, sendAmount);
-          // Loop through each input and sign
-          let redeemScript;
-          // Sign your input (only 1)
+            // add output w/ address and amount to send
+            transactionBuilder.addOutput(refundAddress, sendAmount);
+            // Loop through each input and sign
+            let redeemScript;
+            // Sign your input (only 1)
 
-          const keyPair = sweepBuilder[i].ecPair;
+            const keyPair = sweepBuilder[i].ecPair;
 
-          transactionBuilder.sign(
-            0,
-            keyPair,
-            redeemScript,
-            transactionBuilder.hashTypes.SIGHASH_ALL,
-            utxo.satoshis,
-          );
+            transactionBuilder.sign(
+              0,
+              keyPair,
+              redeemScript,
+              transactionBuilder.hashTypes.SIGHASH_ALL,
+              utxo.satoshis,
+            );
 
-          // build tx
-          const tx = transactionBuilder.build();
-          // output rawhex
-          const hex = tx.toHex();
-          returnRawTxs.push(hex);
-        }
-        // console.log(returnRawTxs);
+            // build tx
+            const tx = transactionBuilder.build();
+            // output rawhex
+            const hex = tx.toHex();
+            returnRawTxs.push(hex);
+          }
+          // console.log(returnRawTxs);
 
-        // Build & set the server broadcast object in state
-        const returnTxInfos = [];
-        for (let i = 0; i < returnRawTxs.length; i += 1) {
-          const returnTxInfo = {};
-          // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
+          // Build & set the server broadcast object in state
+          const returnTxInfos = [];
+          for (let i = 0; i < returnRawTxs.length; i += 1) {
+            const returnTxInfo = {};
+            // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
 
-          const fiatAmount = parseFloat(formData.tipAmountFiat.value);
-          // Calculate this for each tip in case you add a feature for tips of diff value later
-          const fiatRate = parseFloat(
-            (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
-          );
-          const expirationStamp = Math.round(
-            formData.expirationDate.value.getTime() / 1000,
-          );
-          const tipAddress = tipWallets[i].addr;
-          const tipNote = tipWallets[i].callsign;
+            const fiatAmount = parseFloat(formData.tipAmountFiat.value);
+            // Calculate this for each tip in case you add a feature for tips of diff value later
+            const fiatRate = parseFloat(
+              (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
+            );
+            const expirationStamp = Math.round(
+              formData.expirationDate.value.getTime() / 1000,
+            );
+            const tipAddress = tipWallets[i].addr;
+            const tipNote = tipWallets[i].callsign;
 
-          returnTxInfo.creationPaymentUrl = invoiceUrl;
-          returnTxInfo.creationTxid = invoiceTxid;
-          returnTxInfo.fiatCode = selectedCurrency;
-          returnTxInfo.fiatAmount = fiatAmount;
-          returnTxInfo.fiatRate = fiatRate;
-          returnTxInfo.source = 'gifts';
-          returnTxInfo.email = formData.emailAddress.value;
-          returnTxInfo.rawTx = returnRawTxs[i];
-          returnTxInfo.expirationStamp = expirationStamp;
-          returnTxInfo.giftAddress = tipAddress;
-          returnTxInfo.giftNote = tipNote;
-          returnTxInfo.refundAddress = refundAddress;
-          returnTxInfos.push(returnTxInfo);
-        }
-        console.log(returnTxInfos);
-        return this.postReturnTxInfos(returnTxInfos);
-      },
-      err => {
-        console.log(`Error in bitbox.Address.utxo(sweepAddresses)`);
-        console.log(err);
-        return this.setState({ createExpirationTxsFailed: true });
-        // Handle this error, let user retry invoiceSuccess
-      },
-    );
+            returnTxInfo.creationPaymentUrl = invoiceUrl;
+            returnTxInfo.creationTxid = invoiceTxid;
+            returnTxInfo.fiatCode = selectedCurrency;
+            returnTxInfo.fiatAmount = fiatAmount;
+            returnTxInfo.fiatRate = fiatRate;
+            returnTxInfo.source = 'gifts';
+            returnTxInfo.email = formData.emailAddress.value;
+            returnTxInfo.rawTx = returnRawTxs[i];
+            returnTxInfo.expirationStamp = expirationStamp;
+            returnTxInfo.giftAddress = tipAddress;
+            returnTxInfo.giftNote = tipNote;
+            returnTxInfo.refundAddress = refundAddress;
+            returnTxInfos.push(returnTxInfo);
+          }
+          console.log(returnTxInfos);
+          return this.postReturnTxInfos(returnTxInfos);
+        },
+        err => {
+          console.log(`Error fetching utxo promises`);
+          console.log(err);
+        },
+      );
+    } else {
+      // check balances of addresses in one async batch
+      bitbox.Address.utxo(sweepAddresses).then(
+        u => {
+          for (let i = 0; i < u.length; i += 1) {
+            // utxos come back in same order they were sent
+            sweepBuilder[i].utxos = u[i].utxos;
+          }
+          // now make return txs
+          const returnRawTxs = [];
+          for (let i = 0; i < sweepBuilder.length; i += 1) {
+            const transactionBuilder = new bitbox.TransactionBuilder();
+            let originalAmount = 0;
+            // Only 1 utxo, what you just paid
+            const utxo = sweepBuilder[i].utxos[0];
+            originalAmount += utxo.satoshis;
+            transactionBuilder.addInput(utxo.txid, utxo.vout);
+            if (originalAmount < 1) {
+              returnRawTxs[
+                i
+              ] = `Error, no utxo found for wallet at address ${sweepBuilder[i].fromAddr}`;
+            }
+            // Calc fee for 1 input 1 output
+            const byteCount = bitbox.BitcoinCash.getByteCount(
+              { P2PKH: 1 },
+              { P2PKH: 1 },
+            );
+            // Make fee 2 sat/byte to make sure even smallest tips get swept
+            const fee = Math.ceil(2 * byteCount);
+            // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+            const sendAmount = originalAmount - fee;
+
+            // add output w/ address and amount to send
+            transactionBuilder.addOutput(refundAddress, sendAmount);
+            // Loop through each input and sign
+            let redeemScript;
+            // Sign your input (only 1)
+
+            const keyPair = sweepBuilder[i].ecPair;
+
+            transactionBuilder.sign(
+              0,
+              keyPair,
+              redeemScript,
+              transactionBuilder.hashTypes.SIGHASH_ALL,
+              utxo.satoshis,
+            );
+
+            // build tx
+            const tx = transactionBuilder.build();
+            // output rawhex
+            const hex = tx.toHex();
+            returnRawTxs.push(hex);
+          }
+          // console.log(returnRawTxs);
+
+          // Build & set the server broadcast object in state
+          const returnTxInfos = [];
+          for (let i = 0; i < returnRawTxs.length; i += 1) {
+            const returnTxInfo = {};
+            // Calculate BCH exchange rate from sats, as it was originally calculated to determine sats
+
+            const fiatAmount = parseFloat(formData.tipAmountFiat.value);
+            // Calculate this for each tip in case you add a feature for tips of diff value later
+            const fiatRate = parseFloat(
+              (fiatAmount / (tipWallets[i].sats / 1e8)).toFixed(2),
+            );
+            const expirationStamp = Math.round(
+              formData.expirationDate.value.getTime() / 1000,
+            );
+            const tipAddress = tipWallets[i].addr;
+            const tipNote = tipWallets[i].callsign;
+
+            returnTxInfo.creationPaymentUrl = invoiceUrl;
+            returnTxInfo.creationTxid = invoiceTxid;
+            returnTxInfo.fiatCode = selectedCurrency;
+            returnTxInfo.fiatAmount = fiatAmount;
+            returnTxInfo.fiatRate = fiatRate;
+            returnTxInfo.source = 'gifts';
+            returnTxInfo.email = formData.emailAddress.value;
+            returnTxInfo.rawTx = returnRawTxs[i];
+            returnTxInfo.expirationStamp = expirationStamp;
+            returnTxInfo.giftAddress = tipAddress;
+            returnTxInfo.giftNote = tipNote;
+            returnTxInfo.refundAddress = refundAddress;
+            returnTxInfos.push(returnTxInfo);
+          }
+          console.log(returnTxInfos);
+          return this.postReturnTxInfos(returnTxInfos);
+        },
+        err => {
+          console.log(`Error in bitbox.Address.utxo(sweepAddresses)`);
+          console.log(err);
+          return this.setState({ createExpirationTxsFailed: true });
+          // Handle this error, let user retry invoiceSuccess
+        },
+      );
+    }
 
     // Add the utxos to the sweepbuilder array
     // iterate over utxo object
@@ -1405,6 +1589,10 @@ class GiftsPortal extends React.Component {
     });
   }
 
+  stopSweepingStatus() {
+    return this.setState({ sweepingGifts: false });
+  }
+
   async sweepAllTips(e) {
     e.preventDefault();
     this.setState({ bitboxSweepTxBuildError: false, sweepingGifts: true });
@@ -1424,6 +1612,7 @@ class GiftsPortal extends React.Component {
     // of what you need to build your sweeping tx
     const sweepBuilder = [];
     const sweepAddresses = [];
+
     tipWallets.forEach(tipWallet => {
       const sweepChunk = {};
       // get ec pair from wif
@@ -1435,10 +1624,230 @@ class GiftsPortal extends React.Component {
       sweepAddresses.push(fromAddr);
       sweepBuilder.push(sweepChunk);
     });
-    // console.log(sweepBuilder);
+    console.log(`sweepBuilder:`);
+    console.log(sweepBuilder);
+    console.log(`sweepAddresses:`);
+    console.log(sweepAddresses);
     // TODO can you get batch utxos from more than 20 addresses?
-    // check balances of addresses in one async batch
+    // TODO ctrl f bulk handling
     let u;
+    if (tipWallets.length > 20) {
+      console.log(`More than 20 wallets to be swept`);
+      // parse into arrays of 20 at a time
+      const sweepBuilderBulkHolder = [];
+      const sweepAddressesBulkHolder = [];
+      const batchCount = Math.ceil(tipWallets.length / 20);
+      console.log(`batchCount: ${batchCount}`);
+      for (let i = 0; i < batchCount; i += 1) {
+        const startIndex = 20 * i;
+        let endIndex = 20 * (i + 1);
+        if (endIndex > sweepBuilder.length) {
+          endIndex = sweepBuilder.length;
+        }
+        sweepBuilderBulkHolder[i] = sweepBuilder.slice(startIndex, endIndex);
+        sweepAddressesBulkHolder[i] = sweepAddresses.slice(
+          startIndex,
+          endIndex,
+        );
+      }
+      console.log(`sweepBuilderBulkHolder:`);
+      console.log(sweepAddressesBulkHolder);
+      console.log(`sweepAddressesBulkHolder:`);
+      console.log(sweepAddressesBulkHolder);
+      // Make an array of promises to get the utxos then promise.all()
+      const utxoPromises = [];
+      for (let i = 0; i < batchCount; i += 1) {
+        utxoPromises[i] = bitbox.Address.utxo(sweepAddressesBulkHolder[i]);
+      }
+      // check balances of addresses in one async batch
+      let bulkU;
+      try {
+        bulkU = await Promise.all(utxoPromises);
+      } catch (err) {
+        console.log(`Error in fetching bulk utxos in sweepAll()`);
+        console.log(err);
+        return this.setState({
+          bitboxSweepTxBuildError: true,
+          sweepingGifts: false,
+        });
+      }
+      console.log(`Utxo promises successfully fetched`);
+      console.log(bulkU);
+      // const mergedUtxos = [].concat.apply([], bulkU);
+      u = bulkU.flat(1);
+      const sweepBuilderFlat = sweepBuilderBulkHolder.flat(1);
+      console.log(`Merged utxos`);
+      console.log(u);
+
+      // try to just consolidate all the utxos and proceed normally
+
+      /* Promise.all(utxoPromises).then(
+        res => {
+          console.log(`Utxo promises successfully fetched`);
+          console.log(res);
+          return this.setState({
+            sweepingGifts: false,
+          });
+        },
+        err => {
+          console.log(`Error fetching utxo promises`);
+          console.log(err);
+          return this.setState({
+            sweepingGifts: false,
+          });
+        },
+      );
+      */
+
+      // Try without flattening and with batched transactions
+      // Got error trying to do a sweep tx with 400 utxos, but 200 worked ok
+      const sweepUtxoBatchSize = 200;
+      const sweepTxsBatchCount = Math.ceil(u.length / sweepUtxoBatchSize);
+      // Remake your utxo array with this batch size
+      const utxoBatches = [];
+      const sweepBuilderBatches = [];
+
+      for (let i = 0; i < sweepTxsBatchCount; i += 1) {
+        const startIndex = sweepUtxoBatchSize * i;
+        let endIndex = sweepUtxoBatchSize * (i + 1);
+        if (endIndex > u.length) {
+          endIndex = u.length;
+        }
+        utxoBatches[i] = u.slice(startIndex, endIndex);
+        sweepBuilderBatches[i] = sweepBuilderFlat.slice(startIndex, endIndex);
+      }
+      console.log(`utxoBatches:`);
+      console.log(utxoBatches);
+
+      // iterate and send txs with 200 utxos at a time
+      const rawSweepTxs = [];
+      for (let z = 0; z < sweepTxsBatchCount; z += 1) {
+        for (let i = 0; i < utxoBatches[z].length; i += 1) {
+          // utxos come back in same order they were sent
+          // handle case that not all addresses will have utxos later
+          sweepBuilderBatches[z][i].utxos = utxoBatches[z][i].utxos;
+        }
+        // console.log(`completed sweepBuilder:`);
+        // console.log(sweepBuilder);
+
+        // now make that return tx
+        const transactionBuilder = new bitbox.TransactionBuilder();
+        let originalAmount = 0;
+        let inputCount = 0;
+
+        // loop over sweepBuilder
+        for (let j = 0; j < sweepBuilderBatches[z].length; j += 1) {
+          // Loop through all for each tip with utxos and add as inputs
+          for (let i = 0; i < sweepBuilderBatches[z][j].utxos.length; i += 1) {
+            const utxo = sweepBuilderBatches[z][j].utxos[i];
+
+            originalAmount += utxo.satoshis;
+            // console.log(`Input ${inputCount + 1}: { ${utxo.txid} , ${utxo.vout}}`);
+
+            transactionBuilder.addInput(utxo.txid, utxo.vout);
+            inputCount += 1;
+          }
+        }
+        if (originalAmount < 1) {
+          console.log(`originalAmount is 0, handle as error`);
+          if (z === sweepTxsBatchCount - 1) {
+            return this.setState({
+              tipsAlreadySweptError: true,
+              sweepingGifts: false,
+            });
+          }
+        }
+        // console.log(`Total inputs: ${inputCount}`);
+        const byteCount = bitbox.BitcoinCash.getByteCount(
+          { P2PKH: inputCount },
+          { P2PKH: 1 },
+        );
+        // Use 2 sats/byte to avoid any mempool errors
+        const fee = Math.ceil(2 * byteCount);
+        // console.log(`fee: ${fee}`);
+        // amount to send to receiver. It's the original amount - 1 sat/byte for tx size
+        const sendAmount = originalAmount - fee;
+        // console.log(`sendAmount: ${sendAmount}`);
+
+        // add output w/ address and amount to send
+        transactionBuilder.addOutput(
+          bitbox.Address.toLegacyAddress(refundAddress),
+          sendAmount,
+        );
+
+        // Loop through each input and sign
+        let redeemScript;
+        let signedInputCount = 0;
+        for (let j = 0; j < sweepBuilderBatches[z].length; j += 1) {
+          for (let i = 0; i < sweepBuilderBatches[z][j].utxos.length; i += 1) {
+            const utxo = sweepBuilderBatches[z][j].utxos[i];
+            // console.log(`utxo[${i}]: ${utxo.vout}`);
+            // console.log(utxo);
+            // console.log(`signing ecPair:`);
+            // console.log(sweepBuilder[j].ecPair);
+            transactionBuilder.sign(
+              signedInputCount,
+              sweepBuilderBatches[z][j].ecPair,
+              redeemScript,
+              transactionBuilder.hashTypes.SIGHASH_ALL,
+              utxo.satoshis,
+            );
+            signedInputCount += 1;
+            /*
+        console.log(
+          `Signed input ${i} round ${j} with ${sweepBuilder[j].ecPair.d[0]}`,
+        ); */
+          }
+        }
+        // build tx
+        const tx = transactionBuilder.build();
+        // output rawhex
+        const hex = tx.toHex();
+        console.log(`Sweep tx ${z + 1} of ${sweepTxsBatchCount} processed`);
+        rawSweepTxs.push(bitbox.RawTransactions.sendRawTransaction([hex]));
+        // console.log(hex);
+      }
+
+      try {
+        const resultingTxids = await Promise.all(rawSweepTxs);
+        console.log(`resultingTxids:`);
+        console.log(resultingTxids);
+        const txidStr = resultingTxids[0][0];
+        // TODO properly assign batched sweep claim txs to correct tickets
+        console.log(`txidStr: ${txidStr}`);
+        // console.log(typeof txid);
+        // console.log(`txidStr: ${txidStr}`);
+        // console.log(`txid: ${txid}`);
+        // set tips as claimed by this txid
+        const claimedTipWallets = [];
+        tipWallets.forEach(tipWallet => {
+          const claimedTipWallet = tipWallet;
+          // Only apply to tips that were not previously claimed
+          if (claimedTipWallet.status !== 'claimed') {
+            claimedTipWallet.status = 'claimed';
+            claimedTipWallet.claimedTxid = txidStr;
+          }
+          claimedTipWallets.push(claimedTipWallet);
+        });
+
+        return this.setState({
+          sweptTxid: txidStr,
+          tipsSweptCount: signedInputCount,
+          tipWallets: claimedTipWallets,
+          sweepingGifts: false,
+        });
+      } catch (err) {
+        console.log(`Error in broadcasting transaction:`);
+        console.log(err);
+
+        return this.setState({
+          bitboxSweepTxBuildError: true,
+          sweepingGifts: false,
+        });
+      }
+    }
+    // check balances of addresses in one async batch
+
     try {
       u = await bitbox.Address.utxo(sweepAddresses);
     } catch (err) {
@@ -1738,6 +2147,160 @@ class GiftsPortal extends React.Component {
     });
   }
 
+  async importMoarMnemonic() {
+    console.log(`importMoarMnemonic called`);
+    // import the next 400 wallets at a time
+    const {
+      walletInfo,
+      formData,
+      selectedCurrency,
+      sweptTxid,
+      tipsAlreadySweptError,
+      tipsClaimedCount,
+      showSweepForm,
+      tipWallets,
+      importedGiftInfo,
+    } = this.state;
+    // will push new entries here
+    // root seed buffer
+    // Use already-validated user mnemonic
+    const mnemonic = formData.importedMnemonic.value;
+    const rootSeed = bitbox.Mnemonic.toSeed(mnemonic);
+    // master HDNode
+    const masterHDNode = bitbox.HDNode.fromSeed(rootSeed, 'bitcoincash');
+    const moarGiftWallets = tipWallets;
+    let moarClaimedTips = tipsClaimedCount;
+    const { derivePath } = walletInfo;
+    // ?? let claimedTipCount = 0;
+    this.setState({
+      importingMoarFromMnemonic: true,
+      networkError: '',
+    });
+    const potentialGiftBatchSize = 20;
+    const startPotentialTipScan = tipWallets.length;
+    const endPotentialGiftScan = startPotentialTipScan + potentialGiftBatchSize;
+
+    // to start, just add another 20
+    const potentialTipWallets = [];
+    const potentialTipAddresses = [];
+    for (let i = startPotentialTipScan; i < endPotentialGiftScan; i += 1) {
+      const potentialTipWallet = {
+        addr: '',
+        wif: '',
+        sats: '',
+        status: '',
+        claimedTxid: '',
+        callsign: '',
+      };
+
+      const potentialChildNode = masterHDNode.derivePath(`${derivePath}${i}`);
+      const potentialTipAddress = bitbox.HDNode.toCashAddress(
+        potentialChildNode,
+      );
+      const potentialTipCallsignPicker = new Chance(
+        `${potentialTipAddress}BCHPLS`,
+      );
+
+      const potentialTipCallsign =
+        callsigns[
+          Math.floor(potentialTipCallsignPicker.random() * callsigns.length)
+        ];
+      /* let potentialTipCallsign;
+      if (importedGiftInfo.length >= i) {
+        potentialTipCallsign = importedGiftInfo[i].giftNote;
+      } else {
+        potentialTipCallsign =
+          callsigns[
+            Math.floor(potentialTipCallsignPicker.random() * callsigns.length)
+          ];
+      }
+      */
+
+      const potentialTipWif = bitbox.HDNode.toWIF(potentialChildNode);
+      // console.log(`${derivePath}${i}: ${potentialTipAddress}`);
+
+      potentialTipWallet.addr = potentialTipAddress;
+      potentialTipWallet.callsign = potentialTipCallsign;
+      potentialTipWallet.wif = potentialTipWif;
+
+      // Note that using push and not the specific index only works because everything is in HD order
+      potentialTipWallets.push(potentialTipWallet);
+
+      potentialTipAddresses.push(potentialTipAddress);
+    }
+    // console.log(potentialTipAddresses);
+
+    // get the tx history for those 20
+    try {
+      const potentialTipDetails = await bitbox.Address.details(
+        potentialTipAddresses,
+      );
+      // console.log(potentialTipDetails);
+
+      for (let i = 0; i < potentialTipDetails.length; i += 1) {
+        if (potentialTipDetails[i].transactions.length > 0) {
+          const tipWallet = potentialTipWallets[i];
+          if (potentialTipDetails[i].totalReceivedSat > 0) {
+            tipWallet.sats = potentialTipDetails[i].totalReceivedSat;
+          } else {
+            // handle 0 conf
+            tipWallet.sats = potentialTipDetails[i].unconfirmedBalanceSat;
+          }
+
+          if (
+            potentialTipDetails[i].transactions.length === 1 &&
+            (potentialTipDetails[i].balance > 0 ||
+              potentialTipDetails[i].unconfirmedBalanceSat > 0)
+          ) {
+            tipWallet.status = 'unclaimed';
+          } else if (
+            potentialTipDetails[i].transactions.length > 1 &&
+            (potentialTipDetails[i].balance === 0 ||
+              potentialTipDetails[i].unconfirmedBalanceSat < 0)
+          ) {
+            tipWallet.status = 'claimed';
+            moarClaimedTips += 1;
+            // eslint-disable-next-line prefer-destructuring
+            tipWallet.claimedTxid = potentialTipDetails[i].transactions[0];
+          }
+          if (typeof importedGifts !== 'undefined') {
+            if (importedGiftInfo.length > 0) {
+              try {
+                tipWallet.status = importedGiftInfo[i].status;
+              } catch (err) {
+                console.log(`Error in applying server tip status`);
+                console.log(err);
+              }
+            }
+          }
+
+          moarGiftWallets.push(tipWallet);
+        } else {
+          console.log(`You have ${i} Gifts in this wallet so far.`);
+          break;
+        }
+      }
+    } catch (err) {
+      console.log(`Error in bitbox.Address.details[potentialTipDetails]`);
+      console.log(err);
+      return this.setState({
+        importingMoarFromMnemonic: false,
+      });
+    }
+    let allTipsSwept = false;
+    if (moarClaimedTips === moarGiftWallets.length) {
+      allTipsSwept = true;
+    }
+    console.log(`moarGiftWallets:`);
+    console.log(moarGiftWallets);
+    this.setState({
+      tipWallets: moarGiftWallets,
+      tipsClaimedCount: moarClaimedTips,
+      tipsAlreadySweptError: allTipsSwept,
+      importingMoarFromMnemonic: false,
+    });
+  }
+
   // eslint-disable-next-line consistent-return
   async importMnemonic() {
     const {
@@ -1984,7 +2547,7 @@ class GiftsPortal extends React.Component {
 
               tipWallets.push(tipWallet);
             } else {
-              // console.log(`You have ${i} tips in this wallet`);
+              console.log(`You have ${i} tips in this wallet`);
               break;
             }
           }
@@ -2208,6 +2771,11 @@ class GiftsPortal extends React.Component {
       // get a child node
       const childNode = masterHDNode.derivePath(`${derivePath}${i}`);
 
+      // log progress
+      if (i % 10 === 0) {
+        console.log(`Processed ${i} Gifts...`);
+      }
+
       // get the cash address
       const fundingAddress = bitbox.HDNode.toCashAddress(childNode);
       // console.log(`${derivePath}${i}: ${fundingAddress}`);
@@ -2322,6 +2890,7 @@ class GiftsPortal extends React.Component {
       // invoiceTxid,
       generatingInvoice,
       importingMnemonic,
+      importingMoarFromMnemonic,
       apiPostFailed,
       createExpirationTxsFailed,
       customExpirationDate,
@@ -2663,6 +3232,7 @@ class GiftsPortal extends React.Component {
                       </AddressInputWrapper>
                     </AddressForm>
                     {sweepingGifts && <Loader />}
+
                     {!sweepingGifts && (
                       <Buttons
                         show={sweptTxid === null && !tipsAlreadySweptError}
@@ -2692,15 +3262,24 @@ class GiftsPortal extends React.Component {
                   </>
                 )}
                 {!importingMnemonic && importedMnemonic && sweptTxid === null && (
-                  <Paragraph style={{ marginTop: '12px' }}>
-                    <FormattedMessage
-                      id="home.cards.manage.claimedCount"
-                      values={{
-                        tipsClaimedCount,
-                        tipsTotalCount: tipWallets.length,
-                      }}
-                    />
-                  </Paragraph>
+                  <>
+                    <Paragraph style={{ marginTop: '12px' }}>
+                      <FormattedMessage
+                        id="home.cards.manage.claimedCount"
+                        values={{
+                          tipsClaimedCount,
+                          tipsTotalCount: tipWallets.length,
+                        }}
+                      />
+                    </Paragraph>
+                    {importingMoarFromMnemonic ? (
+                      <Loader />
+                    ) : (
+                      <Button onClick={this.importMoarMnemonic}>
+                        More Gifts
+                      </Button>
+                    )}
+                  </>
                 )}
               </Card>
             </ShowFlexContainerTwoCols>
@@ -2955,7 +3534,7 @@ class GiftsPortal extends React.Component {
                           name="tipCount"
                           type="number"
                           min="1"
-                          max="20"
+                          max="2500"
                           step="1"
                           value={formData.tipCount.value}
                           onChange={this.handleTipCountChange}
@@ -3581,7 +4160,12 @@ class GiftsPortal extends React.Component {
                       </InputError>
                     </AddressInputWrapper>
                   </AddressForm>
-                  {sweepingGifts && <Loader />}
+                  {sweepingGifts && (
+                    <Button design="light" onClick={this.stopSweepingStatus}>
+                      Stop
+                    </Button>
+                  )}
+
                   {!sweepingGifts && (
                     <Buttons
                       show={sweptTxid === null && !tipsAlreadySweptError}
@@ -3596,6 +4180,9 @@ class GiftsPortal extends React.Component {
                       </Button>
                       <Button design="dark" onClick={this.toggleSweepForm}>
                         <FormattedMessage id="home.buttons.goBack" />
+                      </Button>
+                      <Button design="light" onClick={this.stopSweepingStatus}>
+                        Stop
                       </Button>
                     </Buttons>
                   )}
@@ -3619,7 +4206,7 @@ class GiftsPortal extends React.Component {
               <CustomSelect
                 onChange={this.handleSelectedCurrencyChangeFromSelect}
                 options={currencies}
-                defaultValue={currencies[144]}
+                defaultValue={currencies[145]}
                 isSearchable
               />
             </InputWrapper>
