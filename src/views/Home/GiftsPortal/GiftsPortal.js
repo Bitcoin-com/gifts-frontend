@@ -482,7 +482,7 @@ class GiftsPortal extends React.Component {
       field.error = formatMessage({
         id: 'home.errors.tipCountNoTips',
       });
-    } else if (parseFloat(value) > 2500) {
+    } else if (parseFloat(value) > 1000) {
       field.state = inputState.invalid;
       field.error = formatMessage({
         id: 'home.errors.tipCountTooManyTips',
@@ -2832,7 +2832,8 @@ class GiftsPortal extends React.Component {
       .then(response => response.json())
       .then(
         res => {
-          // console.log(res);
+          console.log(`Invoice Response:`);
+          console.log(res);
           // catch errors that aren't handled by pay.bitcoin.com
           if (res.cause) {
             console.log(`Error in BIP070 invoice generation`);
@@ -3548,7 +3549,7 @@ class GiftsPortal extends React.Component {
                           name="tipCount"
                           type="number"
                           min="1"
-                          max="2500"
+                          max="1000"
                           step="1"
                           value={formData.tipCount.value}
                           onChange={this.handleTipCountChange}
