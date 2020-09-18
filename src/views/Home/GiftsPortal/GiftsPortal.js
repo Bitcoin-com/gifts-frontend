@@ -94,11 +94,11 @@ const defaultRefundAddress =
 
 // set api here
 // Prod
-// const giftsBackendBase = 'https://gifts-api.bitcoin.com';
+const giftsBackendBase = 'https://gifts-api.bitcoin.com';
 // Dev
 // const giftsBackendBase = 'http://localhost:3001';
 // Staging
-const giftsBackendBase = 'https://cashtips-api.btctest.net';
+//const giftsBackendBase = 'https://cashtips-api.btctest.net';
 
 const giftsBackend = `${giftsBackendBase}/new`;
 const giftsQuery = `${giftsBackendBase}/gifts`; // :creationTxid
@@ -333,13 +333,13 @@ class GiftsPortal extends React.Component {
         'Content-Type': 'application/json',
       },
     })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(
-        res => {
+        (res) => {
           // console.log(res);
           this.setState({ stats: res.quantity });
         },
-        err => {
+        (err) => {
           console.log(err);
         },
       );
@@ -703,7 +703,7 @@ class GiftsPortal extends React.Component {
       .getAddress({
         protocol: 'BCH',
       })
-      .then(data => {
+      .then((data) => {
         console.log(data);
         const { address } = data;
 
@@ -730,7 +730,7 @@ class GiftsPortal extends React.Component {
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(`Error getting BCH address from bitcoincom-link`);
         console.log(err);
       });
@@ -742,7 +742,7 @@ class GiftsPortal extends React.Component {
 
     const ws = new WebSocket('wss://ws.blockchain.info/bch/inv');
     const that = this; // cache the this
-    ws.onmessage = event => {
+    ws.onmessage = (event) => {
       const wsTx = JSON.parse(event.data);
       // console.log(`New tx:`);
       // console.log(wsTx);
@@ -762,7 +762,7 @@ class GiftsPortal extends React.Component {
       clearTimeout(connectInterval); // clear Interval on on open of websocket connection
     };
     // websocket onclose event listener
-    ws.onclose = e => {
+    ws.onclose = (e) => {
       // console.log(`Websocket closed.`);
       /*
       console.log(
@@ -787,7 +787,7 @@ class GiftsPortal extends React.Component {
       ); // call check function after timeout
       return console.log(`Websocket closed`);
     };
-    ws.onerror = err => {
+    ws.onerror = (err) => {
       console.error(
         'Webocket encountered error: ',
         err.message,
@@ -807,7 +807,7 @@ class GiftsPortal extends React.Component {
   watchInvoiceByAddr() {
     const { fundingAddress, invoiceInterval } = this.state;
     bitbox.Address.details(fundingAddress).then(
-      details => {
+      (details) => {
         // console.log(details);
         const txs = details.transactions;
         // console.log(`Transactions seen: ${txs.length}`);
@@ -821,7 +821,7 @@ class GiftsPortal extends React.Component {
           );
         }
       },
-      err => {
+      (err) => {
         console.log(`Error in watching address details for ${fundingAddress}`);
         console.log(err);
         clearInterval(invoiceInterval);
@@ -959,7 +959,7 @@ class GiftsPortal extends React.Component {
       imagePromises.push(imagePromise);
     }
     Promise.all(imagePromises).then(
-      imgArr => {
+      (imgArr) => {
         console.log(`Images processed for pdf`);
         // console.log(imgArr);
         this.setState({
@@ -969,7 +969,7 @@ class GiftsPortal extends React.Component {
         // put it in state, then pdf element can get it
         // then mb just call this function by default when gifts are created
       },
-      err => {
+      (err) => {
         console.log(`Error in Promise.all(imagePromises)`);
         console.log(err);
         this.setState({
@@ -988,7 +988,7 @@ class GiftsPortal extends React.Component {
     // console.log(`elementId: ${elementId}`);
     const node = document.getElementById(elementId);
     htmlToImage.toJpeg(node).then(
-      dataUrl => {
+      (dataUrl) => {
         // console.log(dataUrl);
         const imageType = 'image/jpg';
         // Download the image
@@ -1000,7 +1000,7 @@ class GiftsPortal extends React.Component {
 
         this.setState({ pngLoading: false });
       },
-      err => {
+      (err) => {
         console.log(`Error in this.shareTip(e) PNG download:`);
         console.log(err);
         this.setState({ pngLoading: false });
@@ -1089,7 +1089,7 @@ class GiftsPortal extends React.Component {
       },
       body: JSON.stringify(returnTxInfos),
     }).then(
-      res => {
+      (res) => {
         console.log(`returnTxInfos successully posted to API`);
         console.log(res);
 
@@ -1097,7 +1097,7 @@ class GiftsPortal extends React.Component {
         // eslint-disable-next-line react/no-unused-state
         return this.setState({ returnTxInfos });
       },
-      err => {
+      (err) => {
         console.log(`Error in postReturnTxInfos`);
         console.log(err);
         // should try to post it again here, mb email the error to admin
@@ -1140,14 +1140,14 @@ class GiftsPortal extends React.Component {
         batchPromises.push(batchPromise);
       }
       Promise.all(batchPromises).then(
-        result => {
+        (result) => {
           console.log(`returnTxInfos successully posted to API as batch post`);
           console.log(result);
           // used in debugging
           // eslint-disable-next-line react/no-unused-state
           return this.setState({ apiPostFailed: false });
         },
-        err => {
+        (err) => {
           console.log(`Error in processing batch post of returnTxInfos`);
           console.log(err);
           return this.setState({ apiPostFailed: true, returnTxInfos });
@@ -1162,7 +1162,7 @@ class GiftsPortal extends React.Component {
         },
         body: JSON.stringify(returnTxInfos),
       }).then(
-        res => {
+        (res) => {
           console.log(`returnTxInfos successully posted to API`);
           console.log(res);
 
@@ -1170,7 +1170,7 @@ class GiftsPortal extends React.Component {
           // eslint-disable-next-line react/no-unused-state
           return this.setState({ apiPostFailed: false });
         },
-        err => {
+        (err) => {
           console.log(`Error in postReturnTxInfos`);
           console.log(err);
           // should try to post it again here, mb email the error to admin
@@ -1212,7 +1212,7 @@ class GiftsPortal extends React.Component {
     // of what you need to build your sweeping tx
     const sweepBuilder = [];
     const sweepAddresses = [];
-    tipWallets.forEach(tipWallet => {
+    tipWallets.forEach((tipWallet) => {
       const sweepChunk = {};
       // get ec pair from wif
       const ecPair = bitbox.ECPair.fromWIF(tipWallet.wif);
@@ -1259,7 +1259,7 @@ class GiftsPortal extends React.Component {
       // check balances of addresses in one async batch
 
       Promise.all(utxoPromises).then(
-        res => {
+        (res) => {
           console.log(`Utxo promises successfully fetched`);
           console.log(res);
           const u = res.flat(1);
@@ -1352,7 +1352,7 @@ class GiftsPortal extends React.Component {
           console.log(returnTxInfos);
           return this.postReturnTxInfos(returnTxInfos);
         },
-        err => {
+        (err) => {
           console.log(`Error fetching utxo promises`);
           console.log(err);
         },
@@ -1360,7 +1360,7 @@ class GiftsPortal extends React.Component {
     } else {
       // check balances of addresses in one async batch
       bitbox.Address.utxo(sweepAddresses).then(
-        u => {
+        (u) => {
           for (let i = 0; i < u.length; i += 1) {
             // utxos come back in same order they were sent
             sweepBuilder[i].utxos = u[i].utxos;
@@ -1447,7 +1447,7 @@ class GiftsPortal extends React.Component {
           console.log(returnTxInfos);
           return this.postReturnTxInfos(returnTxInfos);
         },
-        err => {
+        (err) => {
           console.log(`Error in bitbox.Address.utxo(sweepAddresses)`);
           console.log(err);
           return this.setState({ createExpirationTxsFailed: true });
@@ -1493,7 +1493,7 @@ class GiftsPortal extends React.Component {
     // Get invoiceTxid manually if don't have it
     if (invoiceTxid === '') {
       bitbox.Address.details(tipWallets[0].addr).then(
-        res => {
+        (res) => {
           // console.log(res);
           invoiceTxid = null;
           if (res.transactions.length > 0) {
@@ -1505,7 +1505,7 @@ class GiftsPortal extends React.Component {
             this.createExpirationTxs,
           );
         },
-        err => {
+        (err) => {
           console.log(`Error in fetching txid of invoice payment transaction`);
           console.log(err);
           return this.setState(
@@ -1613,7 +1613,7 @@ class GiftsPortal extends React.Component {
     const sweepBuilder = [];
     const sweepAddresses = [];
 
-    tipWallets.forEach(tipWallet => {
+    tipWallets.forEach((tipWallet) => {
       const sweepChunk = {};
       // get ec pair from wif
       const ecPair = bitbox.ECPair.fromWIF(tipWallet.wif);
@@ -1820,7 +1820,7 @@ class GiftsPortal extends React.Component {
         // console.log(`txid: ${txid}`);
         // set tips as claimed by this txid
         const claimedTipWallets = [];
-        tipWallets.forEach(tipWallet => {
+        tipWallets.forEach((tipWallet) => {
           const claimedTipWallet = tipWallet;
           // Only apply to tips that were not previously claimed
           if (claimedTipWallet.status !== 'claimed') {
@@ -1957,7 +1957,7 @@ class GiftsPortal extends React.Component {
       // console.log(`txid: ${txid}`);
       // set tips as claimed by this txid
       const claimedTipWallets = [];
-      tipWallets.forEach(tipWallet => {
+      tipWallets.forEach((tipWallet) => {
         const claimedTipWallet = tipWallet;
         // Only apply to tips that were not previously claimed
         if (claimedTipWallet.status !== 'claimed') {
@@ -2829,9 +2829,9 @@ class GiftsPortal extends React.Component {
         memo: invoiceMemo,
       }),
     })
-      .then(response => response.json())
+      .then((response) => response.json())
       .then(
-        res => {
+        (res) => {
           console.log(`Invoice Response:`);
           console.log(res);
           // catch errors that aren't handled by pay.bitcoin.com
@@ -2866,7 +2866,7 @@ class GiftsPortal extends React.Component {
             this.subscribeToGifts(tipWallets, paymentId),
           );
         },
-        err => {
+        (err) => {
           console.log(`Error creating invoice`);
           console.log(err);
           return this.setState({
@@ -3015,13 +3015,15 @@ class GiftsPortal extends React.Component {
     if (tipWallets.length >= 4) {
       displayWidth = `${4 * tipWidth + 3 * tipSpaceBetweenCols}in`;
     } else {
-      displayWidth = `${tipWallets.length * tipWidth +
-        (tipWallets.length - 1) * tipSpaceBetweenCols}in`;
+      displayWidth = `${
+        tipWallets.length * tipWidth +
+        (tipWallets.length - 1) * tipSpaceBetweenCols
+      }in`;
     }
     // console.log(`displayWidth: ${displayWidth}`);
 
     if (tipWallets.length > 0) {
-      tipWallets.forEach(tipWallet => {
+      tipWallets.forEach((tipWallet) => {
         printingTips.push(
           <Gift
             key={tipWallet.addr}
