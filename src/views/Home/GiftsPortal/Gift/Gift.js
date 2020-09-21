@@ -82,6 +82,7 @@ const Gift = ({
   share,
   emailApi,
   wifCopied,
+  addrCopied,
   showGiftNames,
   design,
   qrDots,
@@ -742,6 +743,11 @@ const Gift = ({
                   <FormattedMessage id="home.gift.wif" />
                 </ShareMenuButtonCopy>
               </CopyToClipboard>
+              <CopyToClipboard text={tipWallet.addr} onCopy={addrCopied}>
+                <ShareMenuButtonCopy type="button">
+                  <FormattedMessage id="home.gift.address" />
+                </ShareMenuButtonCopy>
+              </CopyToClipboard>
               <ShareMenuButtonEmail onClick={toggleEmail}>
                 <FormattedMessage id="home.gift.email" />
               </ShareMenuButtonEmail>
@@ -777,6 +783,7 @@ Gift.propTypes = {
   share: PropTypes.func.isRequired,
   emailApi: PropTypes.string.isRequired,
   wifCopied: PropTypes.func.isRequired,
+  addrCopied: PropTypes.func.isRequired,
   showGiftNames: PropTypes.bool.isRequired,
   qrDots: PropTypes.bool.isRequired,
   qrLogo: PropTypes.bool.isRequired,
