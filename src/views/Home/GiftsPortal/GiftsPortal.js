@@ -200,6 +200,7 @@ class GiftsPortal extends React.Component {
     this.handleSeedCopied = this.handleSeedCopied.bind(this);
     this.handleUriCopied = this.handleUriCopied.bind(this);
     this.handleWifCopied = this.handleWifCopied.bind(this);
+    this.handleAddrCopied = this.handleAddrCopied.bind(this);
     this.handleSeedSavedConfirmed = this.handleSeedSavedConfirmed.bind(this);
     this.goBackOneStep = this.goBackOneStep.bind(this);
     this.sweepAllTips = this.sweepAllTips.bind(this);
@@ -1405,6 +1406,19 @@ class GiftsPortal extends React.Component {
     });
   }
 
+  handleAddrCopied() {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+
+    const addrCopied = formatMessage({ id: 'home.notifications.addrCopied' });
+
+    toast.notify(addrCopied, {
+      position: 'bottom-right',
+      duration: 3000,
+    });
+  }
+
   async sweepAllTips(e) {
     e.preventDefault();
     this.setState({ bitboxSweepTxBuildError: false, sweepingGifts: true });
@@ -2451,6 +2465,7 @@ class GiftsPortal extends React.Component {
             status={tipWallet.status}
             share={this.shareTip}
             wifCopied={this.handleWifCopied}
+            addrCopied={this.handleAddrCopied}
             emailApi={emailQuery}
             showGiftNames={showGiftNames}
             qrDots={qrDots}

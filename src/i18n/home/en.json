@@ -69,6 +69,7 @@
     "downloading": "Processing...",
     "jpg": "JPG",
     "wif": "WIF",
+    "address": "Address",
     "youGot": "You have received",
     "on": "on",
     "claimBy": "Claim by",
@@ -104,6 +105,7 @@
     "seedCopied": "Recovery seed copied to clipboard",
     "uriCopied": "Invoice URI copied to clipboard",
     "wifCopied": "Private key copied to clipboard",
+    "addrCopied": "BCH Address copied to clipboard",
     "giftsSwept": "{tipsSweptCount} of original {tipWalletsCount} gifts have been <a href=https://explorer.bitcoin.com/bch/tx/{sweptTxid} target=_blank rel=noopener>swept</a> to <a href=https://explorer.bitcoin.com/bch/address/{userRefundAddress} target=_blank rel=noopener>{userRefundAddress}</a>"
   },
   "buttons": {
