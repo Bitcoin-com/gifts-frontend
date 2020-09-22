@@ -54,6 +54,7 @@ import {
   LoadingButton,
   ShareMenuButton,
   ShareMenuButtonCopy,
+  ClaimedCopy,
   ShareMenuButtonEmail,
   LogoFooter,
   InputError,
@@ -706,6 +707,13 @@ const Gift = ({
             </tr>
           </tbody>
         </StatusTable>
+        {tipWallet.status === 'claimed' && (
+          <CopyToClipboard text={tipWallet.addr} onCopy={addrCopied}>
+            <ClaimedCopy type="button">
+              <FormattedMessage id="home.gift.copyAddr" />
+            </ClaimedCopy>
+          </CopyToClipboard>
+        )}
         {tipWallet.status === 'unclaimed' && (
           <ShareMenu
             trigger={

@@ -114,6 +114,20 @@ export const ShareMenuButtonPDF = styled.button`
     color: #000;
   }
 `;
+export const ClaimedCopy = styled.button`
+  width: 130px;
+  text-align: right;
+  float: right;
+  z-index: 10;
+  outline: none;
+  padding: 12px;
+  color: #4d4d4d;
+  cursor: pointer;
+  background-color: transparent;
+  background: url(${copypaste}) no-repeat 8px center;
+  border: none;
+  height: 100%;
+`;
 export const ShareMenuButtonCopy = styled.button`
   width: 100%;
   z-index: 10;

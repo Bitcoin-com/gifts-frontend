@@ -30,6 +30,10 @@
       "title": "Want your money back?",
       "instructions": "You can send all the BCH from your unclaimed gifts to a single address in one transaction."
     },
+    "reload": {
+      "title": "Want to reload your claimed Gifts?",
+      "instructions": "You can reload any already-claimed gifts with the same amount of original BCH. However, these gifts will not be reclaimed automatically. You will need to manually reclaim your funds using this dashboard or the mnemonic seed."
+    },
     "manage": {
       "title": "Manage Gifts",
       "claimedCount": "{tipsClaimedCount} of {tipsTotalCount} gifts have been claimed"
@@ -70,6 +74,7 @@
     "jpg": "JPG",
     "wif": "WIF",
     "address": "Address",
+    "copyAddr": "Copy Address",
     "youGot": "You have received",
     "on": "on",
     "claimBy": "Claim by",
@@ -110,6 +115,8 @@
   },
   "buttons": {
     "createTips": "Go",
+    "reloadGifts": "Reload Claimed Gifts",
+    "moarReloading": "Reload Again",
     "goBack": "Back",
     "copyUri": "Copy URI",
     "copySeed": "Copy",
@@ -152,6 +159,7 @@
   },
   "errors": {
     "tipCountNoTips": "Gift count must be greater than zero",
+    "nothingToReload": "Error generating reload invoice: No empty gifts",
     "tipCountNotInteger": "Gift count must be an integer",
     "tipCountNum": "Gift count must be a number",
     "fiatTipAmountNum": "Gift amount in local currency must be a number",
