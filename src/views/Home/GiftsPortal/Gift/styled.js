@@ -115,7 +115,7 @@ export const ShareMenuButtonPDF = styled.button`
   }
 `;
 export const ClaimedCopy = styled.button`
-  width: 130px;
+  width: 80px;
   text-align: right;
   float: right;
   z-index: 10;

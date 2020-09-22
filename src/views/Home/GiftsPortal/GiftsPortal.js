@@ -3817,16 +3817,15 @@ class GiftsPortal extends React.Component {
                 </>
               )}
             </ShowCard>
-            <ShowCard
-              padded
-              centered
-              className="noPrint"
-              show={
+            {/* Hiding this card even though the code works due to risk of users losing funds, as reloaded gifts do not have reclaim txs
+             To show, the show parameter in ShowCard should be
+             show={
                 importedGiftInfo.length > 0 &&
                 typeof importedGiftInfo[0].fiatCode !== 'undefined' &&
                 typeof importedGiftInfo[0].fiatAmount !== 'undefined'
               }
-            >
+             */}
+            <ShowCard padded centered className="noPrint" show={false}>
               <H3>
                 <FormattedMessage id="home.cards.reload.title" />
               </H3>
