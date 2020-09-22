@@ -237,6 +237,9 @@ class GiftsPortal extends React.Component {
     );
     this.shareTip = this.shareTip.bind(this);
     this.makePdf = this.makePdf.bind(this);
+    this.reloadGifts = this.reloadGifts.bind(this);
+    this.reloadGiftsInvoiceSuccess = this.reloadGiftsInvoiceSuccess.bind(this);
+    this.clearReloadInvoice = this.clearReloadInvoice.bind(this);
     this.handleSelectedExpirationDateChange = this.handleSelectedExpirationDateChange.bind(
       this,
     );
@@ -266,6 +269,8 @@ class GiftsPortal extends React.Component {
       selectedCurrency: 'USD',
       tipWallets: [], // this.testTipsData,
       invoiceUrl: '',
+      reloadInvoiceUrl: '',
+      reloadInvoiceError: false,
       importedMnemonic: false,
       calculatedFiatAmount: null,
       tipsFunded: false,
@@ -283,6 +288,7 @@ class GiftsPortal extends React.Component {
       returnTxInfos: [], // used for debugging
       importedGiftInfo: [],
       generatingInvoice: false,
+      generatingReloadInvoice: false,
       importingMnemonic: false,
       sweepingGifts: false,
       apiPostFailed: false,
@@ -969,6 +975,190 @@ class GiftsPortal extends React.Component {
         });
       },
     );
+  }
+
+  async reloadGifts() {
+    const { importedGiftInfo, tipWallets } = this.state;
+    this.setState({ generatingReloadInvoice: true, reloadInvoiceError: false });
+    // Note that for this use case, we are assuming the tickets are already printed out
+    // showing both fiat and BCH amounts
+    // So we will not recalc the exchange rate. Instead, use same BCH amount and label
+    // with same fiat amount. Otherwise user should make and print new Gifts.
+    let reloadingFiatCode;
+    let reloadingFiatAmount;
+    if (
+      importedGiftInfo.length !== 0 &&
+      importedGiftInfo[0].fiatCode &&
+      importedGiftInfo[0].fiatAmount
+    ) {
+      reloadingFiatCode = importedGiftInfo[0].fiatCode;
+      reloadingFiatAmount = importedGiftInfo[0].fiatAmount;
+    }
+
+    // get original sat amount of tip
+    let giftSats = tipWallets[0].sats;
+    // note: this doesn't work if first tip has been reloaded, make it less fragile
+    const giftAddresses = [];
+    for (let i = 0; i < tipWallets.length; i += 1) {
+      const giftAddress = tipWallets[i].addr;
+      giftAddresses.push(giftAddress);
+    }
+    console.log(`reloadGifts`);
+
+    let currentGiftDetails;
+    try {
+      currentGiftDetails = await bitbox.Address.details(giftAddresses);
+      console.log(currentGiftDetails);
+      // The way to tell if a Gift is swept or not is from the transactions link
+      // currentGiftDetails[i].transactions.length
+      // if this is > 1, then gift is swept (unless it's been swept multiple times!)
+      // e.g. a reloaded gift, this would be 3...and maybe someone reloads gifts multiple times
+      // so actually you need to check balance and unconfirmed balance
+      // ok so do a tree
+      /*
+      1 - if balance is 0, obviously needs to be refunded
+      2 - if balance is not 0, is unconfirmed balance negative?
+      currentGiftDetails[i].balanceSat
+      currentGiftDetails[i].unconfirmedBalanceSat
+      */
+    } catch (err) {
+      console.log(`Error in getting address details for gifts`);
+      console.log(err);
+      return this.setState({
+        generatingReloadInvoice: false,
+        reloadInvoiceError: true,
+      });
+    }
+    // Get initial funding amount
+    const firstGift = currentGiftDetails[0].transactions;
+    const firstGiftFirstTx = firstGift[firstGift.length - 1];
+    let firstGiftFirstTxDetails;
+    try {
+      firstGiftFirstTxDetails = await bitbox.Transaction.details(
+        firstGiftFirstTx,
+      );
+      console.log(firstGiftFirstTxDetails);
+      const firstFundedAmt =
+        parseFloat(firstGiftFirstTxDetails.vout[0].value) * 1e8;
+      console.log(`firstFundedAmt in sats: ${firstFundedAmt}`);
+      giftSats = firstFundedAmt;
+    } catch (err) {
+      console.log(`Error getting first gift tx`);
+      console.log(err);
+      return this.setState({
+        generatingReloadInvoice: false,
+        reloadInvoiceError: true,
+      });
+    }
+    // Scan results for which gifts need to be reloaded
+    const giftsToReload = [];
+    for (let i = 0; i < currentGiftDetails.length; i += 1) {
+      const giftToReload = {
+        address: currentGiftDetails[i].cashAddress,
+        amount: giftSats,
+      };
+      const confirmedBalance = currentGiftDetails[i].balanceSat;
+      const unconfirmedBalance = currentGiftDetails[i].unconfirmedBalanceSat;
+      let balanceToCheck = confirmedBalance;
+      if (balanceToCheck !== 0) {
+        balanceToCheck = confirmedBalance + unconfirmedBalance;
+      }
+      console.log(`Gift ${i + 1}, balanceToCheck: ${balanceToCheck}`);
+      if (balanceToCheck === 0) {
+        giftsToReload.push(giftToReload);
+      }
+    }
+    console.log(giftsToReload);
+    if (giftsToReload.length === 0) {
+      return this.setState({
+        generatingReloadInvoice: false,
+        reloadInvoiceError: true,
+      });
+    }
+    const reloadingInvoiceMemo = `Reload funding transaction for ${giftsToReload.length} BCH gifts of ${reloadingFiatAmount} ${reloadingFiatCode} each`;
+    // create bip70 invoice to reload
+    let reloadInvoice;
+    let reloadInvoiceJson;
+    try {
+      reloadInvoice = await fetch('https://pay.bitcoin.com/create_invoice', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          outputs: giftsToReload,
+          memo: reloadingInvoiceMemo,
+        }),
+      });
+    } catch (err) {
+      console.log(
+        `Error fetching new pay.bitcoin.com invoice from server in reloadGifts()`,
+      );
+      console.log(err);
+      return this.setState({
+        generatingReloadInvoice: false,
+        reloadInvoiceError: true,
+      });
+    }
+    try {
+      reloadInvoiceJson = await reloadInvoice.json();
+      console.log(`reloadInvoiceJson:`);
+      console.log(reloadInvoiceJson);
+      const { paymentId } = reloadInvoiceJson;
+      return this.setState(
+        {
+          reloadInvoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+          generatingReloadInvoice: false,
+        },
+        this.reloadGiftsInvoiceSuccess(),
+      );
+      // then watch for payment
+    } catch (err) {
+      console.log(`Error in JSON conversion in reloadGifts()`);
+      console.log(err);
+      return this.setState({
+        generatingReloadInvoice: false,
+        reloadInvoiceError: true,
+      });
+    }
+
+    // Display loading while reload calc is done
+    // Display invoice component if calc succeeds, or button again with error msg if fails
+    // TODO new state fields for the above
+    // on invoice success, update gift stats
+    // ... change expiration date? no, bc it's already printed on original
+    // so, do not show option if gifts are already expired!
+    // update gift status on page
+
+    // Check for swept gifts
+    // check by actually checking the addresses for a balance, not by checking status
+    // Create bip70 invoice for them
+    // display bip70 invoice, so it should be in a card
+  }
+
+  reloadGiftsInvoiceSuccess() {
+    // Mark any claimed gifts as unclaimed
+    // only runs if they have been successfully funded
+    console.log(`reloadGiftsInvoiceSuccess()`);
+    const { tipWallets, importedGiftInfo } = this.state;
+    const newTipWallets = tipWallets;
+    const newImportedGiftInfo = importedGiftInfo;
+    for (let i = 0; i < tipWallets.length; i += 1) {
+      // update tip wallet status
+      if (tipWallets[i].status === 'claimed') {
+        newTipWallets[i].status = 'unclaimed';
+        newImportedGiftInfo[i].status = 'unclaimed';
+      }
+    }
+    this.setState({
+      tipWallets: newTipWallets,
+      importedGiftInfo: newImportedGiftInfo,
+    });
+  }
+
+  clearReloadInvoice() {
+    this.setState({ reloadInvoiceUrl: '' });
   }
 
   shareTip(e) {
@@ -2321,6 +2511,7 @@ class GiftsPortal extends React.Component {
       selectedCurrency,
       tipWallets,
       invoiceUrl,
+      reloadInvoiceUrl,
       importedMnemonic,
       importedGiftInfo,
       calculatedFiatAmount,
@@ -2331,10 +2522,12 @@ class GiftsPortal extends React.Component {
       tipsSweptCount,
       showSweepForm,
       tipsAlreadySweptError,
+      reloadInvoiceError,
       tipsClaimedCount,
       networkError,
       // invoiceTxid,
       generatingInvoice,
+      generatingReloadInvoice,
       importingMnemonic,
       apiPostFailed,
       createExpirationTxsFailed,
@@ -3481,6 +3674,7 @@ class GiftsPortal extends React.Component {
                 )}
               </Card>
             </ShowFlexContainer>
+            {/* Only show option to refund gifts if server has loaded their originally-printed details */}
 
             <TipContainerWrapper maxWidth={displayWidth}>
               <TipContainer
@@ -3620,6 +3814,71 @@ class GiftsPortal extends React.Component {
                   <ButtonHider show={tipsAlreadySweptError}>
                     {tipsAlreadySweptNotice}
                   </ButtonHider>
+                </>
+              )}
+            </ShowCard>
+            <ShowCard
+              padded
+              centered
+              className="noPrint"
+              show={
+                importedGiftInfo.length > 0 &&
+                typeof importedGiftInfo[0].fiatCode !== 'undefined' &&
+                typeof importedGiftInfo[0].fiatAmount !== 'undefined'
+              }
+            >
+              <H3>
+                <FormattedMessage id="home.cards.reload.title" />
+              </H3>
+              <SweepInstructions>
+                <FormattedMessage id="home.cards.reload.instructions" />
+              </SweepInstructions>
+              {reloadInvoiceUrl === '' && (
+                <>
+                  {generatingReloadInvoice ? (
+                    <Loader />
+                  ) : (
+                    <>
+                      <Button
+                        design="dark"
+                        style={{ margin: 'auto' }}
+                        onClick={this.reloadGifts}
+                      >
+                        <FormattedMessage id="home.buttons.reloadGifts" />
+                      </Button>
+                      {reloadInvoiceError && (
+                        <ErrorNotice>
+                          <FormattedMessage id="home.errors.nothingToReload" />
+                        </ErrorNotice>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+
+              {reloadInvoiceUrl !== '' && (
+                <>
+                  <Invoice
+                    text={
+                      tipsFunded
+                        ? 'Claimed Gifts Reloaded'
+                        : 'Reload Claimed Gifts'
+                    }
+                    sizeQR={windowWidth > 500 ? 250 : windowWidth / 3.2}
+                    copyUri
+                    linkAvailable={isWalletAvailable}
+                    paymentRequestUrl={reloadInvoiceUrl}
+                    successFn={this.reloadGiftsInvoiceSuccess}
+                    isRepeatable={false}
+                    currency={importedGiftInfo[0].fiatCode}
+                  />
+                  <Button
+                    design="light"
+                    style={{ margin: 'auto' }}
+                    onClick={this.clearReloadInvoice}
+                  >
+                    <FormattedMessage id="home.buttons.moarReloading" />
+                  </Button>
                 </>
               )}
             </ShowCard>
