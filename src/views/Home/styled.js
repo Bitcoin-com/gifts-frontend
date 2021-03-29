@@ -10,3 +10,20 @@ export const Wrapper = styled.div`
 export const HeadSection = styled.div`
   background-color: ${({ theme }) => theme.palette.background.dark};
 `;
+
+export const Notice = styled.div`
+  background-color: rgb(45, 50, 59);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90px;
+
+  img {
+    height: 30px;
+    padding-right: 10px;
+  }
+
+  p {
+    padding-bottom: 0px;
+  }
+`;
