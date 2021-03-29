@@ -494,39 +494,21 @@ export const HowToList = styled.ul`
   margin-top: 0px;
 `;
 export const StepOne = styled.li`
-  background: url(${appIcon}) no-repeat left center;
-  background-size: 16px;
-  padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepTwo = styled.li`
-  background: url(${gearIcon}) no-repeat left center;
-  background-size: 16px;
-  padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepThree = styled.li`
-  background: url(${sweepIcon}) no-repeat left center;
-  background-size: 16px;
-  padding-left: 24px;
   margin: 12px 6px 0px 6px;
 `;
 export const StepOneOG = styled.li`
-  background: url(${appIconOG}) no-repeat left center;
-  background-size: 16px;
-  padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepTwoOG = styled.li`
-  background: url(${gearIconOG}) no-repeat left center;
-  background-size: 16px;
-  padding-left: 24px;
   margin: 12px 6px;
 `;
 export const StepThreeOG = styled.li`
-  background: url(${sweepIconOG}) no-repeat left center;
-  background-size: 15px;
-  padding-left: 24px;
   margin: 12px 6px 0px 6px;
 `;
 export const DotComImg = styled.img`

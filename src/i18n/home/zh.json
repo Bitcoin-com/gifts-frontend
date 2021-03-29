@@ -70,8 +70,9 @@
     "on": "on",
     "claimBy": "Claim by",
     "stepOne": "Download the Bitcoin.com wallet",
-    "stepTwo": "Select 'Settings'",
-    "stepThree": "Select 'Sweep Paper Wallet'",
+    "stepTwo": "Tap Scanner",
+    "stepThree": "Scan QR",
+    "stepFour": "Swipe to claim funds",
     "giftName": "Gift Name",
     "status": "Status",
     "label": "Label"

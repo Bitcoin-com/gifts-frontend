@@ -397,8 +397,11 @@ const Gift = ({
                   <StepTwo>
                     <FormattedMessage id="home.gift.stepTwo" />
                   </StepTwo>
-                  <StepThree>
+                  <StepTwo>
                     <FormattedMessage id="home.gift.stepThree" />
+                  </StepTwo>
+                  <StepThree>
+                    <FormattedMessage id="home.gift.stepFour" />
                   </StepThree>
                 </HowToList>
               </HowToClaim>
@@ -508,8 +511,11 @@ const Gift = ({
                   <StepTwoOG>
                     <FormattedMessage id="home.gift.stepTwo" />
                   </StepTwoOG>
-                  <StepThreeOG>
+                  <StepTwoOG>
                     <FormattedMessage id="home.gift.stepThree" />
+                  </StepTwoOG>
+                  <StepThreeOG>
+                    <FormattedMessage id="home.gift.stepFour" />
                   </StepThreeOG>
                 </HowToList>
               </HowToClaim>
