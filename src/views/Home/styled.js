@@ -16,7 +16,7 @@ export const Notice = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 90px;
+  padding: 15px 10px;
 
   img {
     height: 30px;
