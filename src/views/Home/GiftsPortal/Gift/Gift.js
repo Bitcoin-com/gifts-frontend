@@ -10,6 +10,8 @@ import {
   Button,
   Loader,
 } from '@bitcoin-portal/bitcoincom-pkg-components';
+import sweepIcon from '../../../../../static/images/uploads/sweep3x.png';
+import sweepIconOG from '../../../../../static/images/uploads/ic_receive_orange.svg';
 import {
   TipWrapper,
   TipBorder,
@@ -395,7 +397,19 @@ const Gift = ({
                     <FormattedMessage id="home.gift.stepOne" />
                   </StepOne>
                   <StepTwo>
-                    <FormattedMessage id="home.gift.stepTwo" />
+                    <FormattedMessage
+                      id="home.gift.stepTwo"
+                      values={{
+                        scanner: (
+                          <img
+                            src={sweepIcon}
+                            alt=""
+                            width="16px"
+                            style={{ padding: '0 5px' }}
+                          />
+                        ),
+                      }}
+                    />
                   </StepTwo>
                   <StepTwo>
                     <FormattedMessage id="home.gift.stepThree" />
@@ -509,7 +523,19 @@ const Gift = ({
                     <FormattedMessage id="home.gift.stepOne" />
                   </StepOneOG>
                   <StepTwoOG>
-                    <FormattedMessage id="home.gift.stepTwo" />
+                    <FormattedMessage
+                      id="home.gift.stepTwo"
+                      values={{
+                        scanner: (
+                          <img
+                            src={sweepIconOG}
+                            alt=""
+                            width="16px"
+                            style={{ padding: '0 5px' }}
+                          />
+                        ),
+                      }}
+                    />
                   </StepTwoOG>
                   <StepTwoOG>
                     <FormattedMessage id="home.gift.stepThree" />
