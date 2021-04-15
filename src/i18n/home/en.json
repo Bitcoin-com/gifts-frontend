@@ -79,7 +79,7 @@
     "on": "on",
     "claimBy": "Claim by",
     "stepOne": "1. Download the Bitcoin.com wallet",
-    "stepTwo": "2. Tap Scanner",
+    "stepTwo": "2. {scanner} Tap Scanner",
     "stepThree": "3. Scan QR",
     "stepFour": "4. Swipe to claim funds",
     "giftName": "Gift Name",

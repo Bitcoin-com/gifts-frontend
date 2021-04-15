@@ -6,11 +6,6 @@ import {
 } from '@bitcoin-portal/bitcoincom-pkg-components';
 import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
-import gearIcon from '../../../../../static/images/uploads/gear3x.png';
-import sweepIcon from '../../../../../static/images/uploads/sweep3x.png';
-import appIconOG from '../../../../../static/images/uploads/applogogrey.png';
-import gearIconOG from '../../../../../static/images/uploads/ic_settings_active_orange.svg';
-import sweepIconOG from '../../../../../static/images/uploads/ic_receive_orange.svg';
 import downloadIcon from '../../../../../static/images/uploads/download.png';
 import pdfIcon from '../../../../../static/images/uploads/pdf.png';
 import copypaste from '../../../../../static/images/uploads/copypaste.svg';
@@ -498,6 +493,8 @@ export const StepOne = styled.li`
 `;
 export const StepTwo = styled.li`
   margin: 12px 6px;
+  display: flex;
+  align-items: flex-end;
 `;
 export const StepThree = styled.li`
   margin: 12px 6px 0px 6px;
@@ -507,6 +504,8 @@ export const StepOneOG = styled.li`
 `;
 export const StepTwoOG = styled.li`
   margin: 12px 6px;
+  display: flex;
+  align-items: flex-end;
 `;
 export const StepThreeOG = styled.li`
   margin: 12px 6px 0px 6px;
