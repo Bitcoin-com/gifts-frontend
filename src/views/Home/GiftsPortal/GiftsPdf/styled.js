@@ -13,6 +13,7 @@ export const Gift = styled(Image)`
 `;
 export const GiftWrapper = styled(View)`
   display: inline-block;
+  margin: 5px;
 `;
 export const GiftsRow = styled(View)`
   margin-top: 0.5cm;
