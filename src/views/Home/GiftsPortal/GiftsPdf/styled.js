@@ -8,12 +8,11 @@ export const TopSpace = styled(View)`
 
 export const Gift = styled(Image)`
   display: inline-block;
-  width: 3.8cm;
-  border: 1px solid #000;
+  width: 3.4cm;
 `;
 export const GiftWrapper = styled(View)`
   display: inline-block;
-  margin: 5px;
+  border: 3px solid #000;
 `;
 export const GiftsRow = styled(View)`
   margin-top: 0.5cm;
