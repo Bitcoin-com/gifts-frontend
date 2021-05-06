@@ -173,6 +173,7 @@ export const ShareMenuListItem = styled.div`
 export const SnapshotHolder = styled.div`
   background-color: #fff;
   text-align: center;
+  border: 2px solid #000;
 `;
 
 export const ShareButton = styled.div`
