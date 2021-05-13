@@ -1,9 +1,7 @@
 import styled from 'styled-components';
 import Popup from 'reactjs-popup';
-import {
-  Paragraph,
-  TimesSolidThick,
-} from '@bitcoin-portal/bitcoincom-pkg-components';
+import Paragraph from '@bitcoin-portal/bitcoincom-pkg-components/dist/Paragraph';
+import TimesSolidThick from '@bitcoin-portal/bitcoincom-pkg-components/dist/IconsNavigation/TimesSolidThick';
 import { colors, media } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import appIcon from '../../../../../static/images/uploads/appLogoDot.png';
 import downloadIcon from '../../../../../static/images/uploads/download.png';

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Navbar from '@bitcoin-portal/navbar';
 import Footer from '@bitcoin-portal/footer';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
-import themes from '@bitcoin-portal/bitcoincom-pkg-theme';
+import themes, { colors } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import Intl from '../../i18n/hoc';
 
 const GlobalStyle = createGlobalStyle`
@@ -15,7 +15,7 @@ const GlobalStyle = createGlobalStyle`
   body,
   ___gatsby,
   ___gatsby > div {
-    font-family: ${({ theme }) => theme.typography.fontFamily};
+    font-family: ${({ theme }) => theme.typography.fontFamily} !important;
     margin: 0;
     padding: 0;
     color: ${({ theme }) => theme.palette.text.default};
@@ -25,7 +25,7 @@ const GlobalStyle = createGlobalStyle`
     overflow-x: auto;
 
     font-size: 16px;
-    background-color: ${({ theme }) => theme.palette.background.default};
+    background-color: ${colors.solid.bgGrey};
 
   }
 

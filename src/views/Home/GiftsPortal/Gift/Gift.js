@@ -5,11 +5,10 @@ import PropTypes from 'prop-types';
 import QRCode from 'qrcode.react';
 import htmlToImage from 'html-to-image';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import {
-  Input,
-  Button,
-  Loader,
-} from '@bitcoin-portal/bitcoincom-pkg-components';
+import Input from '@bitcoin-portal/bitcoincom-pkg-components/dist/InputV2';
+import Loader from '@bitcoin-portal/bitcoincom-pkg-components/dist/LoaderV2';
+import Button from '@bitcoin-portal/bitcoincom-pkg-components/dist/ButtonV2/ButtonV2';
+
 import sweepIcon from '../../../../../static/images/uploads/sweep3x.png';
 import sweepIconOG from '../../../../../static/images/uploads/ic_receive_orange.svg';
 import {

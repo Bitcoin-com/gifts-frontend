@@ -8,20 +8,19 @@ import bitcoincomLink from 'bitcoincom-link';
 import toast from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 import PropTypes from 'prop-types';
-import {
-  H2,
-  H3,
-  H5,
-  Card,
-  Checkbox,
-  Paragraph,
-  Loader,
-  Link,
-  ContentBlock,
-  Button,
-  Input,
-  PieChart,
-} from '@bitcoin-portal/bitcoincom-pkg-components';
+import H2 from '@bitcoin-portal/bitcoincom-pkg-components/dist/H2V2';
+import H3 from '@bitcoin-portal/bitcoincom-pkg-components/dist/H3V2';
+import H5 from '@bitcoin-portal/bitcoincom-pkg-components/dist/H5V2';
+import Card from '@bitcoin-portal/bitcoincom-pkg-components/dist/CardV2';
+import Checkbox from '@bitcoin-portal/bitcoincom-pkg-components/dist/CheckboxV2';
+import Loader from '@bitcoin-portal/bitcoincom-pkg-components/dist/LoaderV2';
+import Link from '@bitcoin-portal/bitcoincom-pkg-components/dist/LinkV2';
+import ContentBlock from '@bitcoin-portal/bitcoincom-pkg-components/dist/ContentBlock';
+import Button from '@bitcoin-portal/bitcoincom-pkg-components/dist/ButtonV2/ButtonV2';
+import Input from '@bitcoin-portal/bitcoincom-pkg-components/dist/InputV2';
+import PieChart from '@bitcoin-portal/bitcoincom-pkg-components/dist/PieChart';
+import Paragraph from '@bitcoin-portal/bitcoincom-pkg-components/dist/Paragraph';
+
 import 'react-datepicker/dist/react-datepicker.css';
 import merge from 'lodash/merge';
 import htmlToImage from 'html-to-image';
@@ -2795,7 +2794,7 @@ class GiftsPortal extends React.Component {
                 </InputWrapper>
                 <Buttons show={!showSweepForm || sweptTxid !== null}>
                   {!importingMnemonic ? (
-                    <Button onClick={this.importMnemonic}>
+                    <Button onClick={this.importMnemonic} design="secondary">
                       <FormattedMessage id="home.buttons.loadTips" />
                     </Button>
                   ) : (
@@ -3144,7 +3143,7 @@ class GiftsPortal extends React.Component {
               show={appState === appStates.seedConfirmed}
               columns={1}
             >
-              <Card padded centered>
+              <Card padded centered style={{ overflow: 'visible' }}>
                 {!tipsFunded && (
                   <H3>
                     <FormattedMessage id="home.cards.build.title" />
@@ -3161,7 +3160,7 @@ class GiftsPortal extends React.Component {
                         <Input
                           id="tipCount"
                           name="tipCount"
-                          type="number"
+                          type="text"
                           min="1"
                           max="20"
                           step="1"
@@ -3183,7 +3182,7 @@ class GiftsPortal extends React.Component {
                         <Input
                           id="tipAmountFiat"
                           name="tipAmountFiat"
-                          type="number"
+                          type="text"
                           min="0"
                           step="0.01"
                           value={formData.tipAmountFiat.value}
@@ -3499,7 +3498,7 @@ class GiftsPortal extends React.Component {
               </ApiErrorCard>
             </ShowFlexContainer>
             <ShowFlexContainer
-              columns={1}
+              columns={2}
               show={tipWallets.length > 0 && tipsFunded}
             >
               <Card
@@ -3839,7 +3838,7 @@ class GiftsPortal extends React.Component {
                   ) : (
                     <>
                       <Button
-                        design="dark"
+                        design="secondary"
                         style={{ margin: 'auto' }}
                         onClick={this.reloadGifts}
                       >
@@ -3872,7 +3871,7 @@ class GiftsPortal extends React.Component {
                     currency={importedGiftInfo[0].fiatCode}
                   />
                   <Button
-                    design="light"
+                    design="secondary"
                     style={{ margin: 'auto' }}
                     onClick={this.clearReloadInvoice}
                   >
