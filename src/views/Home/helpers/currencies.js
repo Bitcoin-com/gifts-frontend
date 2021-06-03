@@ -1,6 +1,5 @@
 import React from 'react';
-import { Flag } from '@bitcoin-portal/bitcoincom-pkg-components';
-
+import Flag from '@bitcoin-portal/bitcoincom-pkg-components/dist/Flag';
 import bchLogo from '../../../../static/images/uploads/bch-square-green.png';
 import bchLogoOldSchool from '../../../../static/images/uploads/bch-logo-oldschool.png';
 import bchLogoEZ from '../../../../static/images/uploads/bch-logo-grey.png';

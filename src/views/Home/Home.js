@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import Navbar from '@bitcoin-portal/navbar';
 import Footer from '@bitcoin-portal/footer';
-import { Paragraph, Link } from '@bitcoin-portal/bitcoincom-pkg-components';
+import Paragraph from '@bitcoin-portal/bitcoincom-pkg-components/dist/Paragraph';
+import Link from '@bitcoin-portal/bitcoincom-pkg-components/dist/LinkV2';
 import { Wrapper, HeadSection, Notice } from './styled';
 import SEO from './SEO';
 import GiftsPortal from './GiftsPortal';
@@ -16,7 +17,7 @@ const Home = ({ locale, intl: { formatMessage } }) => {
       <SEO />
       <Wrapper className="print">
         <HeadSection className="noPrint">
-          <Navbar locale={locale} contrast />
+          <Navbar locale={locale} />
         </HeadSection>
         <Notice>
           <img src={icon} alt="" />

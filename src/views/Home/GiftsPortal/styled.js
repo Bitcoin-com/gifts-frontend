@@ -2,15 +2,14 @@ import styled, { css } from 'styled-components';
 import Popup from 'reactjs-popup';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import {
-  Section,
-  FlexContainer,
-  Card,
-  Button,
-  TimesSolidThick,
-  Paragraph,
-  Select,
-} from '@bitcoin-portal/bitcoincom-pkg-components';
+import Section from '@bitcoin-portal/bitcoincom-pkg-components/dist/Section';
+import FlexContainer from '@bitcoin-portal/bitcoincom-pkg-components/dist/FlexContainerV2';
+import Card from '@bitcoin-portal/bitcoincom-pkg-components/dist/CardV2';
+import Button from '@bitcoin-portal/bitcoincom-pkg-components/dist/ButtonV2/ButtonV2';
+import TimesSolid from '@bitcoin-portal/bitcoincom-pkg-components/dist/IconsNavigation/TimesSolid';
+import Paragraph from '@bitcoin-portal/bitcoincom-pkg-components/dist/Paragraph';
+import Select from '@bitcoin-portal/bitcoincom-pkg-components/dist/SelectV2';
+
 import { colors } from '@bitcoin-portal/bitcoincom-pkg-theme';
 import DatePicker from 'react-datepicker';
 
@@ -77,12 +76,12 @@ const gifts = {
 };
 
 export const HeaderSection = styled(Section)`
-  background-color: ${gifts.palette.background.default};
+  background-color: ${colors.solid.bgGrey};
   padding-bottom: 0px;
 `;
 
 export const PrintableSection = styled(Section)`
-  background-color: ${gifts.palette.background.default};
+  background-color: ${colors.solid.bgGrey};
   @media print {
     margin: 0mm;
     padding: 0mm;
@@ -124,6 +123,10 @@ export const ShowFlexContainer = styled(FlexContainer)`
 export const ShowCard = styled(Card)`
   display: ${({ show = false }) =>
     show === true ? 'flex' : 'none !important'};
+  
+  & > div {
+    justify-content: space-between;
+  }
 `;
 
 export const ShowButton = styled(Button)`
@@ -198,7 +201,7 @@ export const ApiErrorPopup = styled(Popup)`
     border-radius: 5px !important;
   }
 `;
-export const CloseIcon = styled(TimesSolidThick)``;
+export const CloseIcon = styled(TimesSolid)``;
 export const ApiErrorPopupCloser = styled.div`
   position: absolute;
   right: -18px;

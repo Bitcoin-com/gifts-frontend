@@ -3,12 +3,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Navbar from '@bitcoin-portal/navbar';
 import Footer from '@bitcoin-portal/footer';
-import {
-  H1,
-  Paragraph,
-  ContentBlock,
-  Link,
-} from '@bitcoin-portal/bitcoincom-pkg-components';
+import H1 from '@bitcoin-portal/bitcoincom-pkg-components/dist/H1';
+import Paragraph from '@bitcoin-portal/bitcoincom-pkg-components/dist/Paragraph';
+import ContentBlock from '@bitcoin-portal/bitcoincom-pkg-components/dist/ContentBlock';
+import Link from '@bitcoin-portal/bitcoincom-pkg-components/dist/LinkV2';
 import { Wrapper } from './styled';
 import SEO from './SEO';
 

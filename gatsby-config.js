@@ -105,17 +105,5 @@ module.exports = {
         modulePath: `${__dirname}/src/cms/cms.js`,
       },
     }, */
-    {
-      resolve: 'gatsby-plugin-web-font-loader',
-      options: {
-        custom: {
-          families: ['Gilroy:n4,n6,n7'],
-          urls: [
-            'https://menu.cdn.bitcoindotcom.net/uni/dist/fonts.css',
-            '/fonts/fonts.css',
-          ],
-        },
-      },
-    },
   ],
 };
