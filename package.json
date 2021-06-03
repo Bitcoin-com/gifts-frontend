@@ -38,10 +38,10 @@
     ]
   },
   "dependencies": {
-    "@bitcoin-portal/bitcoincom-pkg-components": "^2.0.0-beta22",
+    "@bitcoin-portal/bitcoincom-pkg-components": "^2.0.0-beta38",
     "@bitcoin-portal/bitcoincom-pkg-theme": "^2.0.0-beta02",
-    "@bitcoin-portal/footer": "^3.0.0-beta09",
-    "@bitcoin-portal/navbar": "^3.0.0-beta14",
+    "@bitcoin-portal/footer": "^3.0.0-beta20",
+    "@bitcoin-portal/navbar": "^3.0.0-beta29",
     "@react-pdf/renderer": "^1.6.8",
     "@react-pdf/styled-components": "^1.4.0",
     "babel-plugin-styled-components": "^1.10.7",

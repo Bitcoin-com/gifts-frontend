@@ -973,31 +973,33 @@
     varuint-bitcoin "^1.0.4"
     wif "^2.0.1"
 
-"@bitcoin-portal/bitcoincom-pkg-components@^2.0.0-beta22":
-  version "2.0.0-beta22"
-  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/bitcoincom-pkg-components/2.0.0-beta22/9276821cc06e75e86ce340d8a14b37da669393c3b65aa73cadb1690472123615#af408d5ec0600071ae8d60b77bc14d7fb64d6428"
-  integrity sha512-3yGKe3nxI2LG/3XkOPR2Z6rP2+u84BGxrUuekXcHsEVE1Vl5xf/kX7dnrtkj18NjYp96k25PDOhX30f78M0zBQ==
+"@bitcoin-portal/bitcoincom-pkg-components@^2.0.0-beta38":
+  version "2.0.0-beta38"
+  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/bitcoincom-pkg-components/2.0.0-beta38/1b3ecae20db0bea5964d684f0ded2a23d7d84eb105e2f7506f025b9ced6c7543#000ae8a5eb5c0cc889aa6551cd0173174cc556d6"
+  integrity sha512-jyeIHEX0c5GAZYuPZ3SCWcbNZufFyUCbEsqf3XlPZMj+Keu0AX8FGolc9YPPUvESaeTHqmZnyP2q6XC4sThdEw==
 
 "@bitcoin-portal/bitcoincom-pkg-theme@^2.0.0-beta02":
   version "2.0.0-beta02"
   resolved "https://npm.pkg.github.com/download/@bitcoin-portal/bitcoincom-pkg-theme/2.0.0-beta02/0bf2d4b12f9d6eb756436352827e78448269efb5e452c862c291b4af6d2b1bd6#ce41ccfe42810eb508d7cdbcff6ed2fb6423933a"
   integrity sha512-8B5rMxcNMDNPaF0Y7BW1Zna6F+/nOs/MflVg1QvMG/O//miy6IX5ggR4YsL6SK8HkfPF5PBVPzSfQguR4NEXRg==
 
-"@bitcoin-portal/footer@^3.0.0-beta09":
-  version "3.0.0-beta09"
-  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/footer/3.0.0-beta09/a850350bf6f28bf64c0e4d454a36ecca8cd14ae043ded96d6fcb664695e94c8b#0146d512e62c77fe180af2042064c1c9263dee40"
-  integrity sha512-bpb6iP2PSgngmkkmZpdYS51NyiDZOQmpJsb5cXQd0f1s+TGy2yYlTdqSoYy2gkMM0YTtA9s7eJLUPcSYLwwW1g==
+"@bitcoin-portal/footer@^3.0.0-beta20":
+  version "3.0.0-beta20"
+  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/footer/3.0.0-beta20/9f60b97d1f384c68c0af2f29c9fa016e8ad56d958ef06be71d7acf0e8b2eab03#d3c10665c93e592f70855ee5f7e27a9b45c988d0"
+  integrity sha512-m112F3G/FFD/SYjrFxeqjKKHEVRJayjcWJIEykks7hUaohXUyoI9ombZYw6hN2qEmtNzWNyjPXKjDAGdzPD3rw==
   dependencies:
     "@types/amplitude-js" "^7.0.0"
     amplitude-js "^7.3.3"
+    react-lazy-load-image-component "^1.5.1"
 
-"@bitcoin-portal/navbar@^3.0.0-beta14":
-  version "3.0.0-beta14"
-  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/navbar/3.0.0-beta14/105aecef57d65b159b24e8d6bff0570df090a1880093a889168846633996f5ca#0729aa0c9d1c3b57c5c65e29434cb5c1cce6ad15"
-  integrity sha512-Z4sh7gVs/1Q0inJc9sgtlE8PLi48ZFznUH9TPRNrXLvZLsPz0+2yYeln/ktviy9ViBt7bwI/zCWxBW49DosNEw==
+"@bitcoin-portal/navbar@^3.0.0-beta29":
+  version "3.0.0-beta29"
+  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/navbar/3.0.0-beta29/cfe771d5a5fad3f7a18329e45fb11aea9a61af2f88446aa0bb26359d9881d4dc#597e2b93b1e7635377e96fee31e4ba39809fa969"
+  integrity sha512-eMbsvdfVfrv0ZMw5xzJ6bTjoiiFvqt92mI4Ic7T1r18V48gJc7ad+q5kKbWLWMxogH2jZeKWiIdVb+5hi4r0KQ==
   dependencies:
     "@types/amplitude-js" "^7.0.0"
     amplitude-js "^7.3.3"
+    react-lazy-load-image-component "^1.5.1"
 
 "@emotion/babel-utils@^0.6.4":
   version "0.6.10"
@@ -12704,6 +12706,14 @@ react-is@^16.12.0, react-is@^16.3.1, react-is@^16.6.0, react-is@^16.6.3, react-i
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+react-lazy-load-image-component@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/react-lazy-load-image-component/-/react-lazy-load-image-component-1.5.1.tgz#59cc92326ba5604e9c4a86805a2cf1667fafbc71"
+  integrity sha512-grTEZzURLHPkq7JoipcBBQU44ijdF4fH3Cb+eSD5eSAaMsjugbXqTaVWm5ruPUNLduoNR9KKQF6bOR9h2WphEg==
+  dependencies:
+    lodash.debounce "^4.0.8"
+    lodash.throttle "^4.1.1"
 
 react-lifecycles-compat@^3.0.0, react-lifecycles-compat@^3.0.4:
   version "3.0.4"
