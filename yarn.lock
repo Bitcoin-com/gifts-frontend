@@ -992,10 +992,10 @@
     amplitude-js "^7.3.3"
     react-lazy-load-image-component "^1.5.1"
 
-"@bitcoin-portal/navbar@^3.0.0-beta29":
-  version "3.0.0-beta29"
-  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/navbar/3.0.0-beta29/cfe771d5a5fad3f7a18329e45fb11aea9a61af2f88446aa0bb26359d9881d4dc#597e2b93b1e7635377e96fee31e4ba39809fa969"
-  integrity sha512-eMbsvdfVfrv0ZMw5xzJ6bTjoiiFvqt92mI4Ic7T1r18V48gJc7ad+q5kKbWLWMxogH2jZeKWiIdVb+5hi4r0KQ==
+"@bitcoin-portal/navbar@^3.0.1":
+  version "3.0.1"
+  resolved "https://npm.pkg.github.com/download/@bitcoin-portal/navbar/3.0.1/585e3fa7a594effb267153089a112f125b4d1e100aab175af0a250a2df76ab68#507d6c9151ccd5e0dcdd51cef59f01f23f11bd84"
+  integrity sha512-cwozfOwHNcKq/fAhSZh6RcJZh396sSZp8/cpSpn91+kaT58OgV+cjvOhFvzSn8U/fz0/z33uOQjhVlyH0W61jg==
   dependencies:
     "@types/amplitude-js" "^7.0.0"
     amplitude-js "^7.3.3"
