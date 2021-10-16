@@ -646,7 +646,19 @@ const Gift = ({
                     <FormattedMessage id="home.gift.stepOne" />
                   </StepOneOG>
                   <StepTwoOG>
-                    <FormattedMessage id="home.gift.stepTwo" />
+                    <FormattedMessage
+                      id="home.gift.stepTwo"
+                      values={{
+                        scanner: (
+                          <img
+                            src={sweepIconOG}
+                            alt=""
+                            width="16px"
+                            style={{ padding: '0 5px' }}
+                          />
+                        ),
+                      }}
+                    />
                   </StepTwoOG>
                   <StepThreeOG>
                     <FormattedMessage id="home.gift.stepThree" />
