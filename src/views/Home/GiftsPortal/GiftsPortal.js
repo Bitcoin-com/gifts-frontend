@@ -81,7 +81,7 @@ const Chance = require('chance');
 const callsigns = require('./Gift/callsigns');
 
 const bitbox = new BITBOX({
-  restURL: 'https://rest1.biggestfan.net/v2/',
+  restURL: 'https://rest-proxy.api.bitcoin.com/v2/',
 });
 
 const inputState = { untouched: 0, valid: 1, invalid: 2 };
@@ -2105,7 +2105,7 @@ class GiftsPortal extends React.Component {
         const potentialTipAddresses = [fundingAddress];
         // Start at 1 bc you already have the 0 address
 
-        for (let i = 1; i < 5; i += 1) {
+        for (let i = 1; i < 20; i += 1) {
           const potentialTipWallet = {
             addr: '',
             wif: '',
@@ -2141,7 +2141,7 @@ class GiftsPortal extends React.Component {
         }
         // console.log(potentialTipAddresses);
 
-        // get the tx history for those 5
+        // get the tx history for those 20
         try {
           const potentialTipDetails = await bitbox.Address.details(
             potentialTipAddresses,
