@@ -81,7 +81,7 @@ const Chance = require('chance');
 const callsigns = require('./Gift/callsigns');
 
 const bitbox = new BITBOX({
-  restURL: 'https://rest.bitcoin.com/v2/',
+  restURL: 'https://rest1.biggestfan.net/v2/',
 });
 
 const inputState = { untouched: 0, valid: 1, invalid: 2 };
