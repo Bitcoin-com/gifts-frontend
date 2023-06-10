@@ -52,7 +52,7 @@
     "chance": "^1.1.4",
     "core-js": "^3.6.4",
     "crypto-js": "^4.0.0",
-    "gatsby": "^2.19.17",
+    "gatsby": "^4.25.7",
     "gatsby-plugin-manifest": "^2.2.41",
     "gatsby-plugin-netlify-cms": "^4.1.40",
     "gatsby-plugin-offline": "^3.0.34",
