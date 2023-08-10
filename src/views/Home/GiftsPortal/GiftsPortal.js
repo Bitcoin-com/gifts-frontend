@@ -1079,7 +1079,7 @@ class GiftsPortal extends React.Component {
     let reloadInvoice;
     let reloadInvoiceJson;
     try {
-      reloadInvoice = await fetch('https://pay.bitcoin.com/create_invoice', {
+      reloadInvoice = await fetch('https://pay2.bitcoin.com/create_invoice', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -1107,7 +1107,7 @@ class GiftsPortal extends React.Component {
       const { paymentId } = reloadInvoiceJson;
       return this.setState(
         {
-          reloadInvoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+          reloadInvoiceUrl: `https://pay2.bitcoin.com/i/${paymentId}`,
           generatingReloadInvoice: false,
         },
         this.reloadGiftsInvoiceSuccess(),
@@ -2439,7 +2439,7 @@ class GiftsPortal extends React.Component {
     // console.log(fundingOutputs);
 
     // get invoice
-    fetch('https://pay.bitcoin.com/create_invoice', {
+    fetch('https://pay2.bitcoin.com/create_invoice', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -2480,7 +2480,7 @@ class GiftsPortal extends React.Component {
           return this.setState(
             {
               generatingInvoice: false,
-              invoiceUrl: `https://pay.bitcoin.com/i/${paymentId}`,
+              invoiceUrl: `https://pay2.bitcoin.com/i/${paymentId}`,
               tipWallets,
             },
             this.subscribeToGifts(tipWallets, paymentId),
